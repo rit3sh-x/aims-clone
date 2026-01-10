@@ -1,0 +1,37 @@
+{
+  "extends": "@workspace/typescript-config/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "baseUrl": ".",
+    "forceConsistentCasingInFileNames": true,
+    "types": [
+      "react",
+      "react-native"
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@workspace/api/*": [
+        "../../packages/api/src/*"
+      ],
+      "@workspace/auth/*": [
+        "../../packages/auth/src/*"
+      ],
+      "@workspace/rn-ui/*": [
+        "../../packages/rn-ui/src/*"
+      ],
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "uniwind-types.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

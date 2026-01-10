@@ -1,0 +1,21 @@
+{
+    "name": "@workspace/api",
+    "private": true,
+    "type": "module",
+    "version": "0.0.0",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@trpc/server": "^11.8.1",
+        "@types/react": "^19.2.7",
+        "@workspace/auth": "workspace:*",
+        "@workspace/db": "workspace:*",
+        "react": "^19.2.3",
+        "superjson": "^2.2.6",
+        "zod": "^4.3.5"
+    }
+}

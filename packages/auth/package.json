@@ -1,0 +1,19 @@
+{
+    "name": "@workspace/auth",
+    "private": true,
+    "type": "module",
+    "version": "0.0.0",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "auth:generate": "pnpm dlx @better-auth/cli generate --config src/auth.ts --output ../db/src/schema/auth.ts",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@better-auth/expo": "1.4.10",
+        "@workspace/db": "workspace:*",
+        "better-auth": "1.4.10",
+        "zod": "^4.3.5"
+    }
+}

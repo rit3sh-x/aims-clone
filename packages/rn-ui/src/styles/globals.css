@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+@import 'uniwind';
+
+@import "@workspace/tailwind-config/theme";
+
+@source "../../../apps/{mobile}/*.{ts,tsx}";
+@source "../../../packages/rn-ui/src*.{ts,tsx}";
+@source "../**/*.{ts,tsx}";
+
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+}

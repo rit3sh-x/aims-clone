@@ -1,0 +1,16 @@
+{
+  "extends": "@workspace/typescript-config/base.json",
+  "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
+    "types": ["react", "react-native"],
+    "lib": ["esnext"],
+    "jsx": "react-native",
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@workspace/rn-ui/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

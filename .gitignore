@@ -34,3 +34,6 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+.vscode
+next-env.d.ts
+*env.d.ts

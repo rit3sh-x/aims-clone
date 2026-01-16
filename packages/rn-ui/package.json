@@ -43,7 +43,7 @@
         "zod": "^4.3.5"
     },
     "devDependencies": {
-        "@tailwindcss/postcss": "^4.1.11",
+        "@tailwindcss/postcss": "^4.1.18",
         "@types/react": "^19.2.7",
         "@workspace/eslint-config": "workspace:*",
         "@workspace/tailwind-config": "workspace:*",
@@ -51,7 +51,7 @@
         "eslint": "^9.32.0",
         "eslint-config-expo": "~10.0.0",
         "postcss": "^8.4.35",
-        "tailwindcss": "^4.1.11",
+        "tailwindcss": "^4.1.18",
         "typescript": "^5.9.2"
     },
     "exports": {

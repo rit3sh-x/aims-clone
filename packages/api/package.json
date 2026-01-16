@@ -14,8 +14,14 @@
         "@types/react": "^19.2.7",
         "@workspace/auth": "workspace:*",
         "@workspace/db": "workspace:*",
-        "react": "^19.2.3",
+        "@workspace/infra": "workspace:*",
+        "drizzle-orm": "^0.45.1",
         "superjson": "^2.2.6",
         "zod": "^4.3.5"
+    },
+    "devDependencies": {
+        "@workspace/eslint-config": "workspace:*",
+        "@workspace/typescript-config": "workspace:*",
+        "typescript": "^5.9.2"
     }
 }

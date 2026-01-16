@@ -1,4 +1,12 @@
-import { nextJsConfig } from "@workspace/eslint-config/next-js"
+const { defineConfig } = require("eslint/config");
 
-/** @type {import("eslint").Linter.Config} */
-export default nextJsConfig
+const { config: baseConfig } = require("@workspace/eslint-config/base");
+const { reactConfig } = require("@workspace/eslint-config/react-library");
+
+module.exports = defineConfig(
+  {
+    ignores: [".nitro/**", ".output/**", ".tanstack/**"],
+  },
+  ...baseConfig,
+  reactConfig,
+);

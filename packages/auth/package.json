@@ -7,13 +7,21 @@
         ".": "./src/index.ts"
     },
     "scripts": {
-        "auth:generate": "pnpm dlx @better-auth/cli generate --config src/auth.ts --output ../db/src/schema/auth.ts",
+        "generate": "better-auth generate --config src/auth.ts --output ../db/src/schema.ts",
+        "migrate": "better-auth generate --config src/auth.ts --output ../db/src/better-auth.ts",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@better-auth/expo": "1.4.10",
         "@workspace/db": "workspace:*",
+        "@workspace/infra": "workspace:*",
         "better-auth": "1.4.10",
         "zod": "^4.3.5"
+    },
+    "devDependencies": {
+        "@better-auth/cli": "^1.4.10",
+        "@workspace/eslint-config": "workspace:*",
+        "@workspace/typescript-config": "workspace:*",
+        "typescript": "^5.9.2"
     }
 }

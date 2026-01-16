@@ -8,6 +8,7 @@ module.exports = function (api) {
                 {
                     alias: {
                         "@workspace/rn-ui": "../../packages/rn-ui/src",
+                        "@": "./src",
                     },
                 },
             ],

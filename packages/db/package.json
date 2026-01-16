@@ -4,22 +4,25 @@
     "type": "module",
     "version": "0.0.0",
     "exports": {
-        ".": "./src/*"
+        ".": "./src/index.ts"
     },
     "scripts": {
-        "db:generate": "drizzle-kit generate",
-        "db:migrate": "drizzle-kit migrate",
-        "db:push": "drizzle-kit push",
-        "db:studio": "drizzle-kit studio"
+        "generate:custom": "drizzle-kit generate --custom",
+        "generate": "drizzle-kit generate",
+        "migrate": "drizzle-kit migrate",
+        "push": "drizzle-kit push",
+        "studio": "drizzle-kit studio"
     },
     "dependencies": {
         "@types/pg": "^8.16.0",
         "drizzle-orm": "^0.45.1",
         "pg": "^8.12.0",
-        "server-only": "^0.0.1",
         "zod": "^4.3.5"
     },
     "devDependencies": {
-        "drizzle-kit": "^0.31.8"
+        "@workspace/typescript-config": "workspace:*",
+        "@workspace/eslint-config": "workspace:*",
+        "drizzle-kit": "^0.31.8",
+        "typescript": "^5.9.2"
     }
 }

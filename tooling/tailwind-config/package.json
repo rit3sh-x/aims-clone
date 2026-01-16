@@ -10,8 +10,15 @@
         "./postcss.config": "./postcss.config.mjs"
     },
     "dependencies": {
-        "tailwindcss": "^4.1.18",
+        "@tailwindcss/postcss": "^4.1.18",
         "postcss": "^8.4.35",
-        "@tailwindcss/postcss": "^4.1.18"
+        "tailwindcss": "^4.1.18"
+    },
+    "devDependencies": {
+        "@types/node": "^25.0.6",
+        "@workspace/eslint-config": "workspace:*",
+        "@workspace/typescript-config": "workspace:*",
+        "eslint": "^9.39.2",
+        "typescript": "^5.9.3"
     }
 }

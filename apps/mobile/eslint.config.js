@@ -1,10 +1,14 @@
-// https://docs.expo.dev/guides/using-eslint/
-const { defineConfig } = require('eslint/config');
-const expoConfig = require('eslint-config-expo/flat');
+const { defineConfig } = require("eslint/config");
+const expoConfig = require("eslint-config-expo/flat");
 
-module.exports = defineConfig([
-  expoConfig,
+const { config: baseConfig } = require("@workspace/eslint-config/base");
+const { reactConfig } = require("@workspace/eslint-config/react-library");
+
+module.exports = defineConfig(
   {
-    ignores: ['dist/*'],
+    ignores: [".expo/**", "expo-plugins/**", 'dist/*'],
   },
-]);
+  expoConfig,
+  ...baseConfig,
+  reactConfig,
+);

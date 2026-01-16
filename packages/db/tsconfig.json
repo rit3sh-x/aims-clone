@@ -3,14 +3,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@workspace/db/*": [
-        "./src/*"
-      ]
+      "@workspace/db": [
+        "./src/index.ts"
+      ],
     },
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "./**/*"
+    "./src/**/**/*"
   ],
   "exclude": [
     "node_modules"

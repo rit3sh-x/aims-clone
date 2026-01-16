@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: aims-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: aims
+      POSTGRES_USER: aims_user
+      POSTGRES_PASSWORD: aims_password
+    volumes:
+      - aims_postgres_data:/var/lib/postgresql/18
+    networks:
+      - aims_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aims_user -d aims"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: aims-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: aimsadmin
+      MINIO_ROOT_PASSWORD: aimspassword123
+    volumes:
+      - aims_minio_data:/data
+    networks:
+      - aims_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: aims-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set aims http://minio:9000 aimsadmin aimspassword123 &&
+      mc mb -p aims/aims-bucket &&
+      mc anonymous set download aims/aims-bucket || true
+      "
+    networks:
+      - aims_network
+    restart: "no"
+
+volumes:
+  aims_postgres_data:
+    name: aims_postgres_data
+  aims_minio_data:
+    name: aims_minio_data
+
+networks:
+  aims_network:
+    name: aims_network

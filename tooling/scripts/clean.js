@@ -10,6 +10,7 @@ const targets = [
     ".expo",
     ".turbo",
     ".next",
+    ".tanstack",
     ".parcel-cache",
 ];
 

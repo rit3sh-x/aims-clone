@@ -7,5 +7,5 @@ type RouterInputs = inferRouterInputs<AppRouter>;
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export { type AppRouter, appRouter } from "./router/_app";
-export { createTRPCContext, createFetchContext } from "./init";
+export { createTRPCContext } from "./init";
 export type { RouterInputs, RouterOutputs };

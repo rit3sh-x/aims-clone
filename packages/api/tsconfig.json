@@ -1,21 +1,17 @@
 {
   "extends": "@workspace/typescript-config/base.json",
   "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@workspace/api": [
-        "./src/index.ts"
-      ],
-      "@workspace/db/*": [
-        "../../packages/db/src/*"
-      ],
-      "@workspace/auth/*": [
-        "../../packages/auth/src/*"
-      ]
+      "@workspace/api": ["./src/index.ts"],
+      "@workspace/db": ["../db/src/index.ts"],
+      "@workspace/auth": ["../auth/src/index.ts"],
+      "@workspace/infra": ["../infra/src/index.ts"],
     },
   },
   "include": [
-    "."
+    "src"
   ],
   "exclude": [
     "node_modules"

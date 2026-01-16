@@ -1,10 +1,8 @@
-import { initTRPC, TRPCError } from '@trpc/server';
-import { cache } from 'react';
+import { initTRPC, TRPCError } from "@trpc/server";
+import { cache } from "react";
 import superjson from "superjson";
 import { z, ZodError } from "zod";
-import { auth } from '@workspace/auth/authx
-import { FetchCreateContextFn } from '@trpc/server/adapters/fetch';
-import { AppRouter } from './router/_app';
+import { auth } from "@workspace/auth";
 
 export const createTRPCContext = cache(async (opts: { headers: Headers }) => {
     const { headers } = opts;
@@ -15,13 +13,9 @@ export const createTRPCContext = cache(async (opts: { headers: Headers }) => {
 
     return {
         session,
-    }
-});
-
-export const createFetchContext: FetchCreateContextFn<AppRouter> =
-    async (opts) => {
-        return createTRPCContext({ headers: opts.req.headers });
+        headers,
     };
+});
 
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 
@@ -33,7 +27,9 @@ const t = initTRPC.context<Context>().create({
             ...shape.data,
             zodError:
                 error.cause instanceof ZodError
-                    ? z.flattenError(error.cause as ZodError<Record<string, unknown>>)
+                    ? z.flattenError(
+                          error.cause as ZodError<Record<string, unknown>>
+                      )
                     : null,
         },
     }),
@@ -42,16 +38,18 @@ const t = initTRPC.context<Context>().create({
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure;
+
 export const protectedProcedure = baseProcedure.use(({ ctx, next }) => {
     if (!ctx.session?.user) {
         throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "User isn't logged in."
+            message: "User isn't logged in.",
         });
     }
 
     return next({
         ctx: {
+            ...ctx,
             session: { ...ctx.session, user: ctx.session.user },
         },
     });

@@ -1,33 +1,47 @@
-import { getToken } from "@/lib/auth/server";
-import { spotlightSearch } from "@/modules/dashboard/schema/spotligh-schema";
+import { getSidebarState } from "@/lib/utils";
+import { spotlightSearchSchema } from "@/modules/dashboard/schema/spotlight-schema";
+import { DashboardLayout } from "@/modules/dashboard/ui/layouts/dashboard-layout";
 import {
     createFileRoute,
+    Outlet,
     redirect,
     stripSearchParams,
 } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_dashboard")({
-    validateSearch: spotlightSearch,
+    validateSearch: spotlightSearchSchema,
     search: {
         middlewares: [stripSearchParams({ search: "" })],
     },
-    beforeLoad: async () => {
-        const token = await getToken();
-        if (!token) {
+    beforeLoad: async ({ context }) => {
+        const sidebarOpen = await getSidebarState();
+        const { session } = context;
+        if (!session) {
             throw redirect({ to: "/login" });
         }
         return {
             session: {
-                name: token.user.name,
-                image: token.user.image,
+                name: session.user.name,
+                image: session.user.image,
+                id: session.user.id,
+                role: session.user.role,
             },
+            sidebarOpen,
         };
     },
     component: RouteComponent,
 });
 
 function RouteComponent() {
-    const { session } = Route.useRouteContext();
-    const { search } = Route.useSearch();
-    return <div>Hello "/_dashboard"!</div>;
+    const { session, sidebarOpen } = Route.useRouteContext();
+    return (
+        <DashboardLayout
+            defaultOpen={sidebarOpen}
+            name={session.name}
+            image={session.image}
+            role={session.role}
+        >
+            <Outlet />
+        </DashboardLayout>
+    )
 }

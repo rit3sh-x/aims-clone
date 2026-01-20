@@ -8,196 +8,222 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as DashboardRouteRouteImport } from "./routes/_dashboard/route";
-import { Route as AuthRouteRouteImport } from "./routes/_auth/route";
-import { Route as DashboardIndexRouteImport } from "./routes/_dashboard/index";
-import { Route as AuthResetPasswordRouteImport } from "./routes/_auth/reset-password";
-import { Route as AuthLoginRouteImport } from "./routes/_auth/login";
-import { Route as ApiTrpcSplatRouteImport } from "./routes/api/trpc.$";
-import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth.$";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
+import { Route as AuthRouteRouteImport } from './routes/_auth/route'
+import { Route as DashboardIndexRouteImport } from './routes/_dashboard/index'
+import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-password'
+import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
+import { Route as ApiProfileUserIdRouteImport } from './routes/api/profile.$userId'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
-    id: "/_dashboard",
-    getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/_dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRouteRoute = AuthRouteRouteImport.update({
-    id: "/_auth",
-    getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
-    id: "/",
-    path: "/",
-    getParentRoute: () => DashboardRouteRoute,
-} as any);
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
-    id: "/reset-password",
-    path: "/reset-password",
-    getParentRoute: () => AuthRouteRoute,
-} as any);
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
-    id: "/login",
-    path: "/login",
-    getParentRoute: () => AuthRouteRoute,
-} as any);
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
-    id: "/api/trpc/$",
-    path: "/api/trpc/$",
-    getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/api/trpc/$',
+  path: '/api/trpc/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProfileUserIdRoute = ApiProfileUserIdRouteImport.update({
+  id: '/api/profile/$userId',
+  path: '/api/profile/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-    id: "/api/auth/$",
-    path: "/api/auth/$",
-    getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
-    "/login": typeof AuthLoginRoute;
-    "/reset-password": typeof AuthResetPasswordRoute;
-    "/": typeof DashboardIndexRoute;
-    "/api/auth/$": typeof ApiAuthSplatRoute;
-    "/api/trpc/$": typeof ApiTrpcSplatRoute;
+  '/': typeof DashboardIndexRoute
+  '/login': typeof AuthLoginRoute
+  '/reset-password': typeof AuthResetPasswordRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/profile/$userId': typeof ApiProfileUserIdRoute
+  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesByTo {
-    "/login": typeof AuthLoginRoute;
-    "/reset-password": typeof AuthResetPasswordRoute;
-    "/": typeof DashboardIndexRoute;
-    "/api/auth/$": typeof ApiAuthSplatRoute;
-    "/api/trpc/$": typeof ApiTrpcSplatRoute;
+  '/': typeof DashboardIndexRoute
+  '/login': typeof AuthLoginRoute
+  '/reset-password': typeof AuthResetPasswordRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/profile/$userId': typeof ApiProfileUserIdRoute
+  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesById {
-    __root__: typeof rootRouteImport;
-    "/_auth": typeof AuthRouteRouteWithChildren;
-    "/_dashboard": typeof DashboardRouteRouteWithChildren;
-    "/_auth/login": typeof AuthLoginRoute;
-    "/_auth/reset-password": typeof AuthResetPasswordRoute;
-    "/_dashboard/": typeof DashboardIndexRoute;
-    "/api/auth/$": typeof ApiAuthSplatRoute;
-    "/api/trpc/$": typeof ApiTrpcSplatRoute;
+  __root__: typeof rootRouteImport
+  '/_auth': typeof AuthRouteRouteWithChildren
+  '/_dashboard': typeof DashboardRouteRouteWithChildren
+  '/_auth/login': typeof AuthLoginRoute
+  '/_auth/reset-password': typeof AuthResetPasswordRoute
+  '/_dashboard/': typeof DashboardIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/profile/$userId': typeof ApiProfileUserIdRoute
+  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRouteTypes {
-    fileRoutesByFullPath: FileRoutesByFullPath;
-    fullPaths:
-        | "/login"
-        | "/reset-password"
-        | "/"
-        | "/api/auth/$"
-        | "/api/trpc/$";
-    fileRoutesByTo: FileRoutesByTo;
-    to: "/login" | "/reset-password" | "/" | "/api/auth/$" | "/api/trpc/$";
-    id:
-        | "__root__"
-        | "/_auth"
-        | "/_dashboard"
-        | "/_auth/login"
-        | "/_auth/reset-password"
-        | "/_dashboard/"
-        | "/api/auth/$"
-        | "/api/trpc/$";
-    fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/reset-password'
+    | '/api/auth/$'
+    | '/api/profile/$userId'
+    | '/api/trpc/$'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/login'
+    | '/reset-password'
+    | '/api/auth/$'
+    | '/api/profile/$userId'
+    | '/api/trpc/$'
+  id:
+    | '__root__'
+    | '/_auth'
+    | '/_dashboard'
+    | '/_auth/login'
+    | '/_auth/reset-password'
+    | '/_dashboard/'
+    | '/api/auth/$'
+    | '/api/profile/$userId'
+    | '/api/trpc/$'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-    AuthRouteRoute: typeof AuthRouteRouteWithChildren;
-    DashboardRouteRoute: typeof DashboardRouteRouteWithChildren;
-    ApiAuthSplatRoute: typeof ApiAuthSplatRoute;
-    ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute;
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiProfileUserIdRoute: typeof ApiProfileUserIdRoute
+  ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
 
-declare module "@tanstack/react-router" {
-    interface FileRoutesByPath {
-        "/_dashboard": {
-            id: "/_dashboard";
-            path: "";
-            fullPath: "";
-            preLoaderRoute: typeof DashboardRouteRouteImport;
-            parentRoute: typeof rootRouteImport;
-        };
-        "/_auth": {
-            id: "/_auth";
-            path: "";
-            fullPath: "";
-            preLoaderRoute: typeof AuthRouteRouteImport;
-            parentRoute: typeof rootRouteImport;
-        };
-        "/_dashboard/": {
-            id: "/_dashboard/";
-            path: "/";
-            fullPath: "/";
-            preLoaderRoute: typeof DashboardIndexRouteImport;
-            parentRoute: typeof DashboardRouteRoute;
-        };
-        "/_auth/reset-password": {
-            id: "/_auth/reset-password";
-            path: "/reset-password";
-            fullPath: "/reset-password";
-            preLoaderRoute: typeof AuthResetPasswordRouteImport;
-            parentRoute: typeof AuthRouteRoute;
-        };
-        "/_auth/login": {
-            id: "/_auth/login";
-            path: "/login";
-            fullPath: "/login";
-            preLoaderRoute: typeof AuthLoginRouteImport;
-            parentRoute: typeof AuthRouteRoute;
-        };
-        "/api/trpc/$": {
-            id: "/api/trpc/$";
-            path: "/api/trpc/$";
-            fullPath: "/api/trpc/$";
-            preLoaderRoute: typeof ApiTrpcSplatRouteImport;
-            parentRoute: typeof rootRouteImport;
-        };
-        "/api/auth/$": {
-            id: "/api/auth/$";
-            path: "/api/auth/$";
-            fullPath: "/api/auth/$";
-            preLoaderRoute: typeof ApiAuthSplatRouteImport;
-            parentRoute: typeof rootRouteImport;
-        };
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/_dashboard': {
+      id: '/_dashboard'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_dashboard/': {
+      id: '/_dashboard/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/_auth/reset-password': {
+      id: '/_auth/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/login': {
+      id: '/_auth/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/api/trpc/$': {
+      id: '/api/trpc/$'
+      path: '/api/trpc/$'
+      fullPath: '/api/trpc/$'
+      preLoaderRoute: typeof ApiTrpcSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/profile/$userId': {
+      id: '/api/profile/$userId'
+      path: '/api/profile/$userId'
+      fullPath: '/api/profile/$userId'
+      preLoaderRoute: typeof ApiProfileUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
 }
 
 interface AuthRouteRouteChildren {
-    AuthLoginRoute: typeof AuthLoginRoute;
-    AuthResetPasswordRoute: typeof AuthResetPasswordRoute;
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
-    AuthLoginRoute: AuthLoginRoute,
-    AuthResetPasswordRoute: AuthResetPasswordRoute,
-};
+  AuthLoginRoute: AuthLoginRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
+}
 
 const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
-    AuthRouteRouteChildren
-);
+  AuthRouteRouteChildren,
+)
 
 interface DashboardRouteRouteChildren {
-    DashboardIndexRoute: typeof DashboardIndexRoute;
+  DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-    DashboardIndexRoute: DashboardIndexRoute,
-};
+  DashboardIndexRoute: DashboardIndexRoute,
+}
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
-    DashboardRouteRouteChildren
-);
+  DashboardRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
-    AuthRouteRoute: AuthRouteRouteWithChildren,
-    DashboardRouteRoute: DashboardRouteRouteWithChildren,
-    ApiAuthSplatRoute: ApiAuthSplatRoute,
-    ApiTrpcSplatRoute: ApiTrpcSplatRoute,
-};
+  AuthRouteRoute: AuthRouteRouteWithChildren,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiProfileUserIdRoute: ApiProfileUserIdRoute,
+  ApiTrpcSplatRoute: ApiTrpcSplatRoute,
+}
 export const routeTree = rootRouteImport
-    ._addFileChildren(rootRouteChildren)
-    ._addFileTypes<FileRouteTypes>();
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx";
-import type { createStart } from "@tanstack/react-start";
-declare module "@tanstack/react-start" {
-    interface Register {
-        ssr: true;
-        router: Awaited<ReturnType<typeof getRouter>>;
-    }
+import type { getRouter } from './router'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
 }

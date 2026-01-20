@@ -2,10 +2,10 @@ import {
     S3Client,
     PutObjectCommand,
     DeleteObjectCommand,
+    GetObjectCommand,
 } from "@aws-sdk/client-s3";
-import path from "node:path";
 
-export class S3Service {
+class S3Service {
     private client: S3Client;
     private bucket: string;
     private endpoint?: string;
@@ -40,47 +40,60 @@ export class S3Service {
         });
     }
 
-    private makeKey(userId: string, originalName: string) {
-        const ext = path.extname(originalName);
-        const base = path.basename(originalName, ext).replace(/\s+/g, "_");
-        return `${userId}/${base}_${Date.now()}${ext}`;
+    async getFile(params: { key: string }) {
+        const res = await this.client.send(
+            new GetObjectCommand({
+                Bucket: this.bucket,
+                Key: params.key,
+            })
+        );
+
+        if (!res.Body) {
+            throw new Error("❌ File not found");
+        }
+
+        return {
+            body: res.Body,
+            contentType: res.ContentType,
+            contentLength: res.ContentLength,
+            etag: res.ETag,
+        };
     }
 
-    private getPublicUrl(key: string) {
-        if (!this.endpoint) {
-            return `https://${this.bucket}.s3.amazonaws.com/${key}`;
+    getPublicUrl(params: { key: string }) {
+        const encodedKey = encodeURIComponent(params.key).replace(/%2F/g, "/");
+
+        if (this.endpoint) {
+            const endpoint = this.endpoint.replace(/\/$/, "");
+
+            if (this.forcePathStyle) {
+                return `${endpoint}/${this.bucket}/${encodedKey}`;
+            }
+
+            return `${endpoint.replace("://", `://${this.bucket}.`)}/${encodedKey}`;
         }
 
-        if (this.forcePathStyle) {
-            return `${this.endpoint}/${this.bucket}/${key}`;
-        }
-
-        const u = new URL(this.endpoint);
-        return `${u.protocol}//${this.bucket}.${u.host}/${key}`;
+        return `https://${this.bucket}.s3.amazonaws.com/${encodedKey}`;
     }
 
     async uploadFile(params: {
         userId: string;
-        originalName: string;
+        key: string;
         body: Buffer | Uint8Array;
         contentType: string;
+        ACL?: "public-read";
     }) {
-        const key = this.makeKey(params.userId, params.originalName);
-
         await this.client.send(
             new PutObjectCommand({
                 Bucket: this.bucket,
-                Key: key,
+                Key: params.key,
                 Body: params.body,
                 ContentType: params.contentType,
-                ACL: "public-read",
+                ...(params.ACL && {
+                    ACL: params.ACL,
+                }),
             })
         );
-
-        return {
-            key,
-            url: this.getPublicUrl(key),
-        };
     }
 
     async deleteFile(params: { key: string; userId: string }) {
@@ -96,3 +109,12 @@ export class S3Service {
         );
     }
 }
+
+type GlobalS3 = {
+    s3Service?: S3Service;
+};
+
+const globalForS3 = globalThis as unknown as GlobalS3;
+
+export const s3Service =
+    globalForS3.s3Service ?? (globalForS3.s3Service = new S3Service());

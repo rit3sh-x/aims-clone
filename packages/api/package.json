@@ -4,7 +4,8 @@
     "type": "module",
     "version": "0.0.0",
     "exports": {
-        ".": "./src/index.ts"
+        ".": "./src/index.ts",
+        "./init": "./src/init.ts"
     },
     "scripts": {
         "typecheck": "tsc --noEmit"
@@ -16,6 +17,7 @@
         "@workspace/db": "workspace:*",
         "@workspace/infra": "workspace:*",
         "drizzle-orm": "^0.45.1",
+        "file-type": "^21.3.0",
         "superjson": "^2.2.6",
         "zod": "^4.3.5"
     },

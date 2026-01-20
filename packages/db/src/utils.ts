@@ -11,7 +11,16 @@ export const logAuditEvent = async (event: {
     ipAddress?: string | null;
     userAgent?: string | null;
 }) => {
-    const { action, entityType, userId, after, before, entityId, ipAddress, userAgent } = event;
+    const {
+        action,
+        entityType,
+        userId,
+        after,
+        before,
+        entityId,
+        ipAddress,
+        userAgent,
+    } = event;
     try {
         await db.insert(auditLog).values({
             actorId: userId,

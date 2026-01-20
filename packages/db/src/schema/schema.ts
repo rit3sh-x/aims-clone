@@ -14,17 +14,22 @@ import {
     bigint,
     check,
     uniqueIndex,
+    uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import {
     assessmentTypeEnum,
     attendanceStatusEnum,
+    attendanceTypeEnum,
     auditActionEnum,
     auditEntityEnum,
     classroomTypeEnum,
+    courseStatusEnum,
     courseTypeEnum,
     departmentCodeEnum,
+    documentTypeEnum,
     enrollmentStatusEnum,
+    enrollmentTypeEnum,
     instructorStatusEnum,
     offeringStatusEnum,
     programDegreeEnum,
@@ -48,22 +53,14 @@ export const user = pgTable(
             .$onUpdate(() => new Date())
             .notNull(),
         role: userRoleEnum("role").notNull(),
-        banned: boolean("banned").default(false),
+        banned: boolean("banned").notNull().default(false),
         banReason: text("ban_reason"),
         banExpires: timestamp("ban_expires"),
         twoFactorEnabled: boolean("two_factor_enabled").default(false),
-        disabled: boolean("disabled").default(false),
+        disabled: boolean("disabled").notNull().default(false),
     },
     (table) => [
         index("user_email_idx").on(table.email),
-        index("user_name_search_idx").using(
-            "gin",
-            sql`to_tsvector('english', ${table.name})`
-        ),
-        index("user_email_search_idx").using(
-            "gin",
-            sql`to_tsvector('english', ${table.email})`
-        ),
     ]
 );
 
@@ -154,9 +151,11 @@ export const auditLog = pgTable(
     "audit_log",
     {
         id: serial("id").primaryKey(),
-        actorId: text("actor_id").references(() => user.id, {
-            onDelete: "set null",
-        }).notNull(),
+        actorId: text("actor_id")
+            .references(() => user.id, {
+                onDelete: "set null",
+            })
+            .notNull(),
         action: auditActionEnum("action").notNull(),
         entityType: auditEntityEnum("entity_type").notNull(),
         entityId: text("entity_id"),
@@ -188,13 +187,6 @@ export const department = pgTable(
     },
     (table) => [
         index("department_code_idx").on(table.code),
-        index("department_search_idx").using(
-            "gin",
-            sql`(
-                setweight(to_tsvector('english', ${table.name}), 'A') ||
-                setweight(to_tsvector('english', CAST(${table.code} AS TEXT)), 'B')
-            )`
-        ),
     ]
 );
 
@@ -217,12 +209,14 @@ export const program = pgTable(
     (table) => [
         index("program_code_idx").on(table.code),
         index("program_dept_idx").on(table.departmentId),
-        index("program_search_idx").using(
-            "gin",
-            sql`(
-                setweight(to_tsvector('english', ${table.name}), 'A') ||
-                setweight(to_tsvector('english', ${table.code}), 'B')
-            )`
+        uniqueIndex("program_dept_name_degree_unique").on(
+            table.departmentId,
+            table.name,
+            table.degree
+        ),
+        check(
+            "program_code_uppercase_check",
+            sql`${table.code} = upper(${table.code})`
         ),
     ]
 );
@@ -283,10 +277,6 @@ export const student = pgTable(
         index("student_user_idx").on(table.userId),
         index("student_roll_no_idx").on(table.rollNo),
         index("student_batch_idx").on(table.batchId),
-        index("student_roll_no_search_idx").using(
-            "gin",
-            sql`to_tsvector('english', ${table.rollNo})`
-        ),
         check(
             "student_cgpa_range",
             sql`${table.cgpa} >= 0 AND ${table.cgpa} <= 10`
@@ -318,10 +308,6 @@ export const instructor = pgTable(
         index("instructor_user_idx").on(table.userId),
         index("instructor_employee_idx").on(table.employeeId),
         index("instructor_dept_idx").on(table.departmentId),
-        index("instructor_employee_search_idx").using(
-            "gin",
-            sql`to_tsvector('english', ${table.employeeId})`
-        ),
     ]
 );
 
@@ -332,7 +318,8 @@ export const course = pgTable(
         code: varchar("code", { length: 10 }).notNull().unique(),
         title: text("title").notNull(),
         credits: integer("credits").notNull().default(3),
-        type: courseTypeEnum("type").default("THEORY").notNull(),
+        status: courseStatusEnum("status").notNull().default("PROPOSED"),
+        type: courseTypeEnum("type").default("COMPOSITE").notNull(),
         departmentId: text("department_id")
             .notNull()
             .references(() => department.id, { onDelete: "restrict" }),
@@ -346,13 +333,6 @@ export const course = pgTable(
     (table) => [
         index("course_code_idx").on(table.code),
         index("course_dept_idx").on(table.departmentId),
-        index("course_search_idx").using(
-            "gin",
-            sql`(
-                setweight(to_tsvector('english', ${table.code}), 'A') ||
-                setweight(to_tsvector('english', ${table.title}), 'B')
-            )`
-        ),
         check(
             "course_credits_range",
             sql`${table.credits} > 0 AND ${table.credits} <= 12`
@@ -375,21 +355,46 @@ export const courseOffering = pgTable(
         }),
         maxCapacity: integer("max_capacity").notNull(),
         status: offeringStatusEnum("status").default("PROPOSED").notNull(),
-        createdAt: timestamp("created_at").notNull().defaultNow(),
+        approvedBy: text("approved_by").references(() => user.id, {
+            onDelete: "set null",
+        }),
+        approvedAt: timestamp("approved_at"),
+        rejectionReason: text("rejection_reason"),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
         updatedAt: timestamp("updated_at")
-            .notNull()
             .defaultNow()
-            .$onUpdate(() => new Date()),
+            .$onUpdate(() => new Date())
+            .notNull(),
     },
-    (table) => [
-        index("offering_course_idx").on(table.courseId),
-        index("offering_semester_idx").on(table.semesterId),
-        index("offering_instructor_idx").on(table.instructorId),
+    (t) => [
+        index("offering_course_idx").on(t.courseId),
+        index("offering_semester_idx").on(t.semesterId),
+        index("offering_instructor_idx").on(t.instructorId),
+        index("offering_status_idx").on(t.status),
         uniqueIndex("offering_unique_course_semester").on(
-            table.courseId,
-            table.semesterId
+            t.courseId,
+            t.semesterId
         ),
-        check("offering_capacity_positive", sql`${table.maxCapacity} > 0`),
+        check("offering_capacity_positive", sql`${t.maxCapacity} > 0`),
+    ]
+);
+
+export const offeringBatch = pgTable(
+    "offering_batch",
+    {
+        id: text("id").primaryKey(),
+        offeringId: text("offering_id")
+            .notNull()
+            .references(() => courseOffering.id, { onDelete: "cascade" }),
+        batchId: text("batch_id")
+            .notNull()
+            .references(() => batch.id, { onDelete: "cascade" }),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (t) => [
+        uniqueIndex("offering_batch_unique").on(t.offeringId, t.batchId),
+        index("offering_batch_offering_idx").on(t.offeringId),
+        index("offering_batch_batch_idx").on(t.batchId),
     ]
 );
 
@@ -403,23 +408,30 @@ export const enrollment = pgTable(
         offeringId: text("offering_id")
             .notNull()
             .references(() => courseOffering.id, { onDelete: "cascade" }),
-        status: enrollmentStatusEnum("status").default("ENROLLED").notNull(),
-        enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
+        status: enrollmentStatusEnum("status").default("PENDING").notNull(),
+        type: enrollmentTypeEnum("type").notNull(),
+        instructorApprovedAt: timestamp("instructor_approved_at"),
+        advisorApprovedAt: timestamp("advisor_approved_at"),
+        rejectedBy: text("rejected_by").references(() => user.id, {
+            onDelete: "set null",
+        }),
+        rejectionReason: text("rejection_reason"),
+        enrolledAt: timestamp("enrolled_at"),
         completedAt: timestamp("completed_at"),
         droppedAt: timestamp("dropped_at"),
-        createdAt: timestamp("created_at").notNull().defaultNow(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
         updatedAt: timestamp("updated_at")
-            .notNull()
             .defaultNow()
-            .$onUpdate(() => new Date()),
+            .$onUpdate(() => new Date())
+            .notNull(),
     },
-    (table) => [
-        index("enrollment_student_idx").on(table.studentId),
-        index("enrollment_offering_idx").on(table.offeringId),
-        index("enrollment_status_idx").on(table.status),
+    (t) => [
+        index("enrollment_student_idx").on(t.studentId),
+        index("enrollment_offering_idx").on(t.offeringId),
+        index("enrollment_status_idx").on(t.status),
         uniqueIndex("enrollment_unique_student_offering").on(
-            table.studentId,
-            table.offeringId
+            t.studentId,
+            t.offeringId
         ),
     ]
 );
@@ -433,6 +445,7 @@ export const attendance = pgTable(
             .references(() => enrollment.id, { onDelete: "cascade" }),
         date: date("date", { mode: "date" }).notNull(),
         status: attendanceStatusEnum("status").notNull(),
+        type: attendanceTypeEnum("type").notNull(),
         remarks: text("remarks"),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
@@ -473,10 +486,6 @@ export const assessment = pgTable(
         ),
         index("assessment_offering_idx").on(table.offeringId),
         index("assessment_type_idx").on(table.type),
-        index("assessment_title_search_idx").using(
-            "gin",
-            sql`to_tsvector('english', ${table.title})`
-        ),
         check("assessment_max_marks_positive", sql`${table.maxMarks} > 0`),
         check(
             "assessment_weightage_range",
@@ -559,10 +568,6 @@ export const classroom = pgTable(
     },
     (table) => [
         index("classroom_room_idx").on(table.room),
-        index("classroom_building_search_idx").using(
-            "gin",
-            sql`to_tsvector('english', ${table.building})`
-        ),
         check(
             "classroom_capacity_positive",
             sql`${table.capacity} IS NULL OR ${table.capacity} > 0`
@@ -639,7 +644,6 @@ export const courseFeedback = pgTable(
     "course_feedback",
     {
         id: text("id").primaryKey(),
-
         enrollmentId: text("enrollment_id")
             .notNull()
             .references(() => enrollment.id, { onDelete: "cascade" })
@@ -651,10 +655,6 @@ export const courseFeedback = pgTable(
     (table) => [
         index("feedback_enrollment_idx").on(table.enrollmentId),
         index("feedback_rating_idx").on(table.rating),
-        index("feedback_comments_search_idx").using(
-            "gin",
-            sql`to_tsvector('english', ${table.comments})`
-        ),
         check(
             "feedback_rating_range_chk",
             sql`${table.rating} BETWEEN 1 AND 10`
@@ -667,9 +667,11 @@ export const semester = pgTable(
     {
         id: text("id").primaryKey(),
         year: integer("year").notNull(),
-        code: varchar("code", { length: 10 }).notNull(),
         name: varchar("name", { length: 50 }).notNull(),
         startDate: date("start_date", { mode: "date" }).notNull(),
+        enrollmentDeadline: date("enrollment_deadline", {
+            mode: "date",
+        }).notNull(),
         endDate: date("end_date", { mode: "date" }).notNull(),
         semester: semesterEnum("semester").notNull(),
         status: semesterStatusEnum("status").default("UPCOMING").notNull(),
@@ -680,34 +682,42 @@ export const semester = pgTable(
             .notNull(),
     },
     (t) => [
-        uniqueIndex("semester_year_code_unique").on(t.year, t.code),
+        uniqueIndex("semester_year_code_unique").on(t.year, t.semester),
         index("semester_status_idx").on(t.status),
         check("semester_date_range_chk", sql`${t.startDate} < ${t.endDate}`),
+        check(
+            "semester_enrollment_deadline_chk",
+            sql`
+                ${t.enrollmentDeadline} >= ${t.startDate}
+                AND
+                ${t.enrollmentDeadline} <= ${t.endDate}
+            `
+        ),
     ]
 );
 
 export const document = pgTable(
     "document",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id").primaryKey(),
         userId: text("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
         key: text("key").notNull().unique(),
-        url: text("url").notNull(),
-        name: text("name").notNull(),
+        type: documentTypeEnum("type").notNull(),
         mimeType: varchar("mime_type", { length: 100 }).notNull(),
         size: integer("size").notNull(),
         createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
+            .defaultNow()
+            .$onUpdate(() => new Date())
+            .notNull(),
     },
     (table) => [
         index("document_user_idx").on(table.userId),
         index("document_key_idx").on(table.key),
         index("document_created_idx").on(table.createdAt),
-        index("document_name_search_idx").using(
-            "gin",
-            sql`to_tsvector('english', ${table.name})`
-        ),
+        uniqueIndex("user_profile_image_unique").on(table.userId, table.type),
     ]
 );
 
@@ -810,6 +820,17 @@ export const courseRelations = relations(course, ({ one, many }) => ({
     requiredBy: many(prerequisite, { relationName: "prerequisite" }),
 }));
 
+export const offeringBatchRelations = relations(offeringBatch, ({ one }) => ({
+    offering: one(courseOffering, {
+        fields: [offeringBatch.offeringId],
+        references: [courseOffering.id],
+    }),
+    batch: one(batch, {
+        fields: [offeringBatch.batchId],
+        references: [batch.id],
+    }),
+}));
+
 export const courseOfferingRelations = relations(
     courseOffering,
     ({ one, many }) => ({
@@ -828,6 +849,7 @@ export const courseOfferingRelations = relations(
         enrollments: many(enrollment),
         assessments: many(assessment),
         schedules: many(schedule),
+        batches: many(offeringBatch),
     })
 );
 

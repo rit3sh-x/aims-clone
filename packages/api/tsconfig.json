@@ -5,13 +5,14 @@
     "baseUrl": ".",
     "paths": {
       "@workspace/api": ["./src/index.ts"],
+      "@workspace/api/init": ["./src/init.ts"],
       "@workspace/db": ["../db/src/index.ts"],
       "@workspace/auth": ["../auth/src/index.ts"],
       "@workspace/infra": ["../infra/src/index.ts"],
     },
   },
   "include": [
-    "src"
+    "./src"
   ],
   "exclude": [
     "node_modules"

@@ -202,7 +202,7 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
         results.push({
             title: "Batches",
             items: batches.map((b) => ({
-                field: `${b.program?.name || 'Unknown'} - ${b.year}`,
+                field: `${b.program?.name || "Unknown"} - ${b.year}`,
                 url: "/batches",
                 param: b.id,
             })),
@@ -327,7 +327,7 @@ export async function searchForBatchAdvisor(
         results.push({
             title: "My Batches",
             items: batches.map((b) => ({
-                field: `${b.program?.name || 'Unknown'} - ${b.year}`,
+                field: `${b.program?.name || "Unknown"} - ${b.year}`,
                 url: "/batches",
                 param: b.id,
             })),

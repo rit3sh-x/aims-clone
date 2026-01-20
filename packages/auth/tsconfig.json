@@ -7,8 +7,8 @@
       "@workspace/auth": [
         "./src/index.ts"
       ],
-      "@workspace/db/*": [
-        "../../packages/db/src/*"
+      "@workspace/db": [
+        "../../packages/db/src/index.ts"
       ],
       "@workspace/infra": [
         "../../packages/infra/src/index.ts"
@@ -16,7 +16,7 @@
     }
   },
   "include": [
-    "src"
+    "./src"
   ],
   "exclude": [
     "node_modules"

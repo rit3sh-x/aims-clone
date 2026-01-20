@@ -15,10 +15,13 @@ import { getThemeServerFn, Theme } from "@/theme/theme";
 import appCss from "@/globals.css?url";
 import { ThemeProvider } from "@/theme/provider";
 import { ErrorUI } from "@/components/error-ui";
+import { getToken } from "@/lib/auth/server";
+import { Session } from "@workspace/auth";
 
 export const Route = createRootRouteWithContext<{
     queryClient: QueryClient;
     trpc: TRPCOptionsProxy<AppRouter>;
+    session: Session | null;
 }>()({
     head: () => ({
         meta: [
@@ -39,6 +42,12 @@ export const Route = createRootRouteWithContext<{
             { rel: "apple-touch-icon", href: "/logo.png" },
         ],
     }),
+    beforeLoad: async () => {
+        const session = await getToken();
+        return {
+            session,
+        };
+    },
     loader: () => getThemeServerFn(),
     component: RootComponent,
     notFoundComponent: ErrorUI,
@@ -64,10 +73,10 @@ function RootDocument({ children, theme }: RootDocumentProps) {
             <head>
                 <HeadContent />
             </head>
-            <body className="w-full min-h-screen">
+            <body className="w-screen min-h-screen">
                 <ThemeProvider theme={theme}>
                     {children}
-                    <Toaster />
+                    <Toaster theme={theme} />
                 </ThemeProvider>
                 <TanStackRouterDevtools position="bottom-right" />
                 <Scripts />

@@ -83,45 +83,8 @@ export const scheduling = [
     },
 ];
 
-export const communication = [
-    {
-        title: "Announcements",
-        url: "/communication/announcements",
-        icon: MessageSquareIcon,
-    },
-    {
-        title: "Notifications",
-        url: "/communication/notifications",
-        icon: BellIcon,
-    },
-    { title: "Documents", url: "/communication/documents", icon: FileTextIcon },
-];
-
-export const systemSecurity = [
-    { title: "Users", url: "/system/users", icon: UsersIcon },
-    { title: "Sessions", url: "/system/sessions", icon: HistoryIcon },
-    { title: "Accounts", url: "/system/accounts", icon: FolderOpenIcon },
-    { title: "Two-Factor Settings", url: "/system/two-factor", icon: KeyIcon },
-    {
-        title: "Verification / OTP Logs",
-        url: "/system/otp-logs",
-        icon: ShieldIcon,
-    },
-    { title: "Rate Limits", url: "/system/rate-limits", icon: GaugeIcon },
-];
-
 export const settings = [
     { title: "Semesters", url: "/settings/semesters", icon: CalendarDaysIcon },
-    {
-        title: "Holiday Calendar",
-        url: "/settings/holidays",
-        icon: CalendarIcon,
-    },
-    {
-        title: "System Preferences",
-        url: "/settings/preferences",
-        icon: SettingsIcon,
-    },
 ];
 
 export function getSidebarOptions(role: RoleType) {
@@ -144,8 +107,6 @@ export function getSidebarOptions(role: RoleType) {
                     { title: "Academics", items: academics },
                     { title: "Teaching & Learning", items: teachingLearning },
                     { title: "Scheduling", items: scheduling },
-                    { title: "Communication", items: communication },
-                    { title: "System & Security", items: systemSecurity },
                     { title: "Settings", items: settings },
                 ],
             };

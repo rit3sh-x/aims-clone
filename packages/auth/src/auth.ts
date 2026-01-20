@@ -15,40 +15,11 @@ import {
     ROLE_VALUES,
     ROLES,
 } from "./permissions";
-import type { BetterAuthRateLimitOptions } from "better-auth";
 
 const appUrl = process.env.VITE_APP_URL;
 const mobileSchemes = process.env.MOBILE_SCHEMES;
 const mobileSchemesArray = mobileSchemes?.split(",");
 const isProd = process.env.NODE_ENV === "production";
-
-const rateLimit: BetterAuthRateLimitOptions = isProd
-    ? {
-        enabled: true,
-        window: 60,
-        max: 100,
-        storage: "database",
-        customRules: {
-            "/sign-in/email": { window: 60, max: 5 },
-            "/two-factor/send": { window: 60, max: 3 },
-            "/two-factor/verify": { window: 60, max: 3 },
-            "/email-otp/*": { window: 60, max: 3 },
-            "/get-session": false as false,
-        },
-    }
-    : {
-        enabled: true,
-        window: 10,
-        max: 1000,
-        storage: "database",
-        customRules: {
-            "/sign-in/email": { window: 10, max: 50 },
-            "/two-factor/send": { window: 10, max: 50 },
-            "/two-factor/verify": { window: 10, max: 50 },
-            "/email-otp/*": { window: 10, max: 50 },
-            "/get-session": false as false,
-        },
-    };
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -93,7 +64,6 @@ export const auth = betterAuth({
         expo(),
         tanstackStartCookies(),
     ],
-    rateLimit,
     emailAndPassword: {
         enabled: true,
         autoSignIn: false,
@@ -151,6 +121,7 @@ export const auth = betterAuth({
                 type: ROLE_VALUES,
                 defaultValue: ROLES.STUDENT,
                 input: false,
+                required: true,
             },
         },
     },

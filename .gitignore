@@ -27,6 +27,7 @@ out/
 build
 dist
 /apps/next
+/apps/ts
 
 # Debug
 npm-debug.log*

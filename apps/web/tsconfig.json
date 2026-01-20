@@ -15,6 +15,7 @@
       "@workspace/api": ["../../packages/api/src/index.ts"],
       "@workspace/auth": ["../../packages/auth/src/index.ts"],
       "@workspace/db": ["../../packages/db/src/index.ts"],
+      "@workspace/infra": ["../../packages/infra/src/index.ts"],
     },
   },
   "include": [

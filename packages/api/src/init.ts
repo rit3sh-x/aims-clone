@@ -40,17 +40,25 @@ export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure;
 
 export const protectedProcedure = baseProcedure.use(({ ctx, next }) => {
-    if (!ctx.session?.user) {
+    const { session } = ctx;
+    if (!session) {
         throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "User isn't logged in.",
         });
     }
 
+    if (session.user.banned || session.user.disabled) {
+        throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "User is restricted from logging in.",
+        });
+    }
+
     return next({
         ctx: {
             ...ctx,
-            session: { ...ctx.session, user: ctx.session.user },
+            session: { ...session, user: session.user },
         },
     });
 });

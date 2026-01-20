@@ -24,7 +24,7 @@ export const spotlightRouter = createTRPCRouter({
 
             try {
                 const currentSemester = await db.query.semester.findFirst({
-                    where: eq(semester.isCurrent, true),
+                    where: eq(semester.status, "ONGOING"),
                 });
 
                 if (!currentSemester) {

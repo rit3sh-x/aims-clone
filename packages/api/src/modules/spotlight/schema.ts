@@ -16,5 +16,5 @@ export const spotlightOutputSchema = z.array(
 export type SpotlightResult = z.infer<typeof spotlightOutputSchema>;
 
 export const spotlightInputSchema = z.object({
-    search: z.string().min(1, "Search can't be empty."),
+    search: z.string().trim().min(1, "Search can't be empty."),
 });

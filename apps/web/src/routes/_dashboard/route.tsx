@@ -43,5 +43,5 @@ function RouteComponent() {
         >
             <Outlet />
         </DashboardLayout>
-    )
+    );
 }

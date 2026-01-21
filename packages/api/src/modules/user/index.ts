@@ -75,7 +75,7 @@ export const userRouter = createTRPCRouter({
 
                 return {
                     publicUrl,
-                }
+                };
             } catch (error) {
                 await removeUserProfileImage({
                     key,

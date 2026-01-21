@@ -23,7 +23,8 @@ export const AnimatedThemeToggler = ({
             return;
         }
 
-        const { top, left, width, height } = buttonRef.current.getBoundingClientRect();
+        const { top, left, width, height } =
+            buttonRef.current.getBoundingClientRect();
         const x = left + width / 2;
         const y = top + height / 2;
         const maxRadius = Math.hypot(
@@ -62,7 +63,11 @@ export const AnimatedThemeToggler = ({
             className={cn(className)}
             {...props}
         >
-            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            {theme === "dark" ? (
+                <Sun className="size-4" />
+            ) : (
+                <Moon className="size-4" />
+            )}
         </button>
     );
 };

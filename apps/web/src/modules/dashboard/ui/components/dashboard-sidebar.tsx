@@ -52,8 +52,10 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((e) => {
-                    if (e.target === topEl) setShowTopGradient(!e.isIntersecting);
-                    if (e.target === botEl) setShowBottomGradient(!e.isIntersecting);
+                    if (e.target === topEl)
+                        setShowTopGradient(!e.isIntersecting);
+                    if (e.target === botEl)
+                        setShowBottomGradient(!e.isIntersecting);
                 });
             },
             {
@@ -108,7 +110,10 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                         ref={scrollRef}
                         className="h-full overflow-y-auto scrollbar-hide relative"
                     >
-                        <div ref={topSentinelRef} className="h-0 pointer-events-none" />
+                        <div
+                            ref={topSentinelRef}
+                            className="h-0 pointer-events-none"
+                        />
 
                         <SidebarGroup>
                             <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
@@ -120,12 +125,14 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                                 isActive={isActive(item.url)}
                                                 className={cn(
                                                     isActive(item.url) &&
-                                                    "bg-[#0b63f3]! text-sidebar-primary-foreground hover:bg-[#0b63f3]/90!"
+                                                        "bg-[#0b63f3]! text-sidebar-primary-foreground hover:bg-[#0b63f3]/90!"
                                                 )}
                                                 render={
                                                     <Link to={item.url}>
                                                         <item.icon className="size-4" />
-                                                        <span>{item.title}</span>
+                                                        <span>
+                                                            {item.title}
+                                                        </span>
                                                     </Link>
                                                 }
                                             />
@@ -137,21 +144,30 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
 
                         {sidebarOptions.sections.map((section) => (
                             <SidebarGroup key={section.title}>
-                                <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
+                                <SidebarGroupLabel>
+                                    {section.title}
+                                </SidebarGroupLabel>
                                 <SidebarGroupContent>
                                     <SidebarMenu>
                                         {section.items.map((item) => (
                                             <SidebarMenuItem key={item.title}>
                                                 <SidebarMenuButton
-                                                    isActive={isActive(item.url)}
+                                                    isActive={isActive(
+                                                        item.url
+                                                    )}
                                                     className={cn(
                                                         isActive(item.url) &&
-                                                        "bg-[#0b63f3]! text-sidebar-primary-foreground! hover:bg-[#0b63f3]/90!"
+                                                            "bg-[#0b63f3]! text-sidebar-primary-foreground! hover:bg-[#0b63f3]/90!"
                                                     )}
                                                     render={(props) => (
-                                                        <Link to={item.url} {...props}>
+                                                        <Link
+                                                            to={item.url}
+                                                            {...props}
+                                                        >
                                                             <item.icon className="size-4" />
-                                                            <span>{item.title}</span>
+                                                            <span>
+                                                                {item.title}
+                                                            </span>
                                                         </Link>
                                                     )}
                                                 />
@@ -162,7 +178,10 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                             </SidebarGroup>
                         ))}
 
-                        <div ref={bottomSentinelRef} className="h-0 pointer-events-none" />
+                        <div
+                            ref={bottomSentinelRef}
+                            className="h-0 pointer-events-none"
+                        />
                     </div>
 
                     {showBottomGradient && (

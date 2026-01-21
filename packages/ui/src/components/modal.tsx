@@ -1,6 +1,6 @@
-import React from 'react';
-import { cn } from '../lib/utils';
-import { useIsMobile } from '../hooks/use-mobile';
+import React from "react";
+import { cn } from "../lib/utils";
+import { useIsMobile } from "../hooks/use-mobile";
 import {
     Dialog,
     DialogClose,
@@ -10,7 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from './dialog';
+} from "./dialog";
 import {
     Drawer,
     DrawerClose,
@@ -20,14 +20,14 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
-} from './drawer';
+} from "./drawer";
 
 const ModalContext = React.createContext<{ isMobile: boolean } | null>(null);
 
 function useContext() {
     const context = React.useContext(ModalContext);
     if (!context) {
-        throw new Error('Trigger or Content must be used within <Modal>');
+        throw new Error("Trigger or Content must be used within <Modal>");
     }
     return context;
 }
@@ -137,7 +137,7 @@ const ModalContent = ({
     );
 };
 
-const ModalHeader = ({ className, ...props }: React.ComponentProps<'div'>) => {
+const ModalHeader = ({ className, ...props }: React.ComponentProps<"div">) => {
     const { isMobile } = useContext();
     const Component = isMobile ? DrawerHeader : DialogHeader;
 
@@ -192,10 +192,10 @@ const ModalDescription = ({
     );
 };
 
-const ModalBody = ({ className, ...props }: React.ComponentProps<'div'>) => {
-    return <div className={cn('px-4 py-6', className)} {...props} />;
+const ModalBody = ({ className, ...props }: React.ComponentProps<"div">) => {
+    return <div className={cn("px-4 py-6", className)} {...props} />;
 };
-const ModalFooter = ({ className, ...props }: React.ComponentProps<'div'>) => {
+const ModalFooter = ({ className, ...props }: React.ComponentProps<"div">) => {
     const { isMobile } = useContext();
     const Component = isMobile ? DrawerFooter : DialogFooter;
     return <Component className={className} {...props} />;

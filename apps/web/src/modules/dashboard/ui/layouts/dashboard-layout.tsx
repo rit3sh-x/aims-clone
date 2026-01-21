@@ -11,7 +11,13 @@ interface DashboardLayoutProps {
     role: RoleType;
 }
 
-export const DashboardLayout = ({ children, image, name, defaultOpen, role }: DashboardLayoutProps) => {
+export const DashboardLayout = ({
+    children,
+    image,
+    name,
+    defaultOpen,
+    role,
+}: DashboardLayoutProps) => {
     return (
         <SidebarProvider defaultOpen={defaultOpen}>
             <DashboardSidebar role={role} />
@@ -22,5 +28,5 @@ export const DashboardLayout = ({ children, image, name, defaultOpen, role }: Da
                 </div>
             </main>
         </SidebarProvider>
-    )
-}
+    );
+};

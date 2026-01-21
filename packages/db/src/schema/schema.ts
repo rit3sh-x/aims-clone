@@ -59,9 +59,7 @@ export const user = pgTable(
         twoFactorEnabled: boolean("two_factor_enabled").default(false),
         disabled: boolean("disabled").notNull().default(false),
     },
-    (table) => [
-        index("user_email_idx").on(table.email),
-    ]
+    (table) => [index("user_email_idx").on(table.email)]
 );
 
 export const session = pgTable(
@@ -185,9 +183,7 @@ export const department = pgTable(
             .defaultNow()
             .$onUpdate(() => new Date()),
     },
-    (table) => [
-        index("department_code_idx").on(table.code),
-    ]
+    (table) => [index("department_code_idx").on(table.code)]
 );
 
 export const program = pgTable(

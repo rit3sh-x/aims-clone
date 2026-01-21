@@ -11,8 +11,8 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import {
-    modifyUserProfileImage,
-    removeUserProfileImage,
+    museModifyUserProfileImage,
+    useRemoveUserProfileImage,
 } from "../../hooks/use-profile-image";
 import { toast } from "sonner";
 
@@ -41,12 +41,13 @@ export const ProfilePhoto = ({
         url: "",
         file: null,
     });
-    const [croppedAreaPixels, setCroppedAreaPixels] =
-        useState<Area | null>(null);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(
+        null
+    );
     const [error, setError] = useState("");
 
-    const modifyProfileImage = modifyUserProfileImage();
-    const removeProfileImage = removeUserProfileImage();
+    const modifyProfileImage = museModifyUserProfileImage();
+    const removeProfileImage = useRemoveUserProfileImage();
 
     const isPending =
         modifyProfileImage.isPending || removeProfileImage.isPending;
@@ -95,10 +96,7 @@ export const ProfilePhoto = ({
         if (!photo.file || !croppedAreaPixels) return;
 
         try {
-            const cropped = await getCroppedImg(
-                photo.url,
-                croppedAreaPixels
-            );
+            const cropped = await getCroppedImg(photo.url, croppedAreaPixels);
 
             const formData = new FormData();
             formData.append("image", cropped.file);
@@ -147,9 +145,7 @@ export const ProfilePhoto = ({
                         className="w-full"
                     />
 
-                    {error && (
-                        <p className="text-sm text-red-500">{error}</p>
-                    )}
+                    {error && <p className="text-sm text-red-500">{error}</p>}
 
                     {photo.url && (
                         <div className="relative h-64 md:h-80 w-full overflow-hidden rounded-lg bg-muted">

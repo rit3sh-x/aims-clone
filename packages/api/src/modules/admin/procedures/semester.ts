@@ -7,9 +7,10 @@ import {
     startSemesterInputSchema,
     updateSemesterInputSchema,
 } from "../schema";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, lt, or, sql } from "drizzle-orm";
 import { db, logAuditEvent, semester } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
+import { semesterOverlapCondition } from "../utils";
 
 export const semesterManagement = createTRPCRouter({
     list: adminProcedure
@@ -18,13 +19,10 @@ export const semesterManagement = createTRPCRouter({
             const {
                 status,
                 year,
-                page,
+                semester: chosenSemester,
+                cursor,
                 pageSize,
-                semester: chosenSemster,
             } = input;
-
-            const limit = pageSize;
-            const offset = (page - 1) * pageSize;
 
             const conditions = [];
 
@@ -36,35 +34,55 @@ export const semesterManagement = createTRPCRouter({
                 conditions.push(eq(semester.year, year));
             }
 
-            if (chosenSemster) {
-                conditions.push(eq(semester.semester, chosenSemster));
+            if (chosenSemester) {
+                conditions.push(eq(semester.semester, chosenSemester));
+            }
+
+            if (cursor) {
+                conditions.push(
+                    or(
+                        lt(semester.year, cursor.year),
+                        and(
+                            eq(semester.year, cursor.year),
+                            or(
+                                lt(semester.startDate, cursor.startDate),
+                                and(
+                                    eq(semester.startDate, cursor.startDate),
+                                    lt(semester.id, cursor.id)
+                                )
+                            )
+                        )
+                    )
+                );
             }
 
             const where = conditions.length ? and(...conditions) : undefined;
 
-            const [items, total] = await Promise.all([
-                db.query.semester.findMany({
-                    where,
-                    orderBy: [desc(semester.year), desc(semester.startDate)],
-                    limit,
-                    offset,
-                }),
+            const rows = await db.query.semester.findMany({
+                where,
+                orderBy: [
+                    desc(semester.year),
+                    desc(semester.startDate),
+                    desc(semester.id),
+                ],
+                limit: pageSize + 1,
+            });
 
-                db
-                    .select({ count: sql<number>`count(*)` })
-                    .from(semester)
-                    .where(where)
-                    .then((r) => r[0]?.count ?? 0),
-            ]);
+            const hasNextPage = rows.length > pageSize;
+            const items = hasNextPage ? rows.slice(0, pageSize) : rows;
+
+            const nextCursor = hasNextPage
+                ? {
+                      year: items[items.length - 1]!.year,
+                      startDate: items[items.length - 1]!.startDate,
+                      id: items[items.length - 1]!.id,
+                  }
+                : null;
 
             return {
                 items,
-                meta: {
-                    page,
-                    pageSize: limit,
-                    total,
-                    totalPages: Math.ceil(total / limit),
-                },
+                nextCursor,
+                hasNextPage,
             };
         }),
 
@@ -74,7 +92,6 @@ export const semesterManagement = createTRPCRouter({
             const {
                 year,
                 semester: term,
-                name,
                 startDate,
                 endDate,
                 enrollmentDeadline,
@@ -98,64 +115,48 @@ export const semesterManagement = createTRPCRouter({
                 });
             }
 
-            const existingSameTerm = await db.query.semester.findFirst({
-                where: and(
-                    eq(semester.year, year),
-                    eq(semester.semester, term)
-                ),
-            });
-
-            if (existingSameTerm) {
-                throw new TRPCError({
-                    code: "CONFLICT",
-                    message: `Semester ${term} ${year} already exists`,
+            return await db.transaction(async (tx) => {
+                const overlapping = await tx.query.semester.findFirst({
+                    where: semesterOverlapCondition(startDate, endDate),
                 });
-            }
 
-            const overlapping = await db.query.semester.findFirst({
-                where: sql`
-                daterange(${semester.startDate}, ${semester.endDate}, '[]')
-                && daterange(${startDate}, ${endDate}, '[]')
-            `,
-            });
+                if (overlapping) {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message:
+                            "Semester dates overlap with an existing semester",
+                    });
+                }
 
-            if (overlapping) {
-                throw new TRPCError({
-                    code: "CONFLICT",
-                    message: "Semester dates overlap with an existing semester",
+                const [created] = await tx
+                    .insert(semester)
+                    .values({
+                        year,
+                        semester: term,
+                        startDate,
+                        enrollmentDeadline,
+                        endDate,
+                        status: "UPCOMING",
+                    })
+                    .returning();
+
+                if (!created) {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message: `Semester ${term} ${year} already exists`,
+                    });
+                }
+
+                await logAuditEvent({
+                    userId: ctx.session.user.id,
+                    action: "CREATE",
+                    entityType: "SEMESTER",
+                    entityId: created.id,
+                    after: created,
                 });
-            }
 
-            const [created] = await db
-                .insert(semester)
-                .values({
-                    id: crypto.randomUUID(),
-                    year,
-                    semester: term,
-                    name,
-                    startDate,
-                    enrollmentDeadline,
-                    endDate,
-                    status: "UPCOMING",
-                })
-                .returning();
-
-            if (!created) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to create semester",
-                });
-            }
-
-            await logAuditEvent({
-                userId: ctx.session.user.id,
-                action: "CREATE",
-                entityType: "SEMESTER",
-                entityId: created.id,
-                after: created,
+                return created;
             });
-
-            return created;
         }),
 
     start: adminProcedure
@@ -212,7 +213,7 @@ export const semesterManagement = createTRPCRouter({
 
             await logAuditEvent({
                 userId: ctx.session.user.id,
-                action: "UPDATE",
+                action: "CREATE",
                 entityType: "SEMESTER",
                 entityId: input.id,
                 before: existing,
@@ -225,41 +226,92 @@ export const semesterManagement = createTRPCRouter({
     update: adminProcedure
         .input(updateSemesterInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { id, ...data } = input;
+            const {
+                id,
+                year,
+                semester: term,
+                startDate,
+                endDate,
+                enrollmentDeadline,
+            } = input;
 
-            const existing = await db.query.semester.findFirst({
-                where: eq(semester.id, id),
-            });
-
-            if (!existing) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Semester not found",
+            return await db.transaction(async (tx) => {
+                const existing = await tx.query.semester.findFirst({
+                    where: eq(semester.id, id),
                 });
-            }
 
-            if (existing.status !== "UPCOMING") {
-                throw new TRPCError({
-                    code: "BAD_REQUEST",
-                    message: "Only UPCOMING semesters can be edited",
+                if (!existing) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Semester not found",
+                    });
+                }
+
+                const nextStart = startDate ?? existing.startDate;
+                const nextEnd = endDate ?? existing.endDate;
+                const nextDeadline =
+                    enrollmentDeadline ?? existing.enrollmentDeadline;
+
+                if (nextStart >= nextEnd) {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message: "startDate must be before endDate",
+                    });
+                }
+
+                if (nextDeadline < nextStart || nextDeadline > nextEnd) {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message:
+                            "Enrollment deadline must be between startDate and endDate",
+                    });
+                }
+
+                const overlapping = await tx.query.semester.findFirst({
+                    where: semesterOverlapCondition(nextStart, nextEnd, id),
                 });
-            }
 
-            const [updated] = await db
-                .update(semester)
-                .set(data)
-                .where(eq(semester.id, id))
-                .returning();
+                if (overlapping) {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message:
+                            "Semester dates overlap with an existing semester",
+                    });
+                }
 
-            await logAuditEvent({
-                userId: ctx.session.user.id,
-                action: "UPDATE",
-                entityType: "SEMESTER",
-                entityId: id,
-                before: existing,
-                after: updated,
+                let updated;
+                try {
+                    [updated] = await tx
+                        .update(semester)
+                        .set({
+                            ...(year && { year }),
+                            ...(term && { semester: term }),
+                            ...(startDate && { startDate }),
+                            ...(endDate && { endDate }),
+                            ...(enrollmentDeadline && {
+                                enrollmentDeadline,
+                            }),
+                        })
+                        .where(eq(semester.id, id))
+                        .returning();
+                } catch {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message:
+                            "Semester with this year and term already exists",
+                    });
+                }
+
+                await logAuditEvent({
+                    userId: ctx.session.user.id,
+                    action: "UPDATE",
+                    entityType: "SEMESTER",
+                    entityId: input.id,
+                    before: existing,
+                    after: updated,
+                });
+
+                return updated;
             });
-
-            return updated;
         }),
 });

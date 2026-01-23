@@ -8,31 +8,25 @@ import {
     program,
     department,
     courseOffering,
+    courseOfferingInstructor,
     enrollment,
     semester,
+    advisor,
+    hod,
 } from "@workspace/db";
 import { SpotlightResult } from "./schema";
-import { sql, and, eq, desc, getTableColumns } from "drizzle-orm";
-import { Semester } from "../types/schema";
+import { sql, and, eq, or, ilike, getTableColumns } from "drizzle-orm";
+import type { Semester } from "@workspace/db";
+
+const searchPattern = (query: string) => `%${query}%`;
 
 export async function searchForAdmin(query: string, results: SpotlightResult) {
+    const pattern = searchPattern(query);
+
     const courses = await db
-        .select({
-            ...getTableColumns(course),
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${course.code}), 'A') ||
-                setweight(to_tsvector('english', ${course.title}), 'B'),
-                websearch_to_tsquery('english', ${query})
-            )`,
-        })
+        .select(getTableColumns(course))
         .from(course)
-        .where(
-            sql`(
-                setweight(to_tsvector('english', ${course.code}), 'A') ||
-                setweight(to_tsvector('english', ${course.title}), 'B')
-            ) @@ websearch_to_tsquery('english', ${query})`
-        )
-        .orderBy((t) => desc(t.rank))
+        .where(or(ilike(course.code, pattern), ilike(course.title, pattern)))
         .limit(3);
 
     if (courses.length > 0) {
@@ -49,27 +43,13 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
     const instructors = await db
         .select({
             id: instructor.id,
-            employeeId: instructor.employeeId,
             user: user,
             department: department,
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${user.name}), 'A') ||
-                setweight(to_tsvector('english', ${user.email}), 'B') ||
-                setweight(to_tsvector('english', ${instructor.employeeId}), 'C'),
-                websearch_to_tsquery('english', ${query})
-            )`,
         })
         .from(instructor)
         .innerJoin(user, eq(instructor.userId, user.id))
         .leftJoin(department, eq(instructor.departmentId, department.id))
-        .where(
-            sql`(
-                setweight(to_tsvector('english', ${user.name}), 'A') ||
-                setweight(to_tsvector('english', ${user.email}), 'B') ||
-                setweight(to_tsvector('english', ${instructor.employeeId}), 'C')
-            ) @@ websearch_to_tsquery('english', ${query})`
-        )
-        .orderBy((t) => desc(t.rank))
+        .where(or(ilike(user.name, pattern), ilike(user.email, pattern)))
         .limit(3);
 
     if (instructors.length > 0) {
@@ -90,23 +70,12 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
             user: user,
             batch: batch,
             program: program,
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${student.rollNo}), 'A') ||
-                setweight(to_tsvector('english', ${user.name}), 'B'),
-                websearch_to_tsquery('english', ${query})
-            )`,
         })
         .from(student)
         .innerJoin(user, eq(student.userId, user.id))
         .leftJoin(batch, eq(student.batchId, batch.id))
         .leftJoin(program, eq(batch.programId, program.id))
-        .where(
-            sql`(
-                setweight(to_tsvector('english', ${student.rollNo}), 'A') ||
-                setweight(to_tsvector('english', ${user.name}), 'B')
-            ) @@ websearch_to_tsquery('english', ${query})`
-        )
-        .orderBy((t) => desc(t.rank))
+        .where(or(ilike(student.rollNo, pattern), ilike(user.name, pattern)))
         .limit(3);
 
     if (students.length > 0) {
@@ -121,22 +90,11 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
     }
 
     const departments = await db
-        .select({
-            ...getTableColumns(department),
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${department.name}), 'A') ||
-                setweight(to_tsvector('english', CAST(${department.code} AS TEXT)), 'B'),
-                websearch_to_tsquery('english', ${query})
-            )`,
-        })
+        .select(getTableColumns(department))
         .from(department)
         .where(
-            sql`(
-                setweight(to_tsvector('english', ${department.name}), 'A') ||
-                setweight(to_tsvector('english', CAST(${department.code} AS TEXT)), 'B')
-            ) @@ websearch_to_tsquery('english', ${query})`
+            or(ilike(department.name, pattern), ilike(department.code, pattern))
         )
-        .orderBy((t) => desc(t.rank))
         .limit(3);
 
     if (departments.length > 0) {
@@ -151,22 +109,9 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
     }
 
     const programs = await db
-        .select({
-            ...getTableColumns(program),
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${program.name}), 'A') ||
-                setweight(to_tsvector('english', ${program.code}), 'B'),
-                websearch_to_tsquery('english', ${query})
-            )`,
-        })
+        .select(getTableColumns(program))
         .from(program)
-        .where(
-            sql`(
-                setweight(to_tsvector('english', ${program.name}), 'A') ||
-                setweight(to_tsvector('english', ${program.code}), 'B')
-            ) @@ websearch_to_tsquery('english', ${query})`
-        )
-        .orderBy((t) => desc(t.rank))
+        .where(or(ilike(program.name, pattern), ilike(program.code, pattern)))
         .limit(3);
 
     if (programs.length > 0) {
@@ -185,17 +130,16 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
             id: batch.id,
             year: batch.year,
             program: program,
-            rank: sql<number>`ts_rank(
-                to_tsvector('english', CAST(${batch.year} AS TEXT)),
-                websearch_to_tsquery('english', ${query})
-            )`,
         })
         .from(batch)
         .leftJoin(program, eq(batch.programId, program.id))
         .where(
-            sql`to_tsvector('english', CAST(${batch.year} AS TEXT)) @@ websearch_to_tsquery('english', ${query})`
+            or(
+                sql`CAST(${batch.year} AS TEXT) ILIKE ${pattern}`,
+                ilike(program.name, pattern),
+                ilike(program.code, pattern)
+            )
         )
-        .orderBy((t) => desc(t.rank))
         .limit(3);
 
     if (batches.length > 0) {
@@ -205,6 +149,145 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
                 field: `${b.program?.name || "Unknown"} - ${b.year}`,
                 url: "/batches",
                 param: b.id,
+            })),
+        });
+    }
+}
+
+export async function searchForHod(
+    query: string,
+    results: SpotlightResult,
+    userId: string
+) {
+    const currentHod = await db.query.hod.findFirst({
+        where: eq(hod.userId, userId),
+        with: { department: true },
+    });
+    if (!currentHod) return;
+
+    const pattern = searchPattern(query);
+
+    const deptInstructors = await db
+        .select({
+            id: instructor.id,
+            user: user,
+        })
+        .from(instructor)
+        .innerJoin(user, eq(instructor.userId, user.id))
+        .where(
+            and(
+                eq(instructor.departmentId, currentHod.departmentId),
+                or(ilike(user.name, pattern), ilike(user.email, pattern))
+            )
+        )
+        .limit(3);
+
+    if (deptInstructors.length > 0) {
+        results.push({
+            title: "Department Instructors",
+            items: deptInstructors.map((i) => ({
+                field: i.user.name,
+                url: "/instructors",
+                param: i.id,
+            })),
+        });
+    }
+
+    const deptCourses = await db
+        .select(getTableColumns(course))
+        .from(course)
+        .where(
+            and(
+                eq(course.departmentId, currentHod.departmentId),
+                or(ilike(course.code, pattern), ilike(course.title, pattern))
+            )
+        )
+        .limit(3);
+
+    if (deptCourses.length > 0) {
+        results.push({
+            title: "Department Courses",
+            items: deptCourses.map((c) => ({
+                field: `${c.code} - ${c.title}`,
+                url: "/courses",
+                param: c.id,
+            })),
+        });
+    }
+
+    const deptPrograms = await db
+        .select(getTableColumns(program))
+        .from(program)
+        .where(
+            and(
+                eq(program.departmentId, currentHod.departmentId),
+                or(ilike(program.name, pattern), ilike(program.code, pattern))
+            )
+        )
+        .limit(3);
+
+    if (deptPrograms.length > 0) {
+        results.push({
+            title: "Department Programs",
+            items: deptPrograms.map((p) => ({
+                field: `${p.code} - ${p.name}`,
+                url: "/programs",
+                param: p.id,
+            })),
+        });
+    }
+
+    const deptAdvisors = await db
+        .select({
+            id: advisor.id,
+            user: user,
+        })
+        .from(advisor)
+        .innerJoin(user, eq(advisor.userId, user.id))
+        .where(
+            and(
+                eq(advisor.departmentId, currentHod.departmentId),
+                or(ilike(user.name, pattern), ilike(user.email, pattern))
+            )
+        )
+        .limit(3);
+
+    if (deptAdvisors.length > 0) {
+        results.push({
+            title: "Department Advisors",
+            items: deptAdvisors.map((a) => ({
+                field: a.user.name,
+                url: "/advisors",
+                param: a.id,
+            })),
+        });
+    }
+
+    const deptStudents = await db
+        .select({
+            id: student.id,
+            rollNo: student.rollNo,
+            user: user,
+        })
+        .from(student)
+        .innerJoin(user, eq(student.userId, user.id))
+        .innerJoin(batch, eq(student.batchId, batch.id))
+        .innerJoin(program, eq(batch.programId, program.id))
+        .where(
+            and(
+                eq(program.departmentId, currentHod.departmentId),
+                or(ilike(student.rollNo, pattern), ilike(user.name, pattern))
+            )
+        )
+        .limit(3);
+
+    if (deptStudents.length > 0) {
+        results.push({
+            title: "Department Students",
+            items: deptStudents.map((s) => ({
+                field: `${s.rollNo} - ${s.user.name}`,
+                url: "/students",
+                param: s.id,
             })),
         });
     }
@@ -220,30 +303,27 @@ export async function searchForInstructor(
     });
     if (!currentInstructor) return;
 
+    const pattern = searchPattern(query);
+
     const courses = await db
         .select({
             offering: courseOffering,
             course: course,
             semester: semester,
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${course.code}), 'A') ||
-                setweight(to_tsvector('english', ${course.title}), 'B'),
-                websearch_to_tsquery('english', ${query})
-            )`,
         })
-        .from(courseOffering)
+        .from(courseOfferingInstructor)
+        .innerJoin(
+            courseOffering,
+            eq(courseOfferingInstructor.offeringId, courseOffering.id)
+        )
         .innerJoin(course, eq(courseOffering.courseId, course.id))
         .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
         .where(
             and(
-                eq(courseOffering.instructorId, currentInstructor.id),
-                sql`(
-                    setweight(to_tsvector('english', ${course.code}), 'A') ||
-                    setweight(to_tsvector('english', ${course.title}), 'B')
-                ) @@ websearch_to_tsquery('english', ${query})`
+                eq(courseOfferingInstructor.instructorId, currentInstructor.id),
+                or(ilike(course.code, pattern), ilike(course.title, pattern))
             )
         )
-        .orderBy((t) => [desc(t.rank), desc(semester.year)])
         .limit(3);
 
     if (courses.length) {
@@ -262,27 +342,21 @@ export async function searchForInstructor(
             enrollment: enrollment,
             student: student,
             user: user,
-            offering: courseOffering,
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${student.rollNo}), 'A') ||
-                setweight(to_tsvector('english', ${user.name}), 'B'),
-                websearch_to_tsquery('english', ${query})
-            )`,
         })
         .from(enrollment)
         .innerJoin(student, eq(enrollment.studentId, student.id))
         .innerJoin(user, eq(student.userId, user.id))
         .innerJoin(courseOffering, eq(enrollment.offeringId, courseOffering.id))
+        .innerJoin(
+            courseOfferingInstructor,
+            eq(courseOfferingInstructor.offeringId, courseOffering.id)
+        )
         .where(
             and(
-                eq(courseOffering.instructorId, currentInstructor.id),
-                sql`(
-                    setweight(to_tsvector('english', ${student.rollNo}), 'A') ||
-                    setweight(to_tsvector('english', ${user.name}), 'B')
-                ) @@ websearch_to_tsquery('english', ${query})`
+                eq(courseOfferingInstructor.instructorId, currentInstructor.id),
+                or(ilike(student.rollNo, pattern), ilike(user.name, pattern))
             )
         )
-        .orderBy((t) => desc(t.rank))
         .limit(3);
 
     if (enrollments.length) {
@@ -297,30 +371,36 @@ export async function searchForInstructor(
     }
 }
 
-export async function searchForBatchAdvisor(
+export async function searchForAdvisor(
     query: string,
     results: SpotlightResult,
     userId: string
 ) {
+    const currentAdvisor = await db.query.advisor.findFirst({
+        where: eq(advisor.userId, userId),
+    });
+    if (!currentAdvisor) return;
+
+    const pattern = searchPattern(query);
+
     const batches = await db
         .select({
             id: batch.id,
             year: batch.year,
             program: program,
-            rank: sql<number>`ts_rank(
-                to_tsvector('english', CAST(${batch.year} AS TEXT)),
-                websearch_to_tsquery('english', ${query})
-            )`,
         })
         .from(batch)
         .leftJoin(program, eq(batch.programId, program.id))
         .where(
             and(
-                eq(batch.advisorId, userId),
-                sql`to_tsvector('english', CAST(${batch.year} AS TEXT)) @@ websearch_to_tsquery('english', ${query})`
+                eq(batch.advisorId, currentAdvisor.id),
+                or(
+                    sql`CAST(${batch.year} AS TEXT) ILIKE ${pattern}`,
+                    ilike(program.name, pattern),
+                    ilike(program.code, pattern)
+                )
             )
         )
-        .orderBy((t) => desc(t.rank))
         .limit(3);
 
     if (batches.length > 0) {
@@ -340,25 +420,16 @@ export async function searchForBatchAdvisor(
             rollNo: student.rollNo,
             user: user,
             batch: batch,
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${user.name}), 'A') ||
-                setweight(to_tsvector('english', ${student.rollNo}), 'B'),
-                websearch_to_tsquery('english', ${query})
-            )`,
         })
         .from(student)
         .innerJoin(user, eq(student.userId, user.id))
         .innerJoin(batch, eq(student.batchId, batch.id))
         .where(
             and(
-                eq(batch.advisorId, userId),
-                sql`(
-                    setweight(to_tsvector('english', ${user.name}), 'A') ||
-                    setweight(to_tsvector('english', ${student.rollNo}), 'B')
-                ) @@ websearch_to_tsquery('english', ${query})`
+                eq(batch.advisorId, currentAdvisor.id),
+                or(ilike(user.name, pattern), ilike(student.rollNo, pattern))
             )
         )
-        .orderBy((t) => desc(t.rank))
         .limit(3);
 
     if (students.length > 0) {
@@ -371,13 +442,50 @@ export async function searchForBatchAdvisor(
             })),
         });
     }
+
+    const pendingEnrollments = await db
+        .select({
+            enrollment: enrollment,
+            student: student,
+            user: user,
+            course: course,
+        })
+        .from(enrollment)
+        .innerJoin(student, eq(enrollment.studentId, student.id))
+        .innerJoin(user, eq(student.userId, user.id))
+        .innerJoin(batch, eq(student.batchId, batch.id))
+        .innerJoin(courseOffering, eq(enrollment.offeringId, courseOffering.id))
+        .innerJoin(course, eq(courseOffering.courseId, course.id))
+        .where(
+            and(
+                eq(batch.advisorId, currentAdvisor.id),
+                eq(enrollment.status, "INSTRUCTOR_APPROVED"),
+                or(
+                    ilike(student.rollNo, pattern),
+                    ilike(user.name, pattern),
+                    ilike(course.code, pattern),
+                    ilike(course.title, pattern)
+                )
+            )
+        )
+        .limit(3);
+
+    if (pendingEnrollments.length > 0) {
+        results.push({
+            title: "Pending Approvals",
+            items: pendingEnrollments.map((e) => ({
+                field: `${e.student.rollNo} - ${e.course.code}`,
+                url: "/enrollments",
+                param: e.enrollment.id,
+            })),
+        });
+    }
 }
 
 export async function searchForStudent(
     query: string,
     results: SpotlightResult,
-    userId: string,
-    currentSemester: Semester
+    userId: string
 ) {
     const studentRecord = await db.query.student.findFirst({
         where: eq(student.userId, userId),
@@ -385,23 +493,12 @@ export async function searchForStudent(
 
     if (!studentRecord) return;
 
+    const pattern = searchPattern(query);
+
     const courses = await db
-        .select({
-            ...getTableColumns(course),
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${course.code}), 'A') ||
-                setweight(to_tsvector('english', ${course.title}), 'B'),
-                websearch_to_tsquery('english', ${query})
-            )`,
-        })
+        .select(getTableColumns(course))
         .from(course)
-        .where(
-            sql`(
-                setweight(to_tsvector('english', ${course.code}), 'A') ||
-                setweight(to_tsvector('english', ${course.title}), 'B')
-            ) @@ websearch_to_tsquery('english', ${query})`
-        )
-        .orderBy((t) => desc(t.rank))
+        .where(or(ilike(course.code, pattern), ilike(course.title, pattern)))
         .limit(3);
 
     if (courses.length > 0) {
@@ -420,30 +517,17 @@ export async function searchForStudent(
             enrollment: enrollment,
             offering: courseOffering,
             course: course,
-            instructor: instructor,
-            user: user,
-            rank: sql<number>`ts_rank(
-                setweight(to_tsvector('english', ${course.code}), 'A') ||
-                setweight(to_tsvector('english', ${course.title}), 'B'),
-                websearch_to_tsquery('english', ${query})
-            )`,
         })
         .from(enrollment)
         .innerJoin(courseOffering, eq(enrollment.offeringId, courseOffering.id))
         .innerJoin(course, eq(courseOffering.courseId, course.id))
-        .leftJoin(instructor, eq(courseOffering.instructorId, instructor.id))
-        .leftJoin(user, eq(instructor.userId, user.id))
         .where(
             and(
                 eq(enrollment.studentId, studentRecord.id),
-                currentSemester ? eq(enrollment.status, "ENROLLED") : undefined,
-                sql`(
-                    setweight(to_tsvector('english', ${course.code}), 'A') ||
-                    setweight(to_tsvector('english', ${course.title}), 'B')
-                ) @@ websearch_to_tsquery('english', ${query})`
+                eq(enrollment.status, "ENROLLED"),
+                or(ilike(course.code, pattern), ilike(course.title, pattern))
             )
         )
-        .orderBy((t) => desc(t.rank))
         .limit(3);
 
     if (enrollments.length > 0) {

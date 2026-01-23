@@ -1,5 +1,4 @@
 import { createTRPCRouter, protectedProcedure } from "../../init";
-import { db, semester } from "@workspace/db";
 import {
     spotlightInputSchema,
     spotlightOutputSchema,
@@ -7,11 +6,11 @@ import {
 } from "./schema";
 import {
     searchForAdmin,
-    searchForBatchAdvisor,
+    searchForAdvisor,
+    searchForHod,
     searchForInstructor,
     searchForStudent,
 } from "./utils";
-import { eq } from "drizzle-orm";
 
 export const spotlightRouter = createTRPCRouter({
     spotlightSearch: protectedProcedure
@@ -23,14 +22,6 @@ export const spotlightRouter = createTRPCRouter({
             const results: SpotlightResult = [];
 
             try {
-                const currentSemester = await db.query.semester.findFirst({
-                    where: eq(semester.status, "ONGOING"),
-                });
-
-                if (!currentSemester) {
-                    return [];
-                }
-
                 switch (currentUser.role) {
                     case "ADMIN":
                         await searchForAdmin(search, results);
@@ -42,20 +33,14 @@ export const spotlightRouter = createTRPCRouter({
                             currentUser.id
                         );
                         break;
-                    case "BATCHADVISOR":
-                        await searchForBatchAdvisor(
-                            search,
-                            results,
-                            currentUser.id
-                        );
+                    case "ADVISOR":
+                        await searchForAdvisor(search, results, currentUser.id);
+                        break;
+                    case "HOD":
+                        await searchForHod(search, results, currentUser.id);
                         break;
                     case "STUDENT":
-                        await searchForStudent(
-                            search,
-                            results,
-                            currentUser.id,
-                            currentSemester
-                        );
+                        await searchForStudent(search, results, currentUser.id);
                         break;
                 }
 

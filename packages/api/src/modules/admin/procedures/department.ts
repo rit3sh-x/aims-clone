@@ -2,31 +2,93 @@ import { createTRPCRouter } from "@workspace/api/init";
 import { adminProcedure } from "../middleware";
 import {
     getDepartmentByIdInputSchema,
+    listDepartmentFacultyInputSchema,
     listDepartmentsInputSchema,
-    listDepartmentsOutputSchema,
     updateDepartmentInputSchema,
 } from "../schema";
-import { db, department, logAuditEvent } from "@workspace/db";
-import { asc, eq, ilike, or, sql } from "drizzle-orm";
+import { db, department, instructor, logAuditEvent, user } from "@workspace/db";
+import { and, asc, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const departmentManagement = createTRPCRouter({
     list: adminProcedure
         .input(listDepartmentsInputSchema)
-        .output(listDepartmentsOutputSchema)
         .query(async ({ input }) => {
             const { search } = input;
-            const departments = db.query.department.findMany({
+            const departments = await db.query.department.findMany({
                 where: search
                     ? or(
                           ilike(department.name, `%${search}%`),
-                          sql`CAST(${department.code} AS TEXT) ILIKE ${`%${search}%`}`
+                          ilike(department.code, `%${search}%`)
                       )
                     : undefined,
                 orderBy: [asc(department.code)],
             });
 
             return departments;
+        }),
+
+    listFaculty: adminProcedure
+        .input(listDepartmentFacultyInputSchema)
+        .query(async ({ input }) => {
+            const { departmentId, search, cursor, pageSize } = input;
+
+            const conditions = [];
+
+            if (departmentId) {
+                conditions.push(eq(instructor.departmentId, departmentId));
+            }
+
+            if (search) {
+                conditions.push(
+                    or(
+                        ilike(user.name, `%${search}%`),
+                        ilike(user.email, `%${search}%`),
+                        ilike(instructor.designation, `%${search}%`)
+                    )
+                );
+            }
+
+            if (cursor) {
+                conditions.push(
+                    or(
+                        lt(instructor.createdAt, cursor.createdAt),
+                        and(
+                            eq(instructor.createdAt, cursor.createdAt),
+                            lt(instructor.id, cursor.id)
+                        )
+                    )
+                );
+            }
+
+            const where = conditions.length ? and(...conditions) : undefined;
+
+            const rows = await db
+                .select({
+                    instructor,
+                    user,
+                })
+                .from(instructor)
+                .innerJoin(user, eq(instructor.userId, user.id))
+                .where(where)
+                .orderBy(desc(instructor.createdAt), desc(instructor.id))
+                .limit(pageSize + 1);
+
+            const hasNextPage = rows.length > pageSize;
+            const items = hasNextPage ? rows.slice(0, pageSize) : rows;
+
+            const nextCursor = hasNextPage
+                ? {
+                      createdAt: items[items.length - 1]!.instructor.createdAt,
+                      id: items[items.length - 1]!.instructor.id,
+                  }
+                : null;
+
+            return {
+                items,
+                nextCursor,
+                hasNextPage,
+            };
         }),
 
     getById: adminProcedure
@@ -61,7 +123,7 @@ export const departmentManagement = createTRPCRouter({
         .input(updateDepartmentInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { user } = ctx.session;
-            const { id, name } = input;
+            const { id, name, code } = input;
             const beforeDepartment = await db.query.department.findFirst({
                 where: (d, { eq }) => eq(d.id, id),
             });
@@ -77,6 +139,7 @@ export const departmentManagement = createTRPCRouter({
                 .update(department)
                 .set({
                     name,
+                    code,
                 })
                 .where(eq(department.id, id))
                 .returning();

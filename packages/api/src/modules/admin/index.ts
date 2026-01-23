@@ -10,6 +10,9 @@ import { semesterManagement } from "./procedures/semester";
 import { offeringManagement } from "./procedures/offering";
 import { classroomManagement } from "./procedures/classroom";
 import { logsViewer } from "./procedures/logs";
+import { hodManagement } from "./procedures/hod";
+import { advisorManagement } from "./procedures/advisor";
+import { scheduleManagement } from "./procedures/schedule";
 
 export const adminRouter = createTRPCRouter({
     user: userManagement,
@@ -23,4 +26,7 @@ export const adminRouter = createTRPCRouter({
     offering: offeringManagement,
     classroom: classroomManagement,
     logs: logsViewer,
+    hod: hodManagement,
+    advisor: advisorManagement,
+    schedule: scheduleManagement,
 });

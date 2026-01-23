@@ -2,15 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin } from "better-auth/plugins";
 import { db, schema } from "@workspace/db";
-import {
-    ac,
-    ADMIN,
-    BATCHADVISOR,
-    INSTRUCTOR,
-    STUDENT,
-    ROLE_VALUES,
-    ROLES,
-} from "./permissions";
+import { ROLE_VALUES, ROLES, ROLE_MAP, ac } from "./schema";
 
 export const authSeed = betterAuth({
     database: drizzleAdapter(db, {
@@ -20,13 +12,9 @@ export const authSeed = betterAuth({
     plugins: [
         admin({
             ac,
-            roles: {
-                ADMIN,
-                BATCHADVISOR,
-                INSTRUCTOR,
-                STUDENT,
-            },
-            defaultRole: "STUDENT",
+            adminRoles: [ROLES.ADMIN],
+            defaultRole: ROLES.STUDENT,
+            roles: ROLE_MAP,
         }),
     ],
     emailAndPassword: {

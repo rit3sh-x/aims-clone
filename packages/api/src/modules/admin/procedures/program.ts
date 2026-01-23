@@ -6,7 +6,7 @@ import {
     listProgramsInputSchema,
     updateProgramSchema,
 } from "../schema";
-import { and, asc, eq, ilike, or } from "drizzle-orm";
+import { and, asc, eq, gt, ilike, or } from "drizzle-orm";
 import { db, logAuditEvent, program } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 
@@ -14,7 +14,8 @@ export const programManagement = createTRPCRouter({
     list: adminProcedure
         .input(listProgramsInputSchema)
         .query(async ({ input }) => {
-            const { departmentId, search, page, pageSize } = input;
+            const { departmentId, search, cursor, pageSize } = input;
+
             const conditions = [];
 
             if (departmentId) {
@@ -30,20 +31,38 @@ export const programManagement = createTRPCRouter({
                 );
             }
 
+            if (cursor) {
+                conditions.push(
+                    or(
+                        gt(program.code, cursor.code),
+                        and(
+                            eq(program.code, cursor.code),
+                            gt(program.id, cursor.id)
+                        )
+                    )
+                );
+            }
+
             const items = await db.query.program.findMany({
                 where: conditions.length ? and(...conditions) : undefined,
                 with: { department: true },
-                orderBy: [asc(program.code)],
+                orderBy: [asc(program.code), asc(program.id)],
                 limit: pageSize + 1,
-                offset: (page - 1) * pageSize,
             });
 
             const hasNextPage = items.length > pageSize;
+            const results = hasNextPage ? items.slice(0, pageSize) : items;
+
+            const nextCursor = hasNextPage
+                ? {
+                      code: results[results.length - 1]!.code,
+                      id: results[results.length - 1]!.id,
+                  }
+                : null;
 
             return {
-                items: hasNextPage ? items.slice(0, pageSize) : items,
-                page,
-                pageSize,
+                items: results,
+                nextCursor,
                 hasNextPage,
             };
         }),
@@ -51,16 +70,15 @@ export const programManagement = createTRPCRouter({
     create: adminProcedure
         .input(createProgramSchema)
         .mutation(async ({ input, ctx }) => {
-            const { code, degree, departmentId, name } = input;
+            const { code, degreeType, departmentId, name } = input;
             const { user } = ctx.session;
             const [createdProgram] = await db
                 .insert(program)
                 .values({
                     code,
-                    degree,
                     departmentId,
                     name,
-                    id: crypto.randomUUID(),
+                    degreeType,
                 })
                 .returning();
 

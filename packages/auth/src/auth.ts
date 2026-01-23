@@ -6,15 +6,7 @@ import { oAuthProxy, twoFactor, admin, emailOTP } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { db, logAuditEvent, schema } from "@workspace/db";
 import { sendLoginOTP, sendPasswordResetEmail } from "@workspace/infra";
-import {
-    ac,
-    ADMIN,
-    BATCHADVISOR,
-    INSTRUCTOR,
-    STUDENT,
-    ROLE_VALUES,
-    ROLES,
-} from "./permissions";
+import { ROLE_VALUES, ROLES, ROLE_MAP, ac } from "./schema";
 
 const appUrl = process.env.VITE_APP_URL;
 const mobileSchemes = process.env.MOBILE_SCHEMES;
@@ -30,13 +22,9 @@ export const auth = betterAuth({
     plugins: [
         admin({
             ac,
-            roles: {
-                ADMIN,
-                BATCHADVISOR,
-                INSTRUCTOR,
-                STUDENT,
-            },
+            adminRoles: [ROLES.ADMIN],
             defaultRole: ROLES.STUDENT,
+            roles: ROLE_MAP,
         }),
         twoFactor({
             otpOptions: {
@@ -89,6 +77,9 @@ export const auth = betterAuth({
                     httpOnly: true,
                 },
             },
+        },
+        database: {
+            generateId: "uuid",
         },
     },
     trustedOrigins: [

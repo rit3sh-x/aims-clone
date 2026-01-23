@@ -7,7 +7,6 @@ import {
     uploadUserProfileImage,
 } from "./utils";
 import { db, document, user } from "@workspace/db";
-import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 
 export const userRouter = createTRPCRouter({
@@ -31,11 +30,7 @@ export const userRouter = createTRPCRouter({
             try {
                 await db.transaction(async (tx) => {
                     const existing = await tx.query.document.findFirst({
-                        where: (d, { and, eq }) =>
-                            and(
-                                eq(d.userId, currentUser.id),
-                                eq(d.type, "PROFILE_IMAGE")
-                            ),
+                        where: (d, { and, eq }) => eq(d.userId, currentUser.id),
                     });
 
                     if (existing) {
@@ -51,12 +46,10 @@ export const userRouter = createTRPCRouter({
                             .where(eq(document.id, existing.id));
                     } else {
                         await tx.insert(document).values({
-                            id: randomUUID(),
                             key,
                             mimeType,
                             size,
                             userId: currentUser.id,
-                            type: "PROFILE_IMAGE",
                         });
                     }
 
@@ -99,11 +92,7 @@ export const userRouter = createTRPCRouter({
         try {
             await db.transaction(async (tx) => {
                 const existing = await tx.query.document.findFirst({
-                    where: (d, { and, eq }) =>
-                        and(
-                            eq(d.userId, currentUser.id),
-                            eq(d.type, "PROFILE_IMAGE")
-                        ),
+                    where: (d, { and, eq }) => eq(d.userId, currentUser.id),
                 });
 
                 if (!existing) return;

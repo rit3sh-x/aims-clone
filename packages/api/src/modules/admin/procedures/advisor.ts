@@ -1,20 +1,20 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import {
-    createInstructorInputSchema,
-    getInstructorsByIdInputSchema,
-    listInstructorsInputSchema,
-    updateInstructorInputSchema,
+    createAdvisorInputSchema,
+    getAdvisorByIdInputSchema,
+    listAdvisorsInputSchema,
+    updateAdvisorInputSchema,
 } from "../schema";
 import { adminProcedure } from "../middleware";
-import { db, department, instructor, logAuditEvent, user } from "@workspace/db";
+import { db, advisor, department, logAuditEvent, user } from "@workspace/db";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { auth } from "@workspace/auth";
 import { randomHex } from "../utils";
 
-export const instructorManagement = createTRPCRouter({
+export const advisorManagement = createTRPCRouter({
     list: adminProcedure
-        .input(listInstructorsInputSchema)
+        .input(listAdvisorsInputSchema)
         .query(async ({ input }) => {
             const { pageSize, cursor, departmentCode, search } = input;
 
@@ -36,10 +36,10 @@ export const instructorManagement = createTRPCRouter({
             if (cursor) {
                 conditions.push(
                     or(
-                        lt(instructor.createdAt, cursor.createdAt),
+                        lt(advisor.createdAt, cursor.createdAt),
                         and(
-                            eq(instructor.createdAt, cursor.createdAt),
-                            lt(instructor.id, cursor.id)
+                            eq(advisor.createdAt, cursor.createdAt),
+                            lt(advisor.id, cursor.id)
                         )
                     )
                 );
@@ -49,18 +49,15 @@ export const instructorManagement = createTRPCRouter({
 
             const rows = await db
                 .select({
-                    instructor,
+                    advisor,
                     user,
                     department,
                 })
-                .from(instructor)
-                .innerJoin(user, eq(instructor.userId, user.id))
-                .innerJoin(
-                    department,
-                    eq(instructor.departmentId, department.id)
-                )
+                .from(advisor)
+                .innerJoin(user, eq(advisor.userId, user.id))
+                .innerJoin(department, eq(advisor.departmentId, department.id))
                 .where(where)
-                .orderBy(desc(instructor.createdAt), desc(instructor.id))
+                .orderBy(desc(advisor.createdAt), desc(advisor.id))
                 .limit(pageSize + 1);
 
             const hasNextPage = rows.length > pageSize;
@@ -68,8 +65,8 @@ export const instructorManagement = createTRPCRouter({
 
             const nextCursor = hasNextPage
                 ? {
-                      createdAt: items[items.length - 1]!.instructor.createdAt,
-                      id: items[items.length - 1]!.instructor.id,
+                      createdAt: items[items.length - 1]!.advisor.createdAt,
+                      id: items[items.length - 1]!.advisor.id,
                   }
                 : null;
 
@@ -81,41 +78,39 @@ export const instructorManagement = createTRPCRouter({
         }),
 
     getById: adminProcedure
-        .input(getInstructorsByIdInputSchema)
+        .input(getAdvisorByIdInputSchema)
         .query(async ({ input }) => {
             const { id } = input;
 
-            const [uniqueInstructor] = await db
+            const [uniqueAdvisor] = await db
                 .select({
-                    instructor,
+                    advisor,
                     user,
                     department,
                 })
-                .from(instructor)
-                .innerJoin(user, eq(instructor.userId, user.id))
-                .innerJoin(
-                    department,
-                    eq(instructor.departmentId, department.id)
-                )
-                .where(eq(instructor.id, id))
+                .from(advisor)
+                .innerJoin(user, eq(advisor.userId, user.id))
+                .innerJoin(department, eq(advisor.departmentId, department.id))
+                .where(eq(advisor.id, id))
                 .limit(1);
 
-            if (!uniqueInstructor) {
+            if (!uniqueAdvisor) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Instructor not found",
+                    message: "Advisor not found",
                 });
             }
 
-            return uniqueInstructor;
+            return uniqueAdvisor;
         }),
 
     create: adminProcedure
-        .input(createInstructorInputSchema)
+        .input(createAdvisorInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { departmentCode, designation, email, name } = input;
+            const { departmentCode, email, name } = input;
             const { user } = ctx.session;
             const { headers } = ctx;
+
             const dept = await db.query.department.findFirst({
                 where: (d, { eq }) => eq(d.code, departmentCode),
             });
@@ -131,32 +126,31 @@ export const instructorManagement = createTRPCRouter({
                 body: {
                     email,
                     password: randomHex(),
-                    name: name,
-                    role: "INSTRUCTOR",
+                    name,
+                    role: "ADVISOR",
                 },
                 headers,
             });
 
             const [created] = await db
-                .insert(instructor)
+                .insert(advisor)
                 .values({
                     departmentId: dept.id,
                     userId: newUser.id,
-                    designation,
                 })
                 .returning();
 
             if (!created) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to create instructor",
+                    message: "Failed to create advisor",
                 });
             }
 
             await logAuditEvent({
                 userId: user.id,
                 action: "CREATE",
-                entityType: "INSTRUCTOR",
+                entityType: "ADVISOR",
                 entityId: created.id,
                 after: created,
             });
@@ -165,20 +159,19 @@ export const instructorManagement = createTRPCRouter({
         }),
 
     update: adminProcedure
-        .input(updateInstructorInputSchema)
+        .input(updateAdvisorInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { id, departmentCode, email, name, designation } = input;
-
+            const { id, departmentCode, email, name } = input;
             const { user: currentUser } = ctx.session;
 
-            const existing = await db.query.instructor.findFirst({
-                where: eq(instructor.id, id),
+            const existing = await db.query.advisor.findFirst({
+                where: eq(advisor.id, id),
             });
 
             if (!existing) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Instructor not found",
+                    message: "Advisor not found",
                 });
             }
 
@@ -199,14 +192,13 @@ export const instructorManagement = createTRPCRouter({
                 departmentId = dept.id;
             }
 
-            const updated = db.transaction(async (tx) => {
-                const [updatedInstructor] = await tx
-                    .update(instructor)
+            const updated = await db.transaction(async (tx) => {
+                const [updatedAdvisor] = await tx
+                    .update(advisor)
                     .set({
                         ...(departmentId && { departmentId }),
-                        ...(designation && { designation }),
                     })
-                    .where(eq(instructor.id, id))
+                    .where(eq(advisor.id, id))
                     .returning();
 
                 await tx
@@ -215,23 +207,22 @@ export const instructorManagement = createTRPCRouter({
                         ...(email && { email }),
                         ...(name && { name }),
                     })
-                    .where(eq(user.id, existing.userId))
-                    .returning();
+                    .where(eq(user.id, existing.userId));
 
-                return updatedInstructor;
+                return updatedAdvisor;
             });
 
             if (!updated) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to update instructor",
+                    message: "Failed to update advisor",
                 });
             }
 
             await logAuditEvent({
                 userId: currentUser.id,
                 action: "UPDATE",
-                entityType: "INSTRUCTOR",
+                entityType: "ADVISOR",
                 entityId: id,
                 before: existing,
                 after: updated,

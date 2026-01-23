@@ -6,7 +6,7 @@ import {
     deleteClassroomInputSchema,
     updateClassroomInputSchema,
 } from "../schema";
-import { and, asc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, asc, eq, gt, ilike, or, sql } from "drizzle-orm";
 import { classroom, db, logAuditEvent } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 
@@ -14,10 +14,7 @@ export const classroomManagement = createTRPCRouter({
     list: adminProcedure
         .input(classroomListInputSchema)
         .query(async ({ input }) => {
-            const { page, pageSize, type, search } = input;
-
-            const limit = pageSize;
-            const offset = (page - 1) * pageSize;
+            const { pageSize, type, search, cursor } = input;
 
             const conditions = [];
 
@@ -34,30 +31,40 @@ export const classroomManagement = createTRPCRouter({
                 );
             }
 
+            if (cursor) {
+                conditions.push(
+                    or(
+                        gt(classroom.room, cursor.room),
+                        and(
+                            eq(classroom.room, cursor.room),
+                            gt(classroom.id, cursor.id)
+                        )
+                    )
+                );
+            }
+
             const where = conditions.length ? and(...conditions) : undefined;
 
-            const [items, total] = await Promise.all([
-                db.query.classroom.findMany({
-                    where,
-                    orderBy: [asc(classroom.room)],
-                    limit,
-                    offset,
-                }),
-                db
-                    .select({ count: sql<number>`count(*)` })
-                    .from(classroom)
-                    .where(where)
-                    .then((r) => r[0]?.count ?? 0),
-            ]);
+            const rows = await db.query.classroom.findMany({
+                where,
+                orderBy: [asc(classroom.room), asc(classroom.id)],
+                limit: pageSize + 1,
+            });
+
+            const hasNextPage = rows.length > pageSize;
+            const items = hasNextPage ? rows.slice(0, pageSize) : rows;
+
+            const nextCursor = hasNextPage
+                ? {
+                      room: items[items.length - 1]!.room,
+                      id: items[items.length - 1]!.id,
+                  }
+                : null;
 
             return {
                 items,
-                meta: {
-                    page,
-                    pageSize: limit,
-                    total,
-                    totalPages: Math.ceil(total / limit),
-                },
+                nextCursor,
+                hasNextPage,
             };
         }),
 
@@ -98,31 +105,31 @@ export const classroomManagement = createTRPCRouter({
     update: adminProcedure
         .input(updateClassroomInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { id, ...data } = input;
+            const { roomCode, ...data } = input;
             const { user } = ctx.session;
 
             const existing = await db.query.classroom.findFirst({
-                where: eq(classroom.id, id),
+                where: eq(classroom.room, roomCode),
             });
 
             if (!existing) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Classroom not found",
+                    message: `Classroom with room code '${roomCode}' not found`,
                 });
             }
 
             const [updated] = await db
                 .update(classroom)
                 .set(data)
-                .where(eq(classroom.id, id))
+                .where(eq(classroom.room, roomCode))
                 .returning();
 
             await logAuditEvent({
                 userId: user.id,
                 action: "UPDATE",
                 entityType: "CLASSROOM",
-                entityId: id,
+                entityId: existing.id,
                 before: existing,
                 after: updated,
             });
@@ -133,23 +140,23 @@ export const classroomManagement = createTRPCRouter({
     delete: adminProcedure
         .input(deleteClassroomInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { id } = input;
+            const { roomCode } = input;
             const { user } = ctx.session;
 
             const existing = await db.query.classroom.findFirst({
-                where: eq(classroom.id, id),
+                where: eq(classroom.room, roomCode),
             });
 
             if (!existing) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Classroom not found",
+                    message: `Classroom with room code '${roomCode}' not found`,
                 });
             }
 
             const [deleted] = await db
                 .delete(classroom)
-                .where(eq(classroom.id, id))
+                .where(eq(classroom.room, roomCode))
                 .returning();
 
             if (!deleted) {
@@ -163,7 +170,7 @@ export const classroomManagement = createTRPCRouter({
                 userId: user.id,
                 action: "DELETE",
                 entityType: "CLASSROOM",
-                entityId: id,
+                entityId: existing.id,
                 before: existing,
             });
 

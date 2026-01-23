@@ -2,50 +2,44 @@ import { createTRPCRouter } from "@workspace/api/init";
 import { adminProcedure } from "../middleware";
 import {
     createManyStudentsInputSchema,
-    disableStudentInputSchema,
     getStudentByIdSchema,
     listStudentsInputSchema,
     updateStudentInputSchema,
 } from "../schema";
-import { and, desc, eq, ilike, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, lt, or } from "drizzle-orm";
 import {
+    account,
     batch,
     db,
     department,
     logAuditEvent,
     program,
+    Student,
     student,
     user,
 } from "@workspace/db";
 import { randomHex } from "../utils";
 import { auth } from "@workspace/auth";
 import { TRPCError } from "@trpc/server";
+import pLimit from "p-limit";
 
 export const studentManagement = createTRPCRouter({
     list: adminProcedure
         .input(listStudentsInputSchema)
         .query(async ({ input }) => {
             const {
-                page,
                 pageSize,
+                cursor,
                 departmentCode,
                 programCode,
                 search,
-                status,
                 year,
             } = input;
-
-            const limit = pageSize;
-            const offset = (page - 1) * pageSize;
 
             const conditions = [];
 
             if (search) {
                 conditions.push(ilike(student.rollNo, `%${search}%`));
-            }
-
-            if (status) {
-                conditions.push(eq(student.status, status));
             }
 
             if (year) {
@@ -62,53 +56,51 @@ export const studentManagement = createTRPCRouter({
 
             conditions.push(eq(user.disabled, false));
 
+            if (cursor) {
+                conditions.push(
+                    or(
+                        lt(student.createdAt, cursor.createdAt),
+                        and(
+                            eq(student.createdAt, cursor.createdAt),
+                            lt(student.id, cursor.id)
+                        )
+                    )
+                );
+            }
+
             const where = conditions.length ? and(...conditions) : undefined;
 
-            const [rows, total] = await Promise.all([
-                db
-                    .select({
-                        student,
-                        user,
-                        batch,
-                        program,
-                        department,
-                    })
-                    .from(student)
-                    .innerJoin(user, eq(student.userId, user.id))
-                    .innerJoin(batch, eq(student.batchId, batch.id))
-                    .innerJoin(program, eq(batch.programId, program.id))
-                    .innerJoin(
-                        department,
-                        eq(program.departmentId, department.id)
-                    )
-                    .where(where)
-                    .orderBy(desc(student.createdAt))
-                    .limit(limit + 1)
-                    .offset(offset),
+            const rows = await db
+                .select({
+                    student,
+                    user,
+                    batch,
+                    program,
+                    department,
+                })
+                .from(student)
+                .innerJoin(user, eq(student.userId, user.id))
+                .innerJoin(batch, eq(student.batchId, batch.id))
+                .innerJoin(program, eq(batch.programId, program.id))
+                .innerJoin(department, eq(program.departmentId, department.id))
+                .where(where)
+                .orderBy(desc(student.createdAt), desc(student.id))
+                .limit(pageSize + 1);
 
-                db
-                    .select({ count: sql<number>`count(*)` })
-                    .from(student)
-                    .innerJoin(user, eq(student.userId, user.id))
-                    .innerJoin(batch, eq(student.batchId, batch.id))
-                    .innerJoin(program, eq(batch.programId, program.id))
-                    .innerJoin(
-                        department,
-                        eq(program.departmentId, department.id)
-                    )
-                    .where(where)
-                    .then((r) => r[0]?.count ?? 0),
-            ]);
+            const hasNextPage = rows.length > pageSize;
+            const students = hasNextPage ? rows.slice(0, pageSize) : rows;
 
-            const hasNextPage = rows.length > limit;
-            const students = hasNextPage ? rows.slice(0, limit) : rows;
+            const nextCursor = hasNextPage
+                ? {
+                      createdAt:
+                          students[students.length - 1]!.student.createdAt,
+                      id: students[students.length - 1]!.student.id,
+                  }
+                : null;
 
             return {
                 students,
-                page,
-                pageSize: limit,
-                total,
-                totalPages: Math.ceil(total / limit),
+                nextCursor,
                 hasNextPage,
             };
         }),
@@ -148,91 +140,157 @@ export const studentManagement = createTRPCRouter({
     createMany: adminProcedure
         .input(createManyStudentsInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const created: Array<{
-                student: typeof student.$inferSelect;
-                password: string;
-            }> = [];
+            const { user: currentUser } = ctx.session;
 
-            const failed: Array<{
-                row: (typeof input)[number];
-                reason: string;
-            }> = [];
+            return await db.transaction(async (tx) => {
+                const programCodes = [
+                    ...new Set(input.map((r) => r.programCode)),
+                ];
+                const years = [...new Set(input.map((r) => r.year))];
+                const emails = input.map((r) => r.email.toLowerCase());
+                const hashFn = (await auth.$context).password.hash;
 
-            for (const row of input) {
-                try {
-                    const programRecord = await db.query.program.findFirst({
-                        where: eq(program.code, row.programCode),
-                    });
+                const [programs, existingUsers] = await Promise.all([
+                    tx.query.program.findMany({
+                        where: inArray(program.code, programCodes),
+                    }),
+                    tx.query.user.findMany({
+                        where: inArray(user.email, emails),
+                    }),
+                ]);
 
-                    if (!programRecord) {
+                const programMap = new Map(programs.map((p) => [p.code, p.id]));
+                const existingEmailSet = new Set(
+                    existingUsers.map((u) => u.email)
+                );
+
+                const programIds = [...new Set(programs.map((p) => p.id))];
+                const batches = await tx.query.batch.findMany({
+                    where: and(
+                        inArray(batch.programId, programIds),
+                        inArray(batch.year, years)
+                    ),
+                });
+
+                const batchMap = new Map(
+                    batches.map((b) => [`${b.programId}-${b.year}`, b.id])
+                );
+
+                const seenEmails = new Set<string>();
+                const validRows: Array<{
+                    id: string;
+                    row: (typeof input)[number];
+                    email: string;
+                    programId: string;
+                    batchId: string;
+                    password: string;
+                }> = [];
+
+                const failed: Array<{
+                    row: (typeof input)[number];
+                    reason: string;
+                }> = [];
+
+                for (const row of input) {
+                    const email = row.email.toLowerCase();
+
+                    if (seenEmails.has(email)) {
+                        failed.push({
+                            row,
+                            reason: "Duplicate email in input",
+                        });
+                        continue;
+                    }
+
+                    seenEmails.add(email);
+
+                    if (existingEmailSet.has(email)) {
+                        failed.push({ row, reason: "User already exists" });
+                        continue;
+                    }
+
+                    const programId = programMap.get(row.programCode);
+                    if (!programId) {
                         failed.push({ row, reason: "Program not found" });
                         continue;
                     }
 
-                    const batchRecord = await db.query.batch.findFirst({
-                        where: and(
-                            eq(batch.programId, programRecord.id),
-                            eq(batch.year, row.year)
-                        ),
-                    });
-
-                    if (!batchRecord) {
-                        failed.push({
-                            row,
-                            reason: "Batch not found for given program and year",
-                        });
+                    const batchId = batchMap.get(`${programId}-${row.year}`);
+                    if (!batchId) {
+                        failed.push({ row, reason: "Batch not found" });
                         continue;
                     }
 
-                    const password = randomHex();
-
-                    const { user: newUser } = await auth.api.createUser({
-                        body: {
-                            email: row.email,
-                            password,
-                            name: row.name,
-                            role: "STUDENT",
-                        },
-                    });
-
-                    const studentRecord = await db.query.student.findFirst({
-                        where: (s, { eq }) => eq(s.id, newUser.id),
-                    });
-
-                    if (studentRecord) {
-                        created.push({
-                            student: studentRecord,
-                            password,
-                        });
-                    } else {
-                        failed.push({
-                            row,
-                            reason: "Unexpected error during creation",
-                        });
-                    }
-                } catch (err) {
-                    failed.push({
+                    validRows.push({
+                        id: crypto.randomUUID(),
                         row,
-                        reason: "Unexpected error during creation",
+                        email,
+                        programId,
+                        batchId,
+                        password: randomHex(),
                     });
                 }
-            }
 
-            await logAuditEvent({
-                userId: ctx.session.user.id,
-                action: "CREATE",
-                entityType: "STUDENT",
-                after: {
-                    createdCount: created.length,
-                    failedCount: failed.length,
-                    studentIds: created.map((c) => c.student.id),
-                },
+                if (validRows.length === 0) {
+                    return { created: [], failed };
+                }
+
+                const limit = pLimit(5);
+                const hashedPasswords = await Promise.all(
+                    validRows.map((v) => limit(() => hashFn(v.password)))
+                );
+
+                const passwordMap = new Map(
+                    validRows.map((v, i) => [v.id, hashedPasswords[i]])
+                );
+
+                const userInserts = validRows.map((v) => ({
+                    id: v.id,
+                    email: v.email,
+                    name: v.row.name,
+                    role: "STUDENT" as const,
+                    emailVerified: false,
+                }));
+
+                await tx.insert(user).values(userInserts);
+
+                const accountInserts = validRows.map((v) => ({
+                    userId: v.id,
+                    accountId: v.id,
+                    providerId: "credential",
+                    password: passwordMap.get(v.id)!,
+                }));
+
+                await tx.insert(account).values(accountInserts);
+
+                const studentInserts = validRows.map((v) => ({
+                    userId: v.id,
+                    rollNo: v.row.rollNo,
+                    batchId: v.batchId,
+                    cgpa: v.row.cgpa,
+                }));
+
+                const createdStudents = await tx
+                    .insert(student)
+                    .values(studentInserts)
+                    .returning();
+
+                await logAuditEvent({
+                    userId: currentUser.id,
+                    action: "CREATE",
+                    entityType: "STUDENT",
+                    after: {
+                        createdCount: createdStudents.length,
+                        failedCount: failed.length,
+                        studentIds: createdStudents.map((s) => s.id),
+                    },
+                });
+
+                return {
+                    created: createdStudents,
+                    failed,
+                };
             });
-
-            return {
-                created,
-                failed,
-            };
         }),
 
     update: adminProcedure
@@ -274,43 +332,5 @@ export const studentManagement = createTRPCRouter({
             });
 
             return after;
-        }),
-
-    disable: adminProcedure
-        .input(disableStudentInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            const studentRecord = await db.query.student.findFirst({
-                where: eq(student.id, input.studentId),
-            });
-
-            if (!studentRecord) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Student not found",
-                });
-            }
-
-            const beforeUser = await db.query.user.findFirst({
-                where: eq(user.id, studentRecord.userId),
-            });
-
-            if (!beforeUser || beforeUser.disabled) {
-                return;
-            }
-
-            const [afterUser] = await db
-                .update(user)
-                .set({ disabled: true })
-                .where(eq(user.id, studentRecord.userId))
-                .returning();
-
-            await logAuditEvent({
-                userId: ctx.session.user.id,
-                action: "DISABLE",
-                entityType: "USER",
-                entityId: studentRecord.userId,
-                before: beforeUser,
-                after: afterUser,
-            });
         }),
 });

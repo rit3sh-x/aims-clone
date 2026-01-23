@@ -7,7 +7,7 @@ import {
     rejectCourseInputSchema,
 } from "../schema";
 import { course, db, department, logAuditEvent } from "@workspace/db";
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const courseManagement = createTRPCRouter({
@@ -27,7 +27,7 @@ export const courseManagement = createTRPCRouter({
                 });
             }
 
-            if (beforeCourse.status !== "PROPOSED") {
+            if (beforeCourse.status !== "ADVISOR_ACCEPTED") {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: "Only proposed offerings can be accepted",
@@ -36,7 +36,7 @@ export const courseManagement = createTRPCRouter({
 
             const [updated] = await db
                 .update(course)
-                .set({ status: "ACCEPTED" })
+                .set({ status: "ADMIN_ACCEPTED" })
                 .where(eq(course.id, courseId))
                 .returning();
 
@@ -95,14 +95,11 @@ export const courseManagement = createTRPCRouter({
 
             return updated[0];
         }),
+
     list: adminProcedure
         .input(listCourseInputSchema)
         .query(async ({ input }) => {
-            const { page, pageSize, departmentCode, search, status, type } =
-                input;
-
-            const limit = pageSize;
-            const offset = (page - 1) * pageSize;
+            const { pageSize, cursor, departmentCode, search, status } = input;
 
             const conditions = [];
 
@@ -119,52 +116,48 @@ export const courseManagement = createTRPCRouter({
                 conditions.push(eq(course.status, status));
             }
 
-            if (type) {
-                conditions.push(eq(course.type, type));
-            }
-
             if (departmentCode) {
                 conditions.push(eq(department.code, departmentCode));
             }
 
+            if (cursor) {
+                conditions.push(
+                    or(
+                        lt(course.createdAt, cursor.createdAt),
+                        and(
+                            eq(course.createdAt, cursor.createdAt),
+                            lt(course.id, cursor.id)
+                        )
+                    )
+                );
+            }
+
             const where = conditions.length ? and(...conditions) : undefined;
 
-            const [rows, total] = await Promise.all([
-                db
-                    .select({
-                        course,
-                        department,
-                    })
-                    .from(course)
-                    .innerJoin(
-                        department,
-                        eq(course.departmentId, department.id)
-                    )
-                    .where(where)
-                    .orderBy(desc(course.createdAt))
-                    .limit(limit + 1)
-                    .offset(offset),
+            const rows = await db
+                .select({
+                    course,
+                    department,
+                })
+                .from(course)
+                .innerJoin(department, eq(course.departmentId, department.id))
+                .where(where)
+                .orderBy(desc(course.createdAt), desc(course.id))
+                .limit(pageSize + 1);
 
-                db
-                    .select({ count: sql<number>`count(*)` })
-                    .from(course)
-                    .innerJoin(
-                        department,
-                        eq(course.departmentId, department.id)
-                    )
-                    .where(where)
-                    .then((r) => r[0]?.count ?? 0),
-            ]);
+            const hasNextPage = rows.length > pageSize;
+            const courses = hasNextPage ? rows.slice(0, pageSize) : rows;
 
-            const hasNextPage = rows.length > limit;
-            const courses = hasNextPage ? rows.slice(0, limit) : rows;
+            const nextCursor = hasNextPage
+                ? {
+                      createdAt: courses[courses.length - 1]!.course.createdAt,
+                      id: courses[courses.length - 1]!.course.id,
+                  }
+                : null;
 
             return {
                 courses,
-                page,
-                pageSize: limit,
-                total,
-                totalPages: Math.ceil(total / limit),
+                nextCursor,
                 hasNextPage,
             };
         }),

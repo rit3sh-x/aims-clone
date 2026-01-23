@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
     pgTable,
     text,
@@ -11,12 +11,10 @@ import {
     integer,
     decimal,
     date,
-    bigint,
     check,
     uniqueIndex,
     uuid,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import {
     assessmentTypeEnum,
     attendanceStatusEnum,
@@ -25,24 +23,21 @@ import {
     auditEntityEnum,
     classroomTypeEnum,
     courseStatusEnum,
-    courseTypeEnum,
-    departmentCodeEnum,
-    documentTypeEnum,
     enrollmentStatusEnum,
-    enrollmentTypeEnum,
-    instructorStatusEnum,
     offeringStatusEnum,
-    programDegreeEnum,
-    semesterEnum,
+    degreeTypeEnum,
+    semesterTypeEnum,
     semesterStatusEnum,
-    studentStatusEnum,
     userRoleEnum,
+    gradeTypeEnum,
 } from "./enums";
 
 export const user = pgTable(
     "user",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         name: text("name").notNull(),
         email: text("email").notNull().unique(),
         emailVerified: boolean("email_verified").default(false).notNull(),
@@ -56,7 +51,7 @@ export const user = pgTable(
         banned: boolean("banned").notNull().default(false),
         banReason: text("ban_reason"),
         banExpires: timestamp("ban_expires"),
-        twoFactorEnabled: boolean("two_factor_enabled").default(false),
+        twoFactorEnabled: boolean("two_factor_enabled").default(true),
         disabled: boolean("disabled").notNull().default(false),
     },
     (table) => [index("user_email_idx").on(table.email)]
@@ -65,7 +60,9 @@ export const user = pgTable(
 export const session = pgTable(
     "session",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         expiresAt: timestamp("expires_at").notNull(),
         token: text("token").notNull().unique(),
         createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -74,10 +71,10 @@ export const session = pgTable(
             .notNull(),
         ipAddress: text("ip_address"),
         userAgent: text("user_agent"),
-        userId: text("user_id")
+        userId: uuid("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
-        impersonatedBy: text("impersonated_by"),
+        impersonatedBy: uuid("impersonated_by"),
     },
     (table) => [index("session_userId_idx").on(table.userId)]
 );
@@ -85,10 +82,12 @@ export const session = pgTable(
 export const account = pgTable(
     "account",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         accountId: text("account_id").notNull(),
         providerId: text("provider_id").notNull(),
-        userId: text("user_id")
+        userId: uuid("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
         accessToken: text("access_token"),
@@ -109,7 +108,9 @@ export const account = pgTable(
 export const verification = pgTable(
     "verification",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         identifier: text("identifier").notNull(),
         value: text("value").notNull(),
         expiresAt: timestamp("expires_at").notNull(),
@@ -125,10 +126,12 @@ export const verification = pgTable(
 export const twoFactor = pgTable(
     "two_factor",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         secret: text("secret").notNull().default(""),
         backupCodes: text("backup_codes").notNull(),
-        userId: text("user_id")
+        userId: uuid("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
     },
@@ -138,22 +141,13 @@ export const twoFactor = pgTable(
     ]
 );
 
-export const rateLimit = pgTable("rate_limit", {
-    id: text("id").primaryKey(),
-    key: text("key"),
-    count: integer("count"),
-    lastRequest: bigint("last_request", { mode: "number" }),
-});
-
 export const auditLog = pgTable(
     "audit_log",
     {
         id: serial("id").primaryKey(),
-        actorId: text("actor_id")
-            .references(() => user.id, {
-                onDelete: "set null",
-            })
-            .notNull(),
+        actorId: uuid("actor_id").references(() => user.id, {
+            onDelete: "set null",
+        }),
         action: auditActionEnum("action").notNull(),
         entityType: auditEntityEnum("entity_type").notNull(),
         entityId: text("entity_id"),
@@ -174,26 +168,63 @@ export const auditLog = pgTable(
 export const department = pgTable(
     "department",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         name: text("name").notNull(),
-        code: departmentCodeEnum("code").notNull().unique(),
+        code: varchar("code", { length: 5 }).notNull().unique(),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
             .defaultNow()
             .$onUpdate(() => new Date()),
     },
-    (table) => [index("department_code_idx").on(table.code)]
+    (table) => [
+        index("department_code_idx").on(table.code),
+        check(
+            "department_code_uppercase",
+            sql`${table.code} = UPPER(${table.code})`
+        ),
+    ]
+);
+
+export const hod = pgTable(
+    "hod",
+    {
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        userId: uuid("user_id")
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" })
+            .unique(),
+        departmentId: uuid("department_id")
+            .notNull()
+            .references(() => department.id, { onDelete: "restrict" })
+            .unique(),
+        appointedAt: timestamp("appointed_at").notNull().defaultNow(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
+            .notNull()
+            .defaultNow()
+            .$onUpdate(() => new Date()),
+    },
+    (table) => [
+        index("hod_user_idx").on(table.userId),
+        index("hod_department_idx").on(table.departmentId),
+    ]
 );
 
 export const program = pgTable(
     "program",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         name: text("name").notNull(),
-        code: varchar("code", { length: 5 }).notNull().unique(),
-        degree: programDegreeEnum("degree").notNull(),
-        departmentId: text("department_id")
+        code: varchar("code", { length: 5 }).notNull(),
+        degreeType: degreeTypeEnum("degree").notNull(),
+        departmentId: uuid("department_id")
             .notNull()
             .references(() => department.id, { onDelete: "restrict" }),
         createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -203,13 +234,15 @@ export const program = pgTable(
             .$onUpdate(() => new Date()),
     },
     (table) => [
-        index("program_code_idx").on(table.code),
-        index("program_dept_idx").on(table.departmentId),
-        uniqueIndex("program_dept_name_degree_unique").on(
+        uniqueIndex("program_dept_code_unique").on(
             table.departmentId,
-            table.name,
-            table.degree
+            table.code
         ),
+        uniqueIndex("program_dept_name_unique").on(
+            table.departmentId,
+            table.name
+        ),
+        index("program_dept_idx").on(table.departmentId),
         check(
             "program_code_uppercase_check",
             sql`${table.code} = upper(${table.code})`
@@ -217,17 +250,48 @@ export const program = pgTable(
     ]
 );
 
+export const advisor = pgTable(
+    "advisor",
+    {
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        userId: uuid("user_id")
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" })
+            .unique(),
+        departmentId: uuid("department_id")
+            .notNull()
+            .references(() => department.id, { onDelete: "restrict" }),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
+            .notNull()
+            .defaultNow()
+            .$onUpdate(() => new Date()),
+    },
+    (table) => [
+        index("advisor_user_idx").on(table.userId),
+        index("advisor_department_idx").on(table.departmentId),
+    ]
+);
+
 export const batch = pgTable(
     "batch",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         year: integer("year").notNull(),
-        programId: text("program_id").references(() => program.id, {
-            onDelete: "set null",
-        }),
-        advisorId: text("advisor_id").references(() => user.id, {
-            onDelete: "set null",
-        }),
+        programId: uuid("program_id")
+            .notNull()
+            .references(() => program.id, {
+                onDelete: "restrict",
+            }),
+        advisorId: uuid("advisor_id")
+            .notNull()
+            .references(() => advisor.id, {
+                onDelete: "restrict",
+            }),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
@@ -252,17 +316,18 @@ export const batch = pgTable(
 export const student = pgTable(
     "student",
     {
-        id: text("id").primaryKey(),
-        userId: text("user_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        userId: uuid("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" })
             .unique(),
         rollNo: varchar("roll_no", { length: 12 }).notNull().unique(),
-        batchId: text("batch_id")
+        batchId: uuid("batch_id")
             .notNull()
-            .references(() => batch.id, { onDelete: "set null" }),
+            .references(() => batch.id, { onDelete: "restrict" }),
         cgpa: decimal("cgpa", { precision: 4, scale: 2 }).default("0.00"),
-        status: studentStatusEnum("current_status").notNull(),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
@@ -283,17 +348,17 @@ export const student = pgTable(
 export const instructor = pgTable(
     "instructor",
     {
-        id: text("id").primaryKey(),
-        userId: text("user_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        userId: uuid("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" })
             .unique(),
-        employeeId: varchar("employee_id", { length: 20 }).notNull().unique(),
-        departmentId: text("department_id")
+        departmentId: uuid("department_id")
             .notNull()
             .references(() => department.id, { onDelete: "restrict" }),
         designation: varchar("designation", { length: 100 }),
-        status: instructorStatusEnum("status").default("ACTIVE").notNull(),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
@@ -302,7 +367,6 @@ export const instructor = pgTable(
     },
     (table) => [
         index("instructor_user_idx").on(table.userId),
-        index("instructor_employee_idx").on(table.employeeId),
         index("instructor_dept_idx").on(table.departmentId),
     ]
 );
@@ -310,13 +374,20 @@ export const instructor = pgTable(
 export const course = pgTable(
     "course",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         code: varchar("code", { length: 10 }).notNull().unique(),
         title: text("title").notNull(),
-        credits: integer("credits").notNull().default(3),
+        lectureHours: integer("lecture_hours").notNull().default(3),
+        tutorialHours: integer("tutorial_hours").notNull().default(0),
+        practicalHours: integer("practical_hours").notNull().default(0),
+        selfStudyHours: integer("self_study_hours").notNull().default(0),
+        credits: decimal("credits", { precision: 3, scale: 1 })
+            .notNull()
+            .default("3.0"),
         status: courseStatusEnum("status").notNull().default("PROPOSED"),
-        type: courseTypeEnum("type").default("COMPOSITE").notNull(),
-        departmentId: text("department_id")
+        departmentId: uuid("department_id")
             .notNull()
             .references(() => department.id, { onDelete: "restrict" }),
         description: json("description"),
@@ -330,8 +401,51 @@ export const course = pgTable(
         index("course_code_idx").on(table.code),
         index("course_dept_idx").on(table.departmentId),
         check(
+            "course_code_uppercase",
+            sql`${table.code} = upper(${table.code})`
+        ),
+        check(
             "course_credits_range",
-            sql`${table.credits} > 0 AND ${table.credits} <= 12`
+            sql`${table.credits} > 0 AND ${table.credits} <= 5`
+        ),
+        check(
+            "course_credits_half_step",
+            sql`${table.credits} * 2 = floor(${table.credits} * 2)`
+        ),
+    ]
+);
+
+export const semester = pgTable(
+    "semester",
+    {
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        year: integer("year").notNull(),
+        startDate: date("start_date", { mode: "date" }).notNull(),
+        enrollmentDeadline: date("enrollment_deadline", {
+            mode: "date",
+        }).notNull(),
+        endDate: date("end_date", { mode: "date" }).notNull(),
+        semester: semesterTypeEnum("semester").notNull(),
+        status: semesterStatusEnum("status").default("UPCOMING").notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at")
+            .defaultNow()
+            .$onUpdate(() => new Date())
+            .notNull(),
+    },
+    (t) => [
+        uniqueIndex("semester_year_code_unique").on(t.year, t.semester),
+        index("semester_status_idx").on(t.status),
+        check("semester_date_range_chk", sql`${t.startDate} < ${t.endDate}`),
+        check(
+            "semester_enrollment_deadline_chk",
+            sql`
+                ${t.enrollmentDeadline} >= ${t.startDate}
+                AND
+                ${t.enrollmentDeadline} <= ${t.endDate}
+            `
         ),
     ]
 );
@@ -339,22 +453,16 @@ export const course = pgTable(
 export const courseOffering = pgTable(
     "course_offering",
     {
-        id: text("id").primaryKey(),
-        courseId: text("course_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        courseId: uuid("course_id")
             .notNull()
             .references(() => course.id, { onDelete: "restrict" }),
-        semesterId: text("semester_id")
+        semesterId: uuid("semester_id")
             .notNull()
             .references(() => semester.id, { onDelete: "restrict" }),
-        instructorId: text("instructor_id").references(() => instructor.id, {
-            onDelete: "set null",
-        }),
-        maxCapacity: integer("max_capacity").notNull(),
         status: offeringStatusEnum("status").default("PROPOSED").notNull(),
-        approvedBy: text("approved_by").references(() => user.id, {
-            onDelete: "set null",
-        }),
-        approvedAt: timestamp("approved_at"),
         rejectionReason: text("rejection_reason"),
         createdAt: timestamp("created_at").defaultNow().notNull(),
         updatedAt: timestamp("updated_at")
@@ -365,24 +473,59 @@ export const courseOffering = pgTable(
     (t) => [
         index("offering_course_idx").on(t.courseId),
         index("offering_semester_idx").on(t.semesterId),
-        index("offering_instructor_idx").on(t.instructorId),
         index("offering_status_idx").on(t.status),
         uniqueIndex("offering_unique_course_semester").on(
             t.courseId,
             t.semesterId
         ),
-        check("offering_capacity_positive", sql`${t.maxCapacity} > 0`),
+        check(
+            "offering_rejection_reason_required",
+            sql`
+                ${t.status} != 'REJECTED'
+                OR ${t.rejectionReason} IS NOT NULL
+            `
+        ),
+    ]
+);
+
+export const courseOfferingInstructor = pgTable(
+    "course_offering_instructor",
+    {
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        offeringId: uuid("offering_id")
+            .notNull()
+            .references(() => courseOffering.id, { onDelete: "cascade" }),
+        instructorId: uuid("instructor_id")
+            .notNull()
+            .references(() => instructor.id, { onDelete: "restrict" }),
+        isHead: boolean("is_head").notNull().default(false),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+    },
+    (t) => [
+        uniqueIndex("offering_instructor_unique").on(
+            t.offeringId,
+            t.instructorId
+        ),
+        index("offering_instructor_offering_idx").on(t.offeringId),
+        index("offering_instructor_instructor_idx").on(t.instructorId),
+        uniqueIndex("offering_single_head_unique")
+            .on(t.offeringId)
+            .where(sql`${t.isHead} = true`),
     ]
 );
 
 export const offeringBatch = pgTable(
     "offering_batch",
     {
-        id: text("id").primaryKey(),
-        offeringId: text("offering_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        offeringId: uuid("offering_id")
             .notNull()
             .references(() => courseOffering.id, { onDelete: "cascade" }),
-        batchId: text("batch_id")
+        batchId: uuid("batch_id")
             .notNull()
             .references(() => batch.id, { onDelete: "cascade" }),
         createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -397,24 +540,18 @@ export const offeringBatch = pgTable(
 export const enrollment = pgTable(
     "enrollment",
     {
-        id: text("id").primaryKey(),
-        studentId: text("student_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        studentId: uuid("student_id")
             .notNull()
             .references(() => student.id, { onDelete: "cascade" }),
-        offeringId: text("offering_id")
+        offeringId: uuid("offering_id")
             .notNull()
             .references(() => courseOffering.id, { onDelete: "cascade" }),
         status: enrollmentStatusEnum("status").default("PENDING").notNull(),
-        type: enrollmentTypeEnum("type").notNull(),
         instructorApprovedAt: timestamp("instructor_approved_at"),
         advisorApprovedAt: timestamp("advisor_approved_at"),
-        rejectedBy: text("rejected_by").references(() => user.id, {
-            onDelete: "set null",
-        }),
-        rejectionReason: text("rejection_reason"),
-        enrolledAt: timestamp("enrolled_at"),
-        completedAt: timestamp("completed_at"),
-        droppedAt: timestamp("dropped_at"),
         createdAt: timestamp("created_at").defaultNow().notNull(),
         updatedAt: timestamp("updated_at")
             .defaultNow()
@@ -435,8 +572,10 @@ export const enrollment = pgTable(
 export const attendance = pgTable(
     "attendance",
     {
-        id: text("id").primaryKey(),
-        enrollmentId: text("enrollment_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        enrollmentId: uuid("enrollment_id")
             .notNull()
             .references(() => enrollment.id, { onDelete: "cascade" }),
         date: date("date", { mode: "date" }).notNull(),
@@ -450,7 +589,11 @@ export const attendance = pgTable(
             .$onUpdate(() => new Date()),
     },
     (table) => [
-        uniqueIndex("attendance_unique").on(table.enrollmentId, table.date),
+        uniqueIndex("attendance_unique").on(
+            table.enrollmentId,
+            table.date,
+            table.type
+        ),
         index("attendance_enrollment_idx").on(table.enrollmentId),
         index("attendance_date_idx").on(table.date),
     ]
@@ -459,8 +602,10 @@ export const attendance = pgTable(
 export const assessment = pgTable(
     "assessment",
     {
-        id: text("id").primaryKey(),
-        offeringId: text("offering_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        offeringId: uuid("offering_id")
             .notNull()
             .references(() => courseOffering.id, { onDelete: "cascade" }),
         title: text("title").notNull(),
@@ -493,22 +638,20 @@ export const assessment = pgTable(
 export const grade = pgTable(
     "grade",
     {
-        id: text("id").primaryKey(),
-        enrollmentId: text("enrollment_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        enrollmentId: uuid("enrollment_id")
             .notNull()
             .references(() => enrollment.id, { onDelete: "cascade" }),
-        assessmentId: text("assessment_id")
+        assessmentId: uuid("assessment_id")
             .notNull()
             .references(() => assessment.id, { onDelete: "cascade" }),
         marksObtained: decimal("marks_obtained", {
             precision: 6,
             scale: 2,
         }).notNull(),
-        feedback: text("feedback"),
-        gradedBy: text("graded_by").references(() => instructor.id, {
-            onDelete: "set null",
-        }),
-        gradedAt: timestamp("graded_at"),
+        grade: gradeTypeEnum("grade"),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
@@ -529,7 +672,9 @@ export const grade = pgTable(
 export const timeSlot = pgTable(
     "time_slot",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         dayOfWeek: integer("day_of_week").notNull(),
         startTime: varchar("start_time", { length: 10 }).notNull(),
         endTime: varchar("end_time", { length: 10 }).notNull(),
@@ -541,6 +686,11 @@ export const timeSlot = pgTable(
     },
     (table) => [
         index("time_slot_day_idx").on(table.dayOfWeek),
+        uniqueIndex("time_slot_unique").on(
+            table.dayOfWeek,
+            table.startTime,
+            table.endTime
+        ),
         check(
             "time_slot_day_range",
             sql`${table.dayOfWeek} >= 0 AND ${table.dayOfWeek} <= 6`
@@ -551,7 +701,9 @@ export const timeSlot = pgTable(
 export const classroom = pgTable(
     "classroom",
     {
-        id: text("id").primaryKey(),
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
         room: varchar("room_number", { length: 20 }).notNull().unique(),
         building: varchar("building", { length: 100 }),
         capacity: integer("capacity"),
@@ -574,14 +726,16 @@ export const classroom = pgTable(
 export const schedule = pgTable(
     "schedule",
     {
-        id: text("id").primaryKey(),
-        offeringId: text("offering_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        offeringId: uuid("offering_id")
             .notNull()
             .references(() => courseOffering.id, { onDelete: "cascade" }),
-        timeSlotId: text("time_slot_id")
+        timeSlotId: uuid("time_slot_id")
             .notNull()
             .references(() => timeSlot.id, { onDelete: "cascade" }),
-        classroomId: text("classroom_id")
+        classroomId: uuid("classroom_id")
             .notNull()
             .references(() => classroom.id, { onDelete: "restrict" }),
         effectiveFrom: date("effective_from", { mode: "date" }),
@@ -610,11 +764,13 @@ export const schedule = pgTable(
 export const prerequisite = pgTable(
     "prerequisite",
     {
-        id: text("id").primaryKey(),
-        courseId: text("course_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        courseId: uuid("course_id")
             .notNull()
             .references(() => course.id, { onDelete: "cascade" }),
-        prerequisiteCourseId: text("prerequisite_course_id")
+        prerequisiteCourseId: uuid("prerequisite_course_id")
             .notNull()
             .references(() => course.id, { onDelete: "cascade" }),
         createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -639,8 +795,10 @@ export const prerequisite = pgTable(
 export const courseFeedback = pgTable(
     "course_feedback",
     {
-        id: text("id").primaryKey(),
-        enrollmentId: text("enrollment_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        enrollmentId: uuid("enrollment_id")
             .notNull()
             .references(() => enrollment.id, { onDelete: "cascade" })
             .unique(),
@@ -658,49 +816,16 @@ export const courseFeedback = pgTable(
     ]
 );
 
-export const semester = pgTable(
-    "semester",
-    {
-        id: text("id").primaryKey(),
-        year: integer("year").notNull(),
-        name: varchar("name", { length: 50 }).notNull(),
-        startDate: date("start_date", { mode: "date" }).notNull(),
-        enrollmentDeadline: date("enrollment_deadline", {
-            mode: "date",
-        }).notNull(),
-        endDate: date("end_date", { mode: "date" }).notNull(),
-        semester: semesterEnum("semester").notNull(),
-        status: semesterStatusEnum("status").default("UPCOMING").notNull(),
-        createdAt: timestamp("created_at").defaultNow().notNull(),
-        updatedAt: timestamp("updated_at")
-            .defaultNow()
-            .$onUpdate(() => new Date())
-            .notNull(),
-    },
-    (t) => [
-        uniqueIndex("semester_year_code_unique").on(t.year, t.semester),
-        index("semester_status_idx").on(t.status),
-        check("semester_date_range_chk", sql`${t.startDate} < ${t.endDate}`),
-        check(
-            "semester_enrollment_deadline_chk",
-            sql`
-                ${t.enrollmentDeadline} >= ${t.startDate}
-                AND
-                ${t.enrollmentDeadline} <= ${t.endDate}
-            `
-        ),
-    ]
-);
-
 export const document = pgTable(
     "document",
     {
-        id: uuid("id").primaryKey(),
-        userId: text("user_id")
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        userId: uuid("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
         key: text("key").notNull().unique(),
-        type: documentTypeEnum("type").notNull(),
         mimeType: varchar("mime_type", { length: 100 }).notNull(),
         size: integer("size").notNull(),
         createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -713,7 +838,6 @@ export const document = pgTable(
         index("document_user_idx").on(table.userId),
         index("document_key_idx").on(table.key),
         index("document_created_idx").on(table.createdAt),
-        uniqueIndex("user_profile_image_unique").on(table.userId, table.type),
     ]
 );
 
@@ -729,7 +853,14 @@ export const userRelations = relations(user, ({ many, one }) => ({
         fields: [user.id],
         references: [instructor.userId],
     }),
-    advisedBatches: many(batch),
+    hod: one(hod, {
+        fields: [user.id],
+        references: [hod.userId],
+    }),
+    advisor: one(advisor, {
+        fields: [user.id],
+        references: [advisor.userId],
+    }),
     auditLogs: many(auditLog),
     documents: many(document),
 }));
@@ -755,10 +886,38 @@ export const twoFactorRelations = relations(twoFactor, ({ one }) => ({
     }),
 }));
 
-export const departmentRelations = relations(department, ({ many }) => ({
+export const departmentRelations = relations(department, ({ many, one }) => ({
     programs: many(program),
     courses: many(course),
     instructors: many(instructor),
+    advisors: many(advisor),
+    hod: one(hod, {
+        fields: [department.id],
+        references: [hod.departmentId],
+    }),
+}));
+
+export const hodRelations = relations(hod, ({ one }) => ({
+    user: one(user, {
+        fields: [hod.userId],
+        references: [user.id],
+    }),
+    department: one(department, {
+        fields: [hod.departmentId],
+        references: [department.id],
+    }),
+}));
+
+export const advisorRelations = relations(advisor, ({ one, many }) => ({
+    user: one(user, {
+        fields: [advisor.userId],
+        references: [user.id],
+    }),
+    department: one(department, {
+        fields: [advisor.departmentId],
+        references: [department.id],
+    }),
+    batches: many(batch),
 }));
 
 export const programRelations = relations(program, ({ one, many }) => ({
@@ -774,11 +933,12 @@ export const batchRelations = relations(batch, ({ one, many }) => ({
         fields: [batch.programId],
         references: [program.id],
     }),
-    advisor: one(user, {
+    advisor: one(advisor, {
         fields: [batch.advisorId],
-        references: [user.id],
+        references: [advisor.id],
     }),
     students: many(student),
+    offeringBatches: many(offeringBatch),
 }));
 
 export const studentRelations = relations(student, ({ one, many }) => ({
@@ -802,8 +962,7 @@ export const instructorRelations = relations(instructor, ({ one, many }) => ({
         fields: [instructor.departmentId],
         references: [department.id],
     }),
-    offerings: many(courseOffering),
-    gradedAssessments: many(grade),
+    offerings: many(courseOfferingInstructor),
 }));
 
 export const courseRelations = relations(course, ({ one, many }) => ({
@@ -814,6 +973,10 @@ export const courseRelations = relations(course, ({ one, many }) => ({
     offerings: many(courseOffering),
     prerequisites: many(prerequisite, { relationName: "course" }),
     requiredBy: many(prerequisite, { relationName: "prerequisite" }),
+}));
+
+export const semesterRelations = relations(semester, ({ many }) => ({
+    offerings: many(courseOffering),
 }));
 
 export const offeringBatchRelations = relations(offeringBatch, ({ one }) => ({
@@ -827,6 +990,20 @@ export const offeringBatchRelations = relations(offeringBatch, ({ one }) => ({
     }),
 }));
 
+export const courseOfferingInstructorRelations = relations(
+    courseOfferingInstructor,
+    ({ one }) => ({
+        offering: one(courseOffering, {
+            fields: [courseOfferingInstructor.offeringId],
+            references: [courseOffering.id],
+        }),
+        instructor: one(instructor, {
+            fields: [courseOfferingInstructor.instructorId],
+            references: [instructor.id],
+        }),
+    })
+);
+
 export const courseOfferingRelations = relations(
     courseOffering,
     ({ one, many }) => ({
@@ -838,10 +1015,7 @@ export const courseOfferingRelations = relations(
             fields: [courseOffering.semesterId],
             references: [semester.id],
         }),
-        instructor: one(instructor, {
-            fields: [courseOffering.instructorId],
-            references: [instructor.id],
-        }),
+        instructors: many(courseOfferingInstructor),
         enrollments: many(enrollment),
         assessments: many(assessment),
         schedules: many(schedule),
@@ -860,7 +1034,10 @@ export const enrollmentRelations = relations(enrollment, ({ one, many }) => ({
     }),
     grades: many(grade),
     attendances: many(attendance),
-    feedback: one(courseFeedback),
+    feedback: one(courseFeedback, {
+        fields: [enrollment.id],
+        references: [courseFeedback.enrollmentId],
+    }),
 }));
 
 export const attendanceRelations = relations(attendance, ({ one }) => ({
@@ -886,10 +1063,6 @@ export const gradeRelations = relations(grade, ({ one }) => ({
     assessment: one(assessment, {
         fields: [grade.assessmentId],
         references: [assessment.id],
-    }),
-    gradedByInstructor: one(instructor, {
-        fields: [grade.gradedBy],
-        references: [instructor.id],
     }),
 }));
 

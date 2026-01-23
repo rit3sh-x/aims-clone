@@ -4,14 +4,10 @@ export const auditActionEnum = pgEnum("audit_action", [
     "CREATE",
     "UPDATE",
     "DELETE",
-    "LOGIN",
-    "LOGOUT",
-    "PASSWORD_RESET",
     "ENROLL",
     "UNENROLL",
     "GRADE_SUBMIT",
     "ATTENDANCE_MARK",
-    "ANNOUNCEMENT_POST",
     "BANNED",
     "UNBANNED",
     "DISABLE",
@@ -27,89 +23,53 @@ export const auditEntityEnum = pgEnum("audit_entity", [
     "USER",
     "STUDENT",
     "INSTRUCTOR",
+    "HOD",
+    "ADVISOR",
     "SEMESTER",
     "COURSE",
     "COURSE_OFFERING",
     "ENROLLMENT",
     "ATTENDANCE",
     "GRADE",
-    "ANNOUNCEMENT",
-    "DOCUMENT",
     "SESSION",
     "DEPARTMENT",
     "PROGRAM",
     "BATCH",
     "CLASSROOM",
+    "SCHEDULE",
+    "TIME_SLOT",
 ]);
 export type AuditEntity = (typeof auditEntityEnum.enumValues)[number];
 
 export const userRoleEnum = pgEnum("role", [
     "ADMIN",
-    "BATCHADVISOR",
+    "HOD",
+    "ADVISOR",
     "INSTRUCTOR",
     "STUDENT",
 ]);
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
 
-export const departmentCodeEnum = pgEnum("department_code", [
-    "CSE",
-    "AI",
-    "DS",
-    "IT",
-    "ECE",
-    "EEE",
-    "ME",
-    "CE",
-    "CHE",
-    "META",
-    "BIOTECH",
-    "MATHS",
-    "PHYS",
-    "CHEM",
-]);
-export type DepartmentCode = (typeof departmentCodeEnum.enumValues)[number];
-
-export const programDegreeEnum = pgEnum("program_degree", [
-    "BTECH",
-    "MTECH",
-    "BSC",
-    "MSC",
+export const degreeTypeEnum = pgEnum("degree_type", [
+    "BACHELOR",
+    "MASTER",
+    "DIPLOMA",
     "PHD",
 ]);
-export type ProgramDegree = (typeof programDegreeEnum.enumValues)[number];
+export type DegreeType = (typeof degreeTypeEnum.enumValues)[number];
 
-export const studentStatusEnum = pgEnum("student_status", [
-    "ACTIVE",
-    "SUSPENDED",
-    "DROPPED",
-    "GRADUATED",
+export const semesterTypeEnum = pgEnum("semester_code", [
+    "ODD",
+    "SUMMER",
+    "EVEN",
 ]);
-export type StudentStatus = (typeof studentStatusEnum.enumValues)[number];
+export type SemesterType = (typeof semesterTypeEnum.enumValues)[number];
 
-export const instructorStatusEnum = pgEnum("instructor_status", [
-    "ACTIVE",
-    "ON_LEAVE",
-    "RESIGNED",
-    "RETIRED",
-]);
-export type InstructorStatus = (typeof instructorStatusEnum.enumValues)[number];
-
-export const courseTypeEnum = pgEnum("course_type", [
-    "COMPOSITE",
-    "THEORY",
-    "LAB",
-    "PROJECT",
-    "SEMINAR",
-]);
-export type CourseType = (typeof courseTypeEnum.enumValues)[number];
-
-export const semesterEnum = pgEnum("semester_code", ["ODD", "SUMMER", "EVEN"]);
-export type Semester = (typeof semesterEnum.enumValues)[number];
-
-export const courseStatusEnum = pgEnum("offering_status", [
+export const courseStatusEnum = pgEnum("course_status", [
     "PROPOSED",
     "REJECTED",
-    "ACCEPTED",
+    "ADVISOR_ACCEPTED",
+    "ADMIN_ACCEPTED",
 ]);
 export type CourseStatus = (typeof courseStatusEnum.enumValues)[number];
 
@@ -135,13 +95,6 @@ export const enrollmentStatusEnum = pgEnum("enrollment_status", [
 ]);
 export type EnrollmentStatus = (typeof enrollmentStatusEnum.enumValues)[number];
 
-export const enrollmentTypeEnum = pgEnum("enrollment_type", [
-    "CREDIT",
-    "MINOR",
-    "CONCENTRATION",
-]);
-export type EnrollmentType = (typeof enrollmentTypeEnum.enumValues)[number];
-
 export const attendanceStatusEnum = pgEnum("attendance_status", [
     "PRESENT",
     "ABSENT",
@@ -162,16 +115,29 @@ export const assessmentTypeEnum = pgEnum("assessment_type", [
     "ASSIGNMENT",
     "LAB",
     "PROJECT",
-    "FINAL",
+    "ENDTERM",
 ]);
 export type AssesmentType = (typeof assessmentTypeEnum.enumValues)[number];
+
+export const gradeTypeEnum = pgEnum("grade_type", [
+    "A",
+    "A-",
+    "B",
+    "B-",
+    "C",
+    "C-",
+    "D",
+    "E",
+    "F",
+]);
+export type GradeType = (typeof gradeTypeEnum.enumValues)[number];
 
 export const classroomTypeEnum = pgEnum("classroom_type", [
     "LECTURE",
     "LAB",
     "SEMINAR",
 ]);
-export type ClassroomType = (typeof classroomTypeEnum.enumName)[number];
+export type ClassroomType = (typeof classroomTypeEnum.enumValues)[number];
 
 export const semesterStatusEnum = pgEnum("semester_status", [
     "UPCOMING",
@@ -179,9 +145,3 @@ export const semesterStatusEnum = pgEnum("semester_status", [
     "COMPLETED",
 ]);
 export type SemesterStatus = (typeof semesterStatusEnum.enumValues)[number];
-
-export const documentTypeEnum = pgEnum("semester_status", [
-    "PROFILE_IMAGE",
-    "FEES_DOCUMENT",
-]);
-export type DocumentType = (typeof documentTypeEnum.enumValues)[number];

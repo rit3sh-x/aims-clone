@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lt, lte, or, sql } from "drizzle-orm";
 import { createTRPCRouter } from "@workspace/api/init";
 import { adminProcedure } from "../middleware";
 import { auditLog, db } from "@workspace/db";
@@ -8,8 +8,8 @@ import { listLogsInputSchema } from "../schema";
 export const logsViewer = createTRPCRouter({
     list: adminProcedure.input(listLogsInputSchema).query(async ({ input }) => {
         const {
-            page,
             pageSize,
+            cursor,
             actorId,
             action,
             entityType,
@@ -25,9 +25,6 @@ export const logsViewer = createTRPCRouter({
             });
         }
 
-        const limit = pageSize;
-        const offset = (page - 1) * pageSize;
-
         const conditions = [];
 
         if (actorId) conditions.push(eq(auditLog.actorId, actorId));
@@ -36,39 +33,41 @@ export const logsViewer = createTRPCRouter({
         if (entityId) conditions.push(eq(auditLog.entityId, entityId));
         if (dateFrom) conditions.push(gte(auditLog.createdAt, dateFrom));
         if (dateTo) conditions.push(lte(auditLog.createdAt, dateTo));
+        if (cursor) {
+            conditions.push(
+                or(
+                    lt(auditLog.createdAt, cursor.createdAt),
+                    and(
+                        eq(auditLog.createdAt, cursor.createdAt),
+                        lt(auditLog.id, cursor.id)
+                    )
+                )
+            );
+        }
 
         const where = conditions.length ? and(...conditions) : undefined;
 
-        const [logs, total] = await Promise.all([
-            db.query.auditLog.findMany({
-                where,
-                with: {
-                    user: true,
-                },
-                orderBy: [desc(auditLog.createdAt)],
-                limit,
-                offset,
-            }),
+        const logs = await db.query.auditLog.findMany({
+            where,
+            with: { user: true },
+            orderBy: [desc(auditLog.createdAt), desc(auditLog.id)],
+            limit: pageSize + 1,
+        });
 
-            db
-                .select({ count: sql<number>`count(*)` })
-                .from(auditLog)
-                .where(where)
-                .then((r) => r[0]?.count ?? 0),
-        ]);
+        const hasNextPage = logs.length > pageSize;
+        const items = hasNextPage ? logs.slice(0, pageSize) : logs;
 
-        const totalPages = Math.ceil(total / limit);
-        const hasNextPage = page < totalPages;
+        const nextCursor = hasNextPage
+            ? {
+                  createdAt: items[items.length - 1]!.createdAt,
+                  id: items[items.length - 1]!.id,
+              }
+            : null;
 
         return {
-            logs,
-            meta: {
-                page,
-                pageSize: limit,
-                total,
-                totalPages,
-                hasNextPage,
-            },
+            logs: items,
+            nextCursor,
+            hasNextPage,
         };
     }),
 });

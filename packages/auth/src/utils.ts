@@ -1,6 +1,6 @@
 import { APIError } from "better-auth/api";
 import { auth } from "./auth";
-import type { MultiplePermissions } from "./permissions";
+import type { MultiplePermissions } from "./schema";
 
 export const requirePermission = async (
     userId: string,

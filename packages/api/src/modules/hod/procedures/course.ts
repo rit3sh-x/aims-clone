@@ -1,5 +1,5 @@
 import { createTRPCRouter } from "@workspace/api/init";
-import { adminProcedure } from "../middleware";
+import { hodProcedure } from "../middleware";
 import {
     acceptCourseInputSchema,
     getCourseByIdSchema,
@@ -11,13 +11,18 @@ import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const courseManagement = createTRPCRouter({
-    acceptCourse: adminProcedure
+    acceptCourse: hodProcedure
         .input(acceptCourseInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { courseId } = input;
             const { user } = ctx.session;
+            const { departmentId } = ctx.hod;
+
             const beforeCourse = await db.query.course.findFirst({
-                where: eq(course.id, courseId),
+                where: and(
+                    eq(course.id, courseId),
+                    eq(course.departmentId, departmentId)
+                ),
             });
 
             if (!beforeCourse) {
@@ -27,7 +32,7 @@ export const courseManagement = createTRPCRouter({
                 });
             }
 
-            if (beforeCourse.status !== "HOD_ACCEPTED") {
+            if (beforeCourse.status !== "PROPOSED") {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: "Only proposed offerings can be accepted",
@@ -36,7 +41,7 @@ export const courseManagement = createTRPCRouter({
 
             const [updated] = await db
                 .update(course)
-                .set({ status: "ADMIN_ACCEPTED" })
+                .set({ status: "HOD_ACCEPTED" })
                 .where(eq(course.id, courseId))
                 .returning();
 
@@ -59,13 +64,18 @@ export const courseManagement = createTRPCRouter({
             return updated;
         }),
 
-    rejectCourse: adminProcedure
+    rejectCourse: hodProcedure
         .input(rejectCourseInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { courseId, reason } = input;
             const { user } = ctx.session;
+            const { departmentId } = ctx.hod;
+
             const beforeCourse = await db.query.course.findFirst({
-                where: eq(course.id, courseId),
+                where: and(
+                    eq(course.id, courseId),
+                    eq(course.departmentId, departmentId)
+                ),
             });
 
             if (!beforeCourse) {
@@ -96,12 +106,16 @@ export const courseManagement = createTRPCRouter({
             return updated[0];
         }),
 
-    list: adminProcedure
+    list: hodProcedure
         .input(listCourseInputSchema)
-        .query(async ({ input }) => {
-            const { pageSize, cursor, departmentCode, search } = input;
+        .query(async ({ input, ctx }) => {
+            const { pageSize, cursor, search } = input;
+            const { departmentId } = ctx.hod;
 
             const conditions = [];
+
+            conditions.push(eq(course.departmentId, departmentId));
+            conditions.push(eq(course.status, "PROPOSED"));
 
             if (search) {
                 conditions.push(
@@ -110,12 +124,6 @@ export const courseManagement = createTRPCRouter({
                         ilike(course.title, `%${search}%`)
                     )
                 );
-            }
-
-            conditions.push(eq(course.status, "HOD_ACCEPTED"));
-
-            if (departmentCode) {
-                conditions.push(eq(department.code, departmentCode));
             }
 
             if (cursor) {
@@ -160,21 +168,26 @@ export const courseManagement = createTRPCRouter({
             };
         }),
 
-    getOne: adminProcedure
+    getOne: hodProcedure
         .input(getCourseByIdSchema)
-        .query(async ({ input }) => {
+        .query(async ({ input, ctx }) => {
+            const { departmentId } = ctx.hod;
             const { id } = input;
 
-            const result = await db
+            const [result] = await db
                 .select({
                     course,
                     department,
                 })
                 .from(course)
                 .innerJoin(department, eq(course.departmentId, department.id))
-                .where(eq(course.id, id))
-                .limit(1)
-                .then((r) => r[0]);
+                .where(
+                    and(
+                        eq(course.id, id),
+                        eq(course.departmentId, departmentId)
+                    )
+                )
+                .limit(1);
 
             if (!result) {
                 throw new TRPCError({

@@ -5,37 +5,112 @@ import {
     proposeOfferingInputSchema,
 } from "../schema";
 import {
+    assessmentTemplate,
+    course,
     courseOffering,
+    courseOfferingInstructor,
     db,
+    instructor,
     logAuditEvent,
     offeringBatch,
     prerequisite,
 } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lt, or, type SQL } from "drizzle-orm";
 
 export const offeringManagement = createTRPCRouter({
     propose: instructorProcedure
         .input(proposeOfferingInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { user } = ctx.session;
+            const { instructor: currentInstructor } = ctx;
+
             const {
-                batchIds,
                 courseId,
-                maxCapacity,
                 semesterId,
+                batchIds,
+                instructorIds,
+                headInstructorId,
                 prerequisiteCourseIds,
+                assessmentTemplates,
             } = input;
 
+            if (headInstructorId !== currentInstructor.id) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "Only the head instructor can propose an offering",
+                });
+            }
+
+            if (!instructorIds.includes(headInstructorId)) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message:
+                        "Head instructor must be included in instructorIds",
+                });
+            }
+
+            const courseRecord = await db
+                .select({ status: course.status })
+                .from(course)
+                .where(eq(course.id, courseId))
+                .then((r) => r[0]);
+
+            if (!courseRecord || courseRecord.status !== "ADMIN_ACCEPTED") {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Only ACTIVE courses can be offered",
+                });
+            }
+
+            const instructors = await db
+                .select({ id: instructor.id })
+                .from(instructor)
+                .where(inArray(instructor.id, instructorIds));
+
+            if (instructors.length !== instructorIds.length) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Invalid instructor list",
+                });
+            }
+
+            const totalWeightage = assessmentTemplates.reduce(
+                (sum, t) => sum + t.weightage,
+                0
+            );
+
+            if (totalWeightage !== 100) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Total assessment weightage must be exactly 100",
+                });
+            }
+
             return db.transaction(async (tx) => {
+                const exists = await tx
+                    .select({ id: courseOffering.id })
+                    .from(courseOffering)
+                    .where(
+                        and(
+                            eq(courseOffering.courseId, courseId),
+                            eq(courseOffering.semesterId, semesterId)
+                        )
+                    )
+                    .then((r) => r[0]);
+
+                if (exists) {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message:
+                            "Offering already exists for this course and semester",
+                    });
+                }
+
                 const [offering] = await tx
                     .insert(courseOffering)
                     .values({
-                        id: crypto.randomUUID(),
                         courseId,
                         semesterId,
-                        instructorId: user.id,
-                        maxCapacity,
                         status: "PROPOSED",
                     })
                     .returning();
@@ -47,11 +122,25 @@ export const offeringManagement = createTRPCRouter({
                     });
                 }
 
+                await tx.insert(courseOfferingInstructor).values(
+                    instructorIds.map((id) => ({
+                        offeringId: offering.id,
+                        instructorId: id,
+                        isHead: id === headInstructorId,
+                    }))
+                );
+
                 await tx.insert(offeringBatch).values(
                     batchIds.map((batchId) => ({
-                        id: crypto.randomUUID(),
                         offeringId: offering.id,
                         batchId,
+                    }))
+                );
+
+                await tx.insert(assessmentTemplate).values(
+                    assessmentTemplates.map((template) => ({
+                        ...template,
+                        offeringId: offering.id,
                     }))
                 );
 
@@ -60,7 +149,6 @@ export const offeringManagement = createTRPCRouter({
                         .insert(prerequisite)
                         .values(
                             prerequisiteCourseIds.map((prereqId) => ({
-                                id: crypto.randomUUID(),
                                 courseId,
                                 prerequisiteCourseId: prereqId,
                             }))
@@ -69,14 +157,17 @@ export const offeringManagement = createTRPCRouter({
                 }
 
                 await logAuditEvent({
-                    userId: user.id,
+                    userId: ctx.session.user.id,
                     action: "CREATE",
                     entityType: "COURSE_OFFERING",
                     entityId: offering.id,
                     after: {
                         offering,
+                        instructorIds,
+                        headInstructorId,
                         batchIds,
                         prerequisiteCourseIds,
+                        assessmentTemplates,
                     },
                 });
 
@@ -87,42 +178,61 @@ export const offeringManagement = createTRPCRouter({
     list: instructorProcedure
         .input(listInstructorOfferingsInputSchema)
         .query(async ({ input, ctx }) => {
-            const instructorId = ctx.session.user.id;
-            const { page, pageSize, status } = input;
-            const offset = (page - 1) * pageSize;
+            const { instructor } = ctx;
+            const { pageSize, cursor, status } = input;
 
-            const conditions = [eq(courseOffering.instructorId, instructorId)];
-            if (status) conditions.push(eq(courseOffering.status, status));
+            const conditions: SQL[] = [
+                eq(courseOfferingInstructor.instructorId, instructor.id),
+            ];
 
-            const where = and(...conditions);
+            if (status) {
+                conditions.push(eq(courseOffering.status, status));
+            }
 
-            const [items, total] = await Promise.all([
-                db.query.courseOffering.findMany({
-                    where,
-                    with: {
-                        course: true,
-                        semester: true,
-                    },
-                    orderBy: [desc(courseOffering.createdAt)],
-                    limit: pageSize,
-                    offset,
-                }),
-                db
-                    .select({ count: sql<number>`count(*)` })
-                    .from(courseOffering)
-                    .where(where)
-                    .then((r) => r[0]?.count ?? 0),
-            ]);
+            if (cursor) {
+                const cursorCondition = or(
+                    lt(courseOffering.createdAt, cursor.createdAt),
+                    and(
+                        eq(courseOffering.createdAt, cursor.createdAt),
+                        lt(courseOffering.id, cursor.id)
+                    )
+                );
+
+                if (cursorCondition) {
+                    conditions.push(cursorCondition);
+                }
+            }
+
+            const rows = await db
+                .select({
+                    offering: courseOffering,
+                })
+                .from(courseOffering)
+                .innerJoin(
+                    courseOfferingInstructor,
+                    eq(courseOfferingInstructor.offeringId, courseOffering.id)
+                )
+                .where(and(...conditions))
+                .orderBy(
+                    desc(courseOffering.createdAt),
+                    desc(courseOffering.id)
+                )
+                .limit(pageSize + 1);
+
+            const hasNextPage = rows.length > pageSize;
+            const items = hasNextPage ? rows.slice(0, pageSize) : rows;
+
+            const nextCursor = hasNextPage
+                ? {
+                      createdAt: items[items.length - 1]!.offering.createdAt,
+                      id: items[items.length - 1]!.offering.id,
+                  }
+                : null;
 
             return {
                 items,
-                meta: {
-                    page: page,
-                    pageSize: pageSize,
-                    total,
-                    totalPages: Math.ceil(total / pageSize),
-                    hasNextPage: page * pageSize < total,
-                },
+                nextCursor,
+                hasNextPage,
             };
         }),
 });

@@ -1,15 +1,7 @@
 import { and, eq, desc, lt, or, type SQL } from "drizzle-orm";
 import { createTRPCRouter } from "@workspace/api/init";
-import { instructorProcedure } from "../middleware";
-import {
-    db,
-    student,
-    enrollment,
-    logAuditEvent,
-    courseOfferingInstructor,
-    course,
-    courseOffering,
-} from "@workspace/db";
+import { advisorProcedure } from "../middleware";
+import { db, student, batch, enrollment, logAuditEvent } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 import {
     approveEnrollmentInputSchema,
@@ -18,23 +10,16 @@ import {
 } from "../schema";
 
 export const enrollmentManagement = createTRPCRouter({
-    list: instructorProcedure
+    list: advisorProcedure
         .input(listEnrollmentsInputSchema)
         .query(async ({ input, ctx }) => {
-            const { id: instructorId } = ctx.instructor;
-            const { pageSize, cursor, status, courseCode } = input;
+            const { id: advisorId } = ctx.advisor;
+            const { pageSize, cursor, status } = input;
 
-            const conditions: SQL[] = [
-                eq(courseOfferingInstructor.instructorId, instructorId),
-                eq(courseOfferingInstructor.isHead, true),
-            ];
+            const conditions: SQL[] = [eq(student.advisorId, advisorId)];
 
             if (status) {
                 conditions.push(eq(enrollment.status, status));
-            }
-
-            if (courseCode) {
-                conditions.push(eq(course.code, courseCode));
             }
 
             if (cursor) {
@@ -55,18 +40,8 @@ export const enrollmentManagement = createTRPCRouter({
                 .select({
                     enrollment,
                     student,
-                    course,
                 })
                 .from(enrollment)
-                .innerJoin(
-                    courseOffering,
-                    eq(enrollment.offeringId, courseOffering.id)
-                )
-                .innerJoin(
-                    courseOfferingInstructor,
-                    eq(courseOfferingInstructor.offeringId, courseOffering.id)
-                )
-                .innerJoin(course, eq(courseOffering.courseId, course.id))
                 .innerJoin(student, eq(enrollment.studentId, student.id))
                 .where(and(...conditions))
                 .orderBy(desc(enrollment.createdAt), desc(enrollment.id))
@@ -90,52 +65,42 @@ export const enrollmentManagement = createTRPCRouter({
             };
         }),
 
-    approve: instructorProcedure
+    approveEnrollment: advisorProcedure
         .input(approveEnrollmentInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { enrollmentId } = input;
-            const { id: instructorId } = ctx.instructor;
+            const { id: advisorId } = ctx.advisor;
 
             const record = await db
-                .select({ enrollment })
+                .select({
+                    enrollment,
+                    student,
+                })
                 .from(enrollment)
-                .innerJoin(
-                    courseOffering,
-                    eq(enrollment.offeringId, courseOffering.id)
-                )
-                .innerJoin(
-                    courseOfferingInstructor,
-                    eq(courseOfferingInstructor.offeringId, courseOffering.id)
-                )
-                .where(
-                    and(
-                        eq(enrollment.id, enrollmentId),
-                        eq(courseOfferingInstructor.instructorId, instructorId),
-                        eq(courseOfferingInstructor.isHead, true)
-                    )
-                )
+                .innerJoin(student, eq(enrollment.studentId, student.id))
+                .where(eq(enrollment.id, enrollmentId))
                 .limit(1)
                 .then((r) => r[0]);
 
-            if (!record) {
+            if (!record || record.student.advisorId !== advisorId) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "Only the head instructor can approve enrollments",
+                    message: "Not authorized to approve this enrollment",
                 });
             }
 
-            if (record.enrollment.status !== "PENDING") {
+            if (record.enrollment.status !== "INSTRUCTOR_APPROVED") {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
-                    message: "Enrollment is not awaiting instructor approval",
+                    message: "Enrollment is not awaiting advisor approval",
                 });
             }
 
             const [updated] = await db
                 .update(enrollment)
                 .set({
-                    status: "INSTRUCTOR_APPROVED",
-                    instructorApprovedAt: new Date(),
+                    status: "ADVISOR_APPROVED",
+                    advisorApprovedAt: new Date(),
                 })
                 .where(eq(enrollment.id, enrollmentId))
                 .returning();
@@ -143,7 +108,7 @@ export const enrollmentManagement = createTRPCRouter({
             if (!updated) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to accept the enrollment",
+                    message: "Failed to approve enrollment",
                 });
             }
 
@@ -158,51 +123,41 @@ export const enrollmentManagement = createTRPCRouter({
             return updated;
         }),
 
-    reject: instructorProcedure
+    rejectEnrollment: advisorProcedure
         .input(rejectEnrollmentInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { enrollmentId, reason } = input;
-            const { id: instructorId } = ctx.instructor;
+            const { id: advisorId } = ctx.advisor;
 
             const record = await db
-                .select({ enrollment })
+                .select({
+                    enrollment,
+                    student,
+                })
                 .from(enrollment)
-                .innerJoin(
-                    courseOffering,
-                    eq(enrollment.offeringId, courseOffering.id)
-                )
-                .innerJoin(
-                    courseOfferingInstructor,
-                    eq(courseOfferingInstructor.offeringId, courseOffering.id)
-                )
-                .where(
-                    and(
-                        eq(enrollment.id, enrollmentId),
-                        eq(courseOfferingInstructor.instructorId, instructorId),
-                        eq(courseOfferingInstructor.isHead, true) // 🔑
-                    )
-                )
+                .innerJoin(student, eq(enrollment.studentId, student.id))
+                .where(eq(enrollment.id, enrollmentId))
                 .limit(1)
                 .then((r) => r[0]);
 
-            if (!record) {
+            if (!record || record.student.advisorId !== advisorId) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "Only the head instructor can reject enrollments",
+                    message: "Not authorized to reject this enrollment",
                 });
             }
 
-            if (record.enrollment.status !== "PENDING") {
+            if (record.enrollment.status !== "INSTRUCTOR_APPROVED") {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
-                    message: "Enrollment is not awaiting instructor approval",
+                    message: "Enrollment is not awaiting advisor approval",
                 });
             }
 
             const [updated] = await db
                 .update(enrollment)
                 .set({
-                    status: "INSTRUCTOR_REJECTED",
+                    status: "ADVISOR_REJECTED",
                 })
                 .where(eq(enrollment.id, enrollmentId))
                 .returning();
@@ -210,7 +165,7 @@ export const enrollmentManagement = createTRPCRouter({
             if (!updated) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to reject the enrollment",
+                    message: "Failed to reject enrollment",
                 });
             }
 

@@ -7,14 +7,14 @@ import {
     updateBatchInputSchema,
 } from "../schema";
 import { and, desc, eq, lt, ne, or } from "drizzle-orm";
-import { batch, db, logAuditEvent, program } from "@workspace/db";
+import { batch, db, logAuditEvent, program, department } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 
 export const batchManagement = createTRPCRouter({
     list: adminProcedure
         .input(listBatchesInputSchema)
         .query(async ({ input }) => {
-            const { programId, year, cursor, pageSize } = input;
+            const { programId, year, cursor, pageSize, departmentCode } = input;
 
             const conditions = [];
 
@@ -24,6 +24,10 @@ export const batchManagement = createTRPCRouter({
 
             if (year) {
                 conditions.push(eq(batch.year, year));
+            }
+
+            if (departmentCode) {
+                conditions.push(eq(department.code, departmentCode));
             }
 
             if (cursor) {
@@ -38,23 +42,26 @@ export const batchManagement = createTRPCRouter({
                 );
             }
 
-            const items = await db.query.batch.findMany({
-                where: conditions.length ? and(...conditions) : undefined,
-                with: {
-                    program: { with: { department: true } },
-                    advisor: true,
-                },
-                orderBy: [desc(batch.year), desc(batch.id)],
-                limit: pageSize + 1,
-            });
+            const items = await db
+                .select({
+                    batch,
+                    program,
+                    department,
+                })
+                .from(batch)
+                .innerJoin(program, eq(batch.programId, program.id))
+                .innerJoin(department, eq(program.departmentId, department.id))
+                .where(conditions.length ? and(...conditions) : undefined)
+                .orderBy(desc(batch.year), desc(batch.id))
+                .limit(pageSize + 1);
 
             const hasNextPage = items.length > pageSize;
             const results = hasNextPage ? items.slice(0, pageSize) : items;
 
             const nextCursor = hasNextPage
                 ? {
-                      year: results[results.length - 1]!.year,
-                      id: results[results.length - 1]!.id,
+                      year: results[results.length - 1]!.batch.year,
+                      id: results[results.length - 1]!.batch.id,
                   }
                 : null;
 
@@ -68,7 +75,7 @@ export const batchManagement = createTRPCRouter({
     create: adminProcedure
         .input(createBatchInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { programId, year, advisorId } = input;
+            const { programId, year } = input;
             const { user } = ctx.session;
 
             const programRecord = await db.query.program.findFirst({
@@ -101,7 +108,6 @@ export const batchManagement = createTRPCRouter({
                 .values({
                     year,
                     programId,
-                    advisorId: advisorId,
                 })
                 .returning();
 
@@ -126,7 +132,7 @@ export const batchManagement = createTRPCRouter({
     update: adminProcedure
         .input(updateBatchInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { id, year, programId, advisorId } = input;
+            const { id, year, programId } = input;
             const { user } = ctx.session;
 
             const existingBatch = await db.query.batch.findFirst({
@@ -169,7 +175,6 @@ export const batchManagement = createTRPCRouter({
                 .set({
                     ...(year !== undefined && { year }),
                     ...(programId !== undefined && { programId }),
-                    ...(advisorId !== undefined && { advisorId }),
                 })
                 .where(eq(batch.id, id))
                 .returning();

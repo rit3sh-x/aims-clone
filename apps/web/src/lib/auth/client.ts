@@ -4,6 +4,7 @@ import {
     emailOTPClient,
     twoFactorClient,
     adminClient,
+    customSessionClient,
 } from "better-auth/client/plugins";
 import type { Auth } from "@workspace/auth";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ export const authClient = createAuthClient({
         adminClient(),
         twoFactorClient(),
         inferAdditionalFields<Auth>(),
+        customSessionClient<Auth>(),
     ],
     fetchOptions: {
         onError: async (context) => {

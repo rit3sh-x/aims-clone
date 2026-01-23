@@ -2,9 +2,17 @@ import { createTRPCRouter } from "@workspace/api/init";
 import { offeringManagement } from "./procedures/offering";
 import { scheduleViewer } from "./procedures/schedule";
 import { enrollmentManagement } from "./procedures/enrollment";
+import { assessmentManagement } from "./procedures/assessment";
+import { courseManagement } from "./procedures/course";
+import { gradeManagement } from "./procedures/grade";
+import { attendanceManagement } from "./procedures/attendance";
 
 export const instructorRouter = createTRPCRouter({
     offering: offeringManagement,
     schedule: scheduleViewer,
     enrollment: enrollmentManagement,
+    assessment: assessmentManagement,
+    course: courseManagement,
+    grade: gradeManagement,
+    attendance: attendanceManagement,
 });

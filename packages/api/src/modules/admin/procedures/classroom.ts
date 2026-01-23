@@ -76,7 +76,6 @@ export const classroomManagement = createTRPCRouter({
             const [created] = await db
                 .insert(classroom)
                 .values({
-                    id: crypto.randomUUID(),
                     room,
                     building,
                     capacity,

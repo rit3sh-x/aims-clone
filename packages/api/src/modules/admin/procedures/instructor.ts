@@ -6,7 +6,15 @@ import {
     updateInstructorInputSchema,
 } from "../schema";
 import { adminProcedure } from "../middleware";
-import { db, department, instructor, logAuditEvent, user } from "@workspace/db";
+import {
+    account,
+    db,
+    department,
+    instructor,
+    logAuditEvent,
+    twoFactor,
+    user,
+} from "@workspace/db";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { auth } from "@workspace/auth";
@@ -113,9 +121,10 @@ export const instructorManagement = createTRPCRouter({
     create: adminProcedure
         .input(createInstructorInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { departmentCode, designation, email, name } = input;
-            const { user } = ctx.session;
-            const { headers } = ctx;
+            const { departmentCode, designation, email, name, employeeId } =
+                input;
+            const { user: currentUser } = ctx.session;
+
             const dept = await db.query.department.findFirst({
                 where: (d, { eq }) => eq(d.code, departmentCode),
             });
@@ -127,24 +136,56 @@ export const instructorManagement = createTRPCRouter({
                 });
             }
 
-            const { user: newUser } = await auth.api.createUser({
-                body: {
-                    email,
-                    password: randomHex(),
-                    name: name,
-                    role: "INSTRUCTOR",
-                },
-                headers,
+            const existingUser = await db.query.user.findFirst({
+                where: eq(user.email, email.toLowerCase()),
             });
 
-            const [created] = await db
-                .insert(instructor)
-                .values({
-                    departmentId: dept.id,
-                    userId: newUser.id,
-                    designation,
-                })
-                .returning();
+            if (existingUser) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: "User with this email already exists",
+                });
+            }
+
+            const created = await db.transaction(async (tx) => {
+                const userId = crypto.randomUUID();
+                const password = randomHex();
+                const hashFn = (await auth.$context).password.hash;
+                const hashedPassword = await hashFn(password);
+
+                await tx.insert(user).values({
+                    id: userId,
+                    email: email.toLowerCase(),
+                    name,
+                    role: "INSTRUCTOR",
+                    emailVerified: true,
+                    twoFactorEnabled: true,
+                });
+
+                await tx.insert(account).values({
+                    userId,
+                    accountId: userId,
+                    providerId: "credential",
+                    password: hashedPassword,
+                });
+
+                await tx.insert(twoFactor).values({
+                    userId,
+                    backupCodes: JSON.stringify([]),
+                });
+
+                const [createdInstructor] = await tx
+                    .insert(instructor)
+                    .values({
+                        employeeId,
+                        departmentId: dept.id,
+                        userId,
+                        designation,
+                    })
+                    .returning();
+
+                return createdInstructor;
+            });
 
             if (!created) {
                 throw new TRPCError({
@@ -154,7 +195,7 @@ export const instructorManagement = createTRPCRouter({
             }
 
             await logAuditEvent({
-                userId: user.id,
+                userId: currentUser.id,
                 action: "CREATE",
                 entityType: "INSTRUCTOR",
                 entityId: created.id,
@@ -167,7 +208,8 @@ export const instructorManagement = createTRPCRouter({
     update: adminProcedure
         .input(updateInstructorInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { id, departmentCode, email, name, designation } = input;
+            const { id, departmentCode, email, name, designation, employeeId } =
+                input;
 
             const { user: currentUser } = ctx.session;
 
@@ -205,6 +247,7 @@ export const instructorManagement = createTRPCRouter({
                     .set({
                         ...(departmentId && { departmentId }),
                         ...(designation && { designation }),
+                        ...(employeeId && { employeeId }),
                     })
                     .where(eq(instructor.id, id))
                     .returning();

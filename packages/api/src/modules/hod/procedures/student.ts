@@ -1,20 +1,20 @@
 import { createTRPCRouter } from "@workspace/api/init";
-import { advisorProcedure } from "../middleware";
+import { hodProcedure } from "../middleware";
 import { getStudentByIdSchema, listStudentsInputSchema } from "../schema";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { batch, db, department, program, student, user } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 
 export const studentManagement = createTRPCRouter({
-    list: advisorProcedure
+    list: hodProcedure
         .input(listStudentsInputSchema)
         .query(async ({ input, ctx }) => {
-            const { id: advisorId } = ctx.advisor;
+            const { departmentId } = ctx.hod;
             const { pageSize, cursor, programCode, search, year } = input;
 
             const conditions = [];
 
-            conditions.push(eq(student.advisorId, advisorId));
+            conditions.push(eq(department.id, departmentId));
             conditions.push(eq(user.disabled, false));
 
             if (search) {
@@ -78,10 +78,10 @@ export const studentManagement = createTRPCRouter({
             };
         }),
 
-    getOne: advisorProcedure
+    getOne: hodProcedure
         .input(getStudentByIdSchema)
         .query(async ({ input, ctx }) => {
-            const { id: advisorId } = ctx.advisor;
+            const { departmentId } = ctx.hod;
             const { id } = input;
 
             const result = await db
@@ -100,7 +100,7 @@ export const studentManagement = createTRPCRouter({
                 .where(
                     and(
                         eq(student.id, id),
-                        eq(student.advisorId, advisorId),
+                        eq(department.id, departmentId),
                         eq(user.disabled, false)
                     )
                 )
@@ -110,7 +110,7 @@ export const studentManagement = createTRPCRouter({
             if (!result) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Student not assigned to you",
+                    message: "Student not found in your department",
                 });
             }
 

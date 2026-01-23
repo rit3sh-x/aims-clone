@@ -14,6 +14,7 @@ import {
     check,
     uniqueIndex,
     uuid,
+    real,
 } from "drizzle-orm/pg-core";
 import {
     assessmentTypeEnum,
@@ -198,6 +199,7 @@ export const hod = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" })
             .unique(),
+        employeeId: varchar("employee_id", { length: 20 }).notNull().unique(),
         departmentId: uuid("department_id")
             .notNull()
             .references(() => department.id, { onDelete: "restrict" })
@@ -260,6 +262,7 @@ export const advisor = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" })
             .unique(),
+        employeeId: varchar("employee_id", { length: 20 }).notNull().unique(),
         departmentId: uuid("department_id")
             .notNull()
             .references(() => department.id, { onDelete: "restrict" }),
@@ -287,11 +290,6 @@ export const batch = pgTable(
             .references(() => program.id, {
                 onDelete: "restrict",
             }),
-        advisorId: uuid("advisor_id")
-            .notNull()
-            .references(() => advisor.id, {
-                onDelete: "restrict",
-            }),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
@@ -300,7 +298,6 @@ export const batch = pgTable(
     },
     (table) => [
         index("batch_program_idx").on(table.programId),
-        index("batch_advisor_idx").on(table.advisorId),
         index("batch_year_idx").on(table.year),
         uniqueIndex("batch_unique_year_program").on(
             table.year,
@@ -327,7 +324,9 @@ export const student = pgTable(
         batchId: uuid("batch_id")
             .notNull()
             .references(() => batch.id, { onDelete: "restrict" }),
-        cgpa: decimal("cgpa", { precision: 4, scale: 2 }).default("0.00"),
+        advisorId: uuid("advisor_id")
+            .notNull()
+            .references(() => advisor.id, { onDelete: "restrict" }),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
@@ -338,10 +337,7 @@ export const student = pgTable(
         index("student_user_idx").on(table.userId),
         index("student_roll_no_idx").on(table.rollNo),
         index("student_batch_idx").on(table.batchId),
-        check(
-            "student_cgpa_range",
-            sql`${table.cgpa} >= 0 AND ${table.cgpa} <= 10`
-        ),
+        index("student_advisor_idx").on(table.advisorId),
     ]
 );
 
@@ -355,6 +351,7 @@ export const instructor = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" })
             .unique(),
+        employeeId: varchar("employee_id", { length: 20 }).notNull().unique(),
         departmentId: uuid("department_id")
             .notNull()
             .references(() => department.id, { onDelete: "restrict" }),
@@ -383,9 +380,7 @@ export const course = pgTable(
         tutorialHours: integer("tutorial_hours").notNull().default(0),
         practicalHours: integer("practical_hours").notNull().default(0),
         selfStudyHours: integer("self_study_hours").notNull().default(0),
-        credits: decimal("credits", { precision: 3, scale: 1 })
-            .notNull()
-            .default("3.0"),
+        credits: real("credits").notNull().default(3),
         status: courseStatusEnum("status").notNull().default("PROPOSED"),
         departmentId: uuid("department_id")
             .notNull()
@@ -599,8 +594,8 @@ export const attendance = pgTable(
     ]
 );
 
-export const assessment = pgTable(
-    "assessment",
+export const assessmentTemplate = pgTable(
+    "assessment_template",
     {
         id: uuid("id")
             .default(sql`pg_catalog.gen_random_uuid()`)
@@ -608,11 +603,9 @@ export const assessment = pgTable(
         offeringId: uuid("offering_id")
             .notNull()
             .references(() => courseOffering.id, { onDelete: "cascade" }),
-        title: text("title").notNull(),
         type: assessmentTypeEnum("type").notNull(),
-        maxMarks: decimal("max_marks", { precision: 6, scale: 2 }).notNull(),
-        weightage: decimal("weightage", { precision: 5, scale: 2 }).notNull(),
-        dueDate: timestamp("due_date"),
+        maxMarks: real("max_marks").notNull(),
+        weightage: real("weightage").notNull(),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
@@ -620,17 +613,51 @@ export const assessment = pgTable(
             .$onUpdate(() => new Date()),
     },
     (table) => [
-        uniqueIndex("assessment_unique").on(
+        index("assessment_template_offering_idx").on(table.offeringId),
+        uniqueIndex("assessment_template_unique").on(
             table.offeringId,
-            table.type,
-            table.title
+            table.type
         ),
-        index("assessment_offering_idx").on(table.offeringId),
-        index("assessment_type_idx").on(table.type),
-        check("assessment_max_marks_positive", sql`${table.maxMarks} > 0`),
         check(
-            "assessment_weightage_range",
+            "assessment_template_max_marks_positive",
+            sql`${table.maxMarks} > 0`
+        ),
+        check(
+            "assessment_template_weightage_range",
             sql`${table.weightage} > 0 AND ${table.weightage} <= 100`
+        ),
+    ]
+);
+
+export const assessment = pgTable(
+    "assessment",
+    {
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        enrollmentId: uuid("enrollment_id")
+            .notNull()
+            .references(() => enrollment.id, { onDelete: "cascade" }),
+        templateId: uuid("template_id")
+            .notNull()
+            .references(() => assessmentTemplate.id, { onDelete: "restrict" }),
+        marksObtained: real("marks_obtained").notNull(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
+            .notNull()
+            .defaultNow()
+            .$onUpdate(() => new Date()),
+    },
+    (table) => [
+        index("assessment_enrollment_idx").on(table.enrollmentId),
+        index("assessment_template_idx").on(table.templateId),
+        uniqueIndex("assessment_unique").on(
+            table.enrollmentId,
+            table.templateId
+        ),
+        check(
+            "assessment_marks_range",
+            sql`${table.marksObtained} IS NULL OR ${table.marksObtained} >= 0`
         ),
     ]
 );
@@ -643,15 +670,10 @@ export const grade = pgTable(
             .primaryKey(),
         enrollmentId: uuid("enrollment_id")
             .notNull()
-            .references(() => enrollment.id, { onDelete: "cascade" }),
-        assessmentId: uuid("assessment_id")
-            .notNull()
-            .references(() => assessment.id, { onDelete: "cascade" }),
-        marksObtained: decimal("marks_obtained", {
-            precision: 6,
-            scale: 2,
-        }).notNull(),
-        grade: gradeTypeEnum("grade"),
+            .references(() => enrollment.id, { onDelete: "cascade" })
+            .unique(),
+        totalMarks: real("total_marks").notNull(),
+        grade: gradeTypeEnum("grade").notNull(),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
@@ -660,12 +682,8 @@ export const grade = pgTable(
     },
     (table) => [
         index("grade_enrollment_idx").on(table.enrollmentId),
-        index("grade_assessment_idx").on(table.assessmentId),
-        uniqueIndex("grade_unique_enrollment_assessment").on(
-            table.enrollmentId,
-            table.assessmentId
-        ),
-        check("grade_marks_non_negative", sql`${table.marksObtained} >= 0`),
+        index("grade_grade_idx").on(table.grade),
+        check("grade_total_marks_non_negative", sql`${table.totalMarks} >= 0`),
     ]
 );
 
@@ -917,7 +935,7 @@ export const advisorRelations = relations(advisor, ({ one, many }) => ({
         fields: [advisor.departmentId],
         references: [department.id],
     }),
-    batches: many(batch),
+    students: many(student),
 }));
 
 export const programRelations = relations(program, ({ one, many }) => ({
@@ -933,10 +951,6 @@ export const batchRelations = relations(batch, ({ one, many }) => ({
         fields: [batch.programId],
         references: [program.id],
     }),
-    advisor: one(advisor, {
-        fields: [batch.advisorId],
-        references: [advisor.id],
-    }),
     students: many(student),
     offeringBatches: many(offeringBatch),
 }));
@@ -949,6 +963,10 @@ export const studentRelations = relations(student, ({ one, many }) => ({
     batch: one(batch, {
         fields: [student.batchId],
         references: [batch.id],
+    }),
+    advisor: one(advisor, {
+        fields: [student.advisorId],
+        references: [advisor.id],
     }),
     enrollments: many(enrollment),
 }));
@@ -1018,6 +1036,7 @@ export const courseOfferingRelations = relations(
         instructors: many(courseOfferingInstructor),
         enrollments: many(enrollment),
         assessments: many(assessment),
+        assessmentTemplates: many(assessmentTemplate),
         schedules: many(schedule),
         batches: many(offeringBatch),
     })
@@ -1032,7 +1051,11 @@ export const enrollmentRelations = relations(enrollment, ({ one, many }) => ({
         fields: [enrollment.offeringId],
         references: [courseOffering.id],
     }),
-    grades: many(grade),
+    finalGrade: one(grade, {
+        fields: [enrollment.id],
+        references: [grade.enrollmentId],
+    }),
+    assessments: many(assessment),
     attendances: many(attendance),
     feedback: one(courseFeedback, {
         fields: [enrollment.id],
@@ -1047,22 +1070,32 @@ export const attendanceRelations = relations(attendance, ({ one }) => ({
     }),
 }));
 
-export const assessmentRelations = relations(assessment, ({ one, many }) => ({
-    offering: one(courseOffering, {
-        fields: [assessment.offeringId],
-        references: [courseOffering.id],
+export const assessmentTemplateRelations = relations(
+    assessmentTemplate,
+    ({ one, many }) => ({
+        offering: one(courseOffering, {
+            fields: [assessmentTemplate.offeringId],
+            references: [courseOffering.id],
+        }),
+        assessments: many(assessment),
+    })
+);
+
+export const assessmentRelations = relations(assessment, ({ one }) => ({
+    template: one(assessmentTemplate, {
+        fields: [assessment.templateId],
+        references: [assessmentTemplate.id],
     }),
-    grades: many(grade),
+    enrollment: one(enrollment, {
+        fields: [assessment.enrollmentId],
+        references: [enrollment.id],
+    }),
 }));
 
 export const gradeRelations = relations(grade, ({ one }) => ({
     enrollment: one(enrollment, {
         fields: [grade.enrollmentId],
         references: [enrollment.id],
-    }),
-    assessment: one(assessment, {
-        fields: [grade.assessmentId],
-        references: [assessment.id],
     }),
 }));
 

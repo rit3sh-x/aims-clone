@@ -6,7 +6,15 @@ import {
     updateAdvisorInputSchema,
 } from "../schema";
 import { adminProcedure } from "../middleware";
-import { db, advisor, department, logAuditEvent, user } from "@workspace/db";
+import {
+    db,
+    advisor,
+    department,
+    logAuditEvent,
+    user,
+    account,
+    twoFactor,
+} from "@workspace/db";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { auth } from "@workspace/auth";
@@ -107,9 +115,8 @@ export const advisorManagement = createTRPCRouter({
     create: adminProcedure
         .input(createAdvisorInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { departmentCode, email, name } = input;
-            const { user } = ctx.session;
-            const { headers } = ctx;
+            const { departmentCode, email, name, employeeId } = input;
+            const { user: currentUser } = ctx.session;
 
             const dept = await db.query.department.findFirst({
                 where: (d, { eq }) => eq(d.code, departmentCode),
@@ -122,23 +129,66 @@ export const advisorManagement = createTRPCRouter({
                 });
             }
 
-            const { user: newUser } = await auth.api.createUser({
-                body: {
-                    email,
-                    password: randomHex(),
-                    name,
-                    role: "ADVISOR",
-                },
-                headers,
+            const existingUser = await db.query.user.findFirst({
+                where: eq(user.email, email.toLowerCase()),
             });
 
-            const [created] = await db
-                .insert(advisor)
-                .values({
-                    departmentId: dept.id,
-                    userId: newUser.id,
-                })
-                .returning();
+            if (existingUser) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: "User with this email already exists",
+                });
+            }
+
+            const existingEmployee = await db.query.user.findFirst({
+                where: eq(advisor.employeeId, employeeId),
+            });
+
+            if (existingEmployee) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: "Advisor with this employee ID already exists",
+                });
+            }
+
+            const created = await db.transaction(async (tx) => {
+                const userId = crypto.randomUUID();
+                const password = randomHex();
+                const hashFn = (await auth.$context).password.hash;
+                const hashedPassword = await hashFn(password);
+
+                await tx.insert(user).values({
+                    id: userId,
+                    email: email.toLowerCase(),
+                    name,
+                    role: "ADVISOR",
+                    emailVerified: true,
+                    twoFactorEnabled: true,
+                });
+
+                await tx.insert(account).values({
+                    userId,
+                    accountId: userId,
+                    providerId: "credential",
+                    password: hashedPassword,
+                });
+
+                await tx.insert(twoFactor).values({
+                    userId,
+                    backupCodes: JSON.stringify([]),
+                });
+
+                const [createdAdvisor] = await tx
+                    .insert(advisor)
+                    .values({
+                        departmentId: dept.id,
+                        employeeId,
+                        userId,
+                    })
+                    .returning();
+
+                return createdAdvisor;
+            });
 
             if (!created) {
                 throw new TRPCError({
@@ -148,7 +198,7 @@ export const advisorManagement = createTRPCRouter({
             }
 
             await logAuditEvent({
-                userId: user.id,
+                userId: currentUser.id,
                 action: "CREATE",
                 entityType: "ADVISOR",
                 entityId: created.id,
@@ -204,7 +254,7 @@ export const advisorManagement = createTRPCRouter({
                 await tx
                     .update(user)
                     .set({
-                        ...(email && { email }),
+                        ...(email && { email: email.toLowerCase() }),
                         ...(name && { name }),
                     })
                     .where(eq(user.id, existing.userId));

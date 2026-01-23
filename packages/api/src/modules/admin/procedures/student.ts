@@ -14,8 +14,8 @@ import {
     department,
     logAuditEvent,
     program,
-    Student,
     student,
+    twoFactor,
     user,
 } from "@workspace/db";
 import { randomHex } from "../utils";
@@ -249,7 +249,8 @@ export const studentManagement = createTRPCRouter({
                     email: v.email,
                     name: v.row.name,
                     role: "STUDENT" as const,
-                    emailVerified: false,
+                    emailVerified: true,
+                    twoFactorEnabled: true,
                 }));
 
                 await tx.insert(user).values(userInserts);
@@ -267,13 +268,20 @@ export const studentManagement = createTRPCRouter({
                     userId: v.id,
                     rollNo: v.row.rollNo,
                     batchId: v.batchId,
-                    cgpa: v.row.cgpa,
+                    advisorId: v.row.advisorId,
                 }));
 
                 const createdStudents = await tx
                     .insert(student)
                     .values(studentInserts)
                     .returning();
+
+                const twoFactorInserts = validRows.map((v) => ({
+                    userId: v.id,
+                    backupCodes: JSON.stringify([]),
+                }));
+
+                await tx.insert(twoFactor).values(twoFactorInserts);
 
                 await logAuditEvent({
                     userId: currentUser.id,

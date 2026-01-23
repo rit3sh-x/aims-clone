@@ -6,7 +6,15 @@ import {
     updateHodInputSchema,
 } from "../schema";
 import { adminProcedure } from "../middleware";
-import { db, hod, department, logAuditEvent, user } from "@workspace/db";
+import {
+    db,
+    hod,
+    department,
+    logAuditEvent,
+    user,
+    account,
+    twoFactor,
+} from "@workspace/db";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { auth } from "@workspace/auth";
@@ -105,9 +113,8 @@ export const hodManagement = createTRPCRouter({
     create: adminProcedure
         .input(createHodInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { departmentCode, email, name } = input;
-            const { user } = ctx.session;
-            const { headers } = ctx;
+            const { departmentCode, email, name, employeeId } = input;
+            const { user: currentUser } = ctx.session;
 
             const dept = await db.query.department.findFirst({
                 where: (d, { eq }) => eq(d.code, departmentCode),
@@ -131,23 +138,55 @@ export const hodManagement = createTRPCRouter({
                 });
             }
 
-            const { user: newUser } = await auth.api.createUser({
-                body: {
-                    email,
-                    password: randomHex(),
-                    name,
-                    role: "HOD",
-                },
-                headers,
+            const existingUser = await db.query.user.findFirst({
+                where: eq(user.email, email.toLowerCase()),
             });
 
-            const [created] = await db
-                .insert(hod)
-                .values({
-                    departmentId: dept.id,
-                    userId: newUser.id,
-                })
-                .returning();
+            if (existingUser) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: "User with this email already exists",
+                });
+            }
+
+            const created = await db.transaction(async (tx) => {
+                const userId = crypto.randomUUID();
+                const password = randomHex();
+                const hashFn = (await auth.$context).password.hash;
+                const hashedPassword = await hashFn(password);
+
+                await tx.insert(user).values({
+                    id: userId,
+                    email: email.toLowerCase(),
+                    name,
+                    role: "HOD",
+                    emailVerified: true,
+                    twoFactorEnabled: true,
+                });
+
+                await tx.insert(account).values({
+                    userId,
+                    accountId: userId,
+                    providerId: "credential",
+                    password: hashedPassword,
+                });
+
+                await tx.insert(twoFactor).values({
+                    userId,
+                    backupCodes: JSON.stringify([]),
+                });
+
+                const [createdHod] = await tx
+                    .insert(hod)
+                    .values({
+                        departmentId: dept.id,
+                        userId,
+                        employeeId,
+                    })
+                    .returning();
+
+                return createdHod;
+            });
 
             if (!created) {
                 throw new TRPCError({
@@ -157,7 +196,7 @@ export const hodManagement = createTRPCRouter({
             }
 
             await logAuditEvent({
-                userId: user.id,
+                userId: currentUser.id,
                 action: "CREATE",
                 entityType: "HOD",
                 entityId: created.id,
@@ -170,7 +209,7 @@ export const hodManagement = createTRPCRouter({
     update: adminProcedure
         .input(updateHodInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { id, departmentCode, email, name } = input;
+            const { id, departmentCode, email, name, employeeId } = input;
             const { user: currentUser } = ctx.session;
 
             const existing = await db.query.hod.findFirst({
@@ -198,7 +237,6 @@ export const hodManagement = createTRPCRouter({
                     });
                 }
 
-                // Check if new department already has a HOD
                 if (dept.id !== existing.departmentId) {
                     const existingHod = await db.query.hod.findFirst({
                         where: eq(hod.departmentId, dept.id),
@@ -220,6 +258,7 @@ export const hodManagement = createTRPCRouter({
                     .update(hod)
                     .set({
                         ...(departmentId && { departmentId }),
+                        ...(employeeId && { employeeId }),
                     })
                     .where(eq(hod.id, id))
                     .returning();
@@ -227,7 +266,7 @@ export const hodManagement = createTRPCRouter({
                 await tx
                     .update(user)
                     .set({
-                        ...(email && { email }),
+                        ...(email && { email: email.toLowerCase() }),
                         ...(name && { name }),
                     })
                     .where(eq(user.id, existing.userId));

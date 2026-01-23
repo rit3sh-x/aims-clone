@@ -3,7 +3,6 @@ import {
     auditActionEnum,
     auditEntityEnum,
     classroomTypeEnum,
-    courseStatusEnum,
     degreeTypeEnum,
     semesterStatusEnum,
     semesterTypeEnum,
@@ -96,6 +95,7 @@ export const updateProgramSchema = createProgramSchema.partial().extend({
 export const deleteProgramSchema = z.object({ id: z.string() });
 
 export const listBatchesInputSchema = z.object({
+    departmentCode: z.string().optional(),
     programId: z.string().optional(),
     year: z.number().optional(),
     cursor: z
@@ -114,7 +114,6 @@ export const listBatchesInputSchema = z.object({
 export const createBatchInputSchema = z.object({
     year: z.number().min(2000).max(2100),
     programId: z.string(),
-    advisorId: z.string(),
 });
 
 export const updateBatchInputSchema = createBatchInputSchema.partial().extend({
@@ -152,7 +151,7 @@ export const createManyStudentsInputSchema = z.array(
         rollNo: z.string().max(12),
         programCode: z.string().min(1),
         year: z.number().min(2000).max(2100),
-        cgpa: z.string().optional(),
+        advisorId: z.string().min(1).toUpperCase(),
     })
 );
 
@@ -187,6 +186,7 @@ export const createInstructorInputSchema = z.object({
     name: z.string().min(1),
     departmentCode: z.string(),
     designation: z.string().max(100).optional(),
+    employeeId: z.string().min(1).toUpperCase(),
 });
 
 export const updateInstructorInputSchema = createInstructorInputSchema
@@ -238,6 +238,7 @@ export const createAdvisorInputSchema = z.object({
     name: z.string().min(1).max(255),
     email: z.email(),
     departmentCode: z.string().length(5).toUpperCase(),
+    employeeId: z.string().min(1).toUpperCase(),
 });
 
 export const updateAdvisorInputSchema = createAdvisorInputSchema
@@ -270,6 +271,7 @@ export const createHodInputSchema = z.object({
     name: z.string().min(1).max(255),
     email: z.email(),
     departmentCode: z.string().length(5).toUpperCase(),
+    employeeId: z.string().min(1).toUpperCase(),
 });
 
 export const updateHodInputSchema = createHodInputSchema.partial().extend({
@@ -286,7 +288,6 @@ export const rejectCourseInputSchema = acceptCourseInputSchema.extend({
 
 export const listCourseInputSchema = z.object({
     departmentCode: z.string().optional(),
-    status: z.enum(courseStatusEnum.enumValues).optional(),
     search: z.string().optional(),
     cursor: z
         .object({

@@ -68,7 +68,7 @@ export type SemesterType = (typeof semesterTypeEnum.enumValues)[number];
 export const courseStatusEnum = pgEnum("course_status", [
     "PROPOSED",
     "REJECTED",
-    "ADVISOR_ACCEPTED",
+    "HOD_ACCEPTED",
     "ADMIN_ACCEPTED",
 ]);
 export type CourseStatus = (typeof courseStatusEnum.enumValues)[number];

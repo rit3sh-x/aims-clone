@@ -16,7 +16,6 @@ import {
 } from "@workspace/db";
 import { SpotlightResult } from "./schema";
 import { sql, and, eq, or, ilike, getTableColumns } from "drizzle-orm";
-import type { Semester } from "@workspace/db";
 
 const searchPattern = (query: string) => `%${query}%`;
 
@@ -29,62 +28,46 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
         .where(or(ilike(course.code, pattern), ilike(course.title, pattern)))
         .limit(3);
 
-    if (courses.length > 0) {
+    if (courses.length) {
         results.push({
             title: "Courses",
             items: courses.map((c) => ({
                 field: `${c.code} - ${c.title}`,
-                url: "/courses",
-                param: c.id,
+                url: `/courses/${c.id}`,
             })),
         });
     }
 
     const instructors = await db
-        .select({
-            id: instructor.id,
-            user: user,
-            department: department,
-        })
+        .select({ id: instructor.id, user })
         .from(instructor)
         .innerJoin(user, eq(instructor.userId, user.id))
-        .leftJoin(department, eq(instructor.departmentId, department.id))
         .where(or(ilike(user.name, pattern), ilike(user.email, pattern)))
         .limit(3);
 
-    if (instructors.length > 0) {
+    if (instructors.length) {
         results.push({
             title: "Instructors",
             items: instructors.map((i) => ({
                 field: i.user.name,
-                url: "/instructors/",
-                param: i.id,
+                url: `/instructors/${i.id}`,
             })),
         });
     }
 
     const students = await db
-        .select({
-            id: student.id,
-            rollNo: student.rollNo,
-            user: user,
-            batch: batch,
-            program: program,
-        })
+        .select({ id: student.id, rollNo: student.rollNo, user })
         .from(student)
         .innerJoin(user, eq(student.userId, user.id))
-        .leftJoin(batch, eq(student.batchId, batch.id))
-        .leftJoin(program, eq(batch.programId, program.id))
         .where(or(ilike(student.rollNo, pattern), ilike(user.name, pattern)))
         .limit(3);
 
-    if (students.length > 0) {
+    if (students.length) {
         results.push({
             title: "Students",
             items: students.map((s) => ({
                 field: `${s.rollNo} - ${s.user.name}`,
-                url: "/students",
-                param: s.id,
+                url: `/students/${s.id}`,
             })),
         });
     }
@@ -97,13 +80,12 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
         )
         .limit(3);
 
-    if (departments.length > 0) {
+    if (departments.length) {
         results.push({
             title: "Departments",
             items: departments.map((d) => ({
                 field: `${d.code} - ${d.name}`,
-                url: "/departments",
-                param: d.id,
+                url: `/departments/${d.id}`,
             })),
         });
     }
@@ -114,23 +96,18 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
         .where(or(ilike(program.name, pattern), ilike(program.code, pattern)))
         .limit(3);
 
-    if (programs.length > 0) {
+    if (programs.length) {
         results.push({
             title: "Programs",
             items: programs.map((p) => ({
                 field: `${p.code} - ${p.name}`,
-                url: "/programs",
-                param: p.id,
+                url: `/programs/${p.id}`,
             })),
         });
     }
 
     const batches = await db
-        .select({
-            id: batch.id,
-            year: batch.year,
-            program: program,
-        })
+        .select({ id: batch.id, year: batch.year, program })
         .from(batch)
         .leftJoin(program, eq(batch.programId, program.id))
         .where(
@@ -142,13 +119,12 @@ export async function searchForAdmin(query: string, results: SpotlightResult) {
         )
         .limit(3);
 
-    if (batches.length > 0) {
+    if (batches.length) {
         results.push({
             title: "Batches",
             items: batches.map((b) => ({
-                field: `${b.program?.name || "Unknown"} - ${b.year}`,
-                url: "/batches",
-                param: b.id,
+                field: `${b.program?.name ?? "Unknown"} - ${b.year}`,
+                url: `/batches/${b.id}`,
             })),
         });
     }
@@ -167,11 +143,8 @@ export async function searchForHod(
 
     const pattern = searchPattern(query);
 
-    const deptInstructors = await db
-        .select({
-            id: instructor.id,
-            user: user,
-        })
+    const instructors = await db
+        .select({ id: instructor.id, user })
         .from(instructor)
         .innerJoin(user, eq(instructor.userId, user.id))
         .where(
@@ -182,18 +155,17 @@ export async function searchForHod(
         )
         .limit(3);
 
-    if (deptInstructors.length > 0) {
+    if (instructors.length) {
         results.push({
             title: "Department Instructors",
-            items: deptInstructors.map((i) => ({
+            items: instructors.map((i) => ({
                 field: i.user.name,
-                url: "/instructors",
-                param: i.id,
+                url: `/instructors/${i.id}`,
             })),
         });
     }
 
-    const deptCourses = await db
+    const courses = await db
         .select(getTableColumns(course))
         .from(course)
         .where(
@@ -204,35 +176,12 @@ export async function searchForHod(
         )
         .limit(3);
 
-    if (deptCourses.length > 0) {
+    if (courses.length) {
         results.push({
             title: "Department Courses",
-            items: deptCourses.map((c) => ({
+            items: courses.map((c) => ({
                 field: `${c.code} - ${c.title}`,
-                url: "/courses",
-                param: c.id,
-            })),
-        });
-    }
-
-    const deptPrograms = await db
-        .select(getTableColumns(program))
-        .from(program)
-        .where(
-            and(
-                eq(program.departmentId, currentHod.departmentId),
-                or(ilike(program.name, pattern), ilike(program.code, pattern))
-            )
-        )
-        .limit(3);
-
-    if (deptPrograms.length > 0) {
-        results.push({
-            title: "Department Programs",
-            items: deptPrograms.map((p) => ({
-                field: `${p.code} - ${p.name}`,
-                url: "/programs",
-                param: p.id,
+                url: `/courses/${c.id}`,
             })),
         });
     }
@@ -257,8 +206,7 @@ export async function searchForHod(
             title: "Department Advisors",
             items: deptAdvisors.map((a) => ({
                 field: a.user.name,
-                url: "/advisors",
-                param: a.id,
+                url: `/advisors/${a.id}`,
             })),
         });
     }
@@ -286,8 +234,7 @@ export async function searchForHod(
             title: "Department Students",
             items: deptStudents.map((s) => ({
                 field: `${s.rollNo} - ${s.user.name}`,
-                url: "/students",
-                param: s.id,
+                url: `/students/${s.id}`,
             })),
         });
     }
@@ -331,8 +278,7 @@ export async function searchForInstructor(
             title: "My Courses",
             items: courses.map((o) => ({
                 field: `${o.course.code} - ${o.course.title}`,
-                url: "/courses",
-                param: o.course.id,
+                url: `/courses/${o.course.id}`,
             })),
         });
     }
@@ -364,8 +310,7 @@ export async function searchForInstructor(
             title: "My Students",
             items: enrollments.map((e) => ({
                 field: `${e.student.rollNo} - ${e.user.name}`,
-                url: "/students",
-                param: e.student.id,
+                url: `/students/${e.student.id}`,
             })),
         });
     }
@@ -383,82 +328,43 @@ export async function searchForAdvisor(
 
     const pattern = searchPattern(query);
 
-    const batches = await db
-        .select({
-            id: batch.id,
-            year: batch.year,
-            program: program,
-        })
-        .from(batch)
-        .leftJoin(program, eq(batch.programId, program.id))
-        .where(
-            and(
-                eq(batch.advisorId, currentAdvisor.id),
-                or(
-                    sql`CAST(${batch.year} AS TEXT) ILIKE ${pattern}`,
-                    ilike(program.name, pattern),
-                    ilike(program.code, pattern)
-                )
-            )
-        )
-        .limit(3);
-
-    if (batches.length > 0) {
-        results.push({
-            title: "My Batches",
-            items: batches.map((b) => ({
-                field: `${b.program?.name || "Unknown"} - ${b.year}`,
-                url: "/batches",
-                param: b.id,
-            })),
-        });
-    }
-
     const students = await db
-        .select({
-            id: student.id,
-            rollNo: student.rollNo,
-            user: user,
-            batch: batch,
-        })
+        .select({ id: student.id, rollNo: student.rollNo, user })
         .from(student)
         .innerJoin(user, eq(student.userId, user.id))
-        .innerJoin(batch, eq(student.batchId, batch.id))
         .where(
             and(
-                eq(batch.advisorId, currentAdvisor.id),
-                or(ilike(user.name, pattern), ilike(student.rollNo, pattern))
+                eq(student.advisorId, currentAdvisor.id),
+                or(ilike(student.rollNo, pattern), ilike(user.name, pattern))
             )
         )
         .limit(3);
 
-    if (students.length > 0) {
+    if (students.length) {
         results.push({
             title: "My Students",
             items: students.map((s) => ({
                 field: `${s.rollNo} - ${s.user.name}`,
-                url: "/students",
-                param: s.id,
+                url: `/students/${s.id}`,
             })),
         });
     }
 
     const pendingEnrollments = await db
         .select({
-            enrollment: enrollment,
-            student: student,
-            user: user,
-            course: course,
+            enrollment,
+            student,
+            user,
+            course,
         })
         .from(enrollment)
         .innerJoin(student, eq(enrollment.studentId, student.id))
         .innerJoin(user, eq(student.userId, user.id))
-        .innerJoin(batch, eq(student.batchId, batch.id))
         .innerJoin(courseOffering, eq(enrollment.offeringId, courseOffering.id))
         .innerJoin(course, eq(courseOffering.courseId, course.id))
         .where(
             and(
-                eq(batch.advisorId, currentAdvisor.id),
+                eq(student.advisorId, currentAdvisor.id),
                 eq(enrollment.status, "INSTRUCTOR_APPROVED"),
                 or(
                     ilike(student.rollNo, pattern),
@@ -470,13 +376,12 @@ export async function searchForAdvisor(
         )
         .limit(3);
 
-    if (pendingEnrollments.length > 0) {
+    if (pendingEnrollments.length) {
         results.push({
             title: "Pending Approvals",
             items: pendingEnrollments.map((e) => ({
                 field: `${e.student.rollNo} - ${e.course.code}`,
-                url: "/enrollments",
-                param: e.enrollment.id,
+                url: `/enrollments/${e.enrollment.id}`,
             })),
         });
     }

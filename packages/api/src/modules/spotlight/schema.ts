@@ -3,7 +3,6 @@ import { z } from "zod";
 const spotlightItemSchema = z.object({
     field: z.string(),
     url: z.string(),
-    param: z.string(),
 });
 
 export const spotlightOutputSchema = z.array(

@@ -3,31 +3,26 @@ export const departments = [
         name: "Computer Science & Engineering",
         code: "CSE",
         website: "https://cse.university.edu",
-        id: "+d1",
     },
     {
         name: "Electrical Engineering",
         code: "EE",
         website: "https://ee.university.edu",
-        id: "+d2",
     },
     {
         name: "Mechanical Engineering",
         code: "ME",
         website: "https://me.university.edu",
-        id: "+d3",
     },
     {
         name: "Civil Engineering",
         code: "CE",
         website: "https://ce.university.edu",
-        id: "+d4",
     },
     {
         name: "Electronics & Communication",
         code: "ECE",
         website: "https://ece.university.edu",
-        id: "+d5",
     },
 ];
 
@@ -80,42 +75,36 @@ export const programs = [
         code: "BTCS",
         degreeType: "BACHELOR" as const,
         deptCode: "CSE",
-        id: "+p1",
     },
     {
         name: "Master of Technology in Computer Science",
         code: "MTCS",
         degreeType: "MASTER" as const,
         deptCode: "CSE",
-        id: "+p2",
     },
     {
         name: "Bachelor of Technology in Electrical Engineering",
         code: "BTEE",
         degreeType: "BACHELOR" as const,
         deptCode: "EE",
-        id: "+p3",
     },
     {
         name: "Master of Technology in Electrical Engineering",
         code: "MTEE",
         degreeType: "MASTER" as const,
         deptCode: "EE",
-        id: "+p4",
     },
     {
         name: "Bachelor of Technology in Mechanical Engineering",
         code: "BTME",
         degreeType: "BACHELOR" as const,
         deptCode: "ME",
-        id: "+p5",
     },
     {
         name: "Doctor of Philosophy in Computer Science",
         code: "PHCS",
         degreeType: "PHD" as const,
         deptCode: "CSE",
-        id: "+p6",
     },
 ];
 
@@ -279,7 +268,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2021,
         advisorEmployeeId: "+a1",
-        id: "+s1",
     },
     {
         name: "Priya Singh",
@@ -288,7 +276,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2021,
         advisorEmployeeId: "+a1",
-        id: "+s2",
     },
     {
         name: "Rohan Kumar",
@@ -297,7 +284,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2021,
         advisorEmployeeId: "+a2",
-        id: "+s3",
     },
     {
         name: "Sneha Sharma",
@@ -306,7 +292,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2021,
         advisorEmployeeId: "+a2",
-        id: "+s4",
     },
     {
         name: "Amit Verma",
@@ -315,7 +300,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2022,
         advisorEmployeeId: "+a1",
-        id: "+s5",
     },
     {
         name: "Neha Reddy",
@@ -324,7 +308,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2022,
         advisorEmployeeId: "+a2",
-        id: "+s6",
     },
     {
         name: "Karan Mehta",
@@ -333,7 +316,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2023,
         advisorEmployeeId: "+a1",
-        id: "+s7",
     },
     {
         name: "Divya Gupta",
@@ -342,7 +324,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2023,
         advisorEmployeeId: "+a2",
-        id: "+s8",
     },
     {
         name: "Rahul Joshi",
@@ -351,7 +332,6 @@ export const students = [
         programCode: "BTEE",
         batchYear: 2021,
         advisorEmployeeId: "+a3",
-        id: "+s9",
     },
     {
         name: "Kavya Iyer",
@@ -360,7 +340,6 @@ export const students = [
         programCode: "BTEE",
         batchYear: 2021,
         advisorEmployeeId: "+a4",
-        id: "+s10",
     },
     {
         name: "Siddharth Nair",
@@ -369,7 +348,6 @@ export const students = [
         programCode: "BTEE",
         batchYear: 2022,
         advisorEmployeeId: "+a3",
-        id: "+s11",
     },
     {
         name: "Anjali Rao",
@@ -378,7 +356,6 @@ export const students = [
         programCode: "BTEE",
         batchYear: 2022,
         advisorEmployeeId: "+a4",
-        id: "+s12",
     },
     {
         name: "Varun Pillai",
@@ -387,7 +364,6 @@ export const students = [
         programCode: "BTEE",
         batchYear: 2023,
         advisorEmployeeId: "+a3",
-        id: "+s13",
     },
     {
         name: "Riya Menon",
@@ -396,7 +372,6 @@ export const students = [
         programCode: "BTEE",
         batchYear: 2023,
         advisorEmployeeId: "+a4",
-        id: "+s14",
     },
     {
         name: "Aditya Kumar",
@@ -405,7 +380,6 @@ export const students = [
         programCode: "BTME",
         batchYear: 2021,
         advisorEmployeeId: "+a5",
-        id: "+s15",
     },
     {
         name: "Simran Singh",
@@ -414,7 +388,6 @@ export const students = [
         programCode: "BTME",
         batchYear: 2021,
         advisorEmployeeId: "+a5",
-        id: "+s16",
     },
     {
         name: "Akash Sharma",
@@ -423,7 +396,6 @@ export const students = [
         programCode: "BTME",
         batchYear: 2022,
         advisorEmployeeId: "+a5",
-        id: "+s17",
     },
     {
         name: "Pooja Patel",
@@ -432,7 +404,6 @@ export const students = [
         programCode: "BTME",
         batchYear: 2022,
         advisorEmployeeId: "+a5",
-        id: "+s18",
     },
     {
         name: "Nikhil Verma",
@@ -441,7 +412,6 @@ export const students = [
         programCode: "BTME",
         batchYear: 2023,
         advisorEmployeeId: "+a5",
-        id: "+s19",
     },
     {
         name: "Ishita Reddy",
@@ -450,7 +420,6 @@ export const students = [
         programCode: "BTME",
         batchYear: 2023,
         advisorEmployeeId: "+a5",
-        id: "+s20",
     },
     {
         name: "Manish Gupta",
@@ -459,7 +428,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2022,
         advisorEmployeeId: "+a1",
-        id: "+s21",
     },
     {
         name: "Shruti Joshi",
@@ -468,7 +436,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2022,
         advisorEmployeeId: "+a2",
-        id: "+s22",
     },
     {
         name: "Harsh Iyer",
@@ -477,7 +444,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2023,
         advisorEmployeeId: "+a1",
-        id: "+s23",
     },
     {
         name: "Tanvi Nair",
@@ -486,7 +452,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2023,
         advisorEmployeeId: "+a2",
-        id: "+s24",
     },
     {
         name: "Vishal Rao",
@@ -495,7 +460,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2021,
         advisorEmployeeId: "+a1",
-        id: "+s25",
     },
     {
         name: "Megha Pillai",
@@ -504,7 +468,6 @@ export const students = [
         programCode: "BTCS",
         batchYear: 2021,
         advisorEmployeeId: "+a2",
-        id: "+s26",
     },
     {
         name: "Shubham Menon",
@@ -513,7 +476,6 @@ export const students = [
         programCode: "BTEE",
         batchYear: 2022,
         advisorEmployeeId: "+a3",
-        id: "+s27",
     },
     {
         name: "Ananya Kumar",
@@ -522,7 +484,6 @@ export const students = [
         programCode: "BTEE",
         batchYear: 2022,
         advisorEmployeeId: "+a4",
-        id: "+s28",
     },
     {
         name: "Yash Singh",
@@ -531,7 +492,6 @@ export const students = [
         programCode: "BTME",
         batchYear: 2023,
         advisorEmployeeId: "+a5",
-        id: "+s29",
     },
     {
         name: "Kriti Sharma",
@@ -540,7 +500,6 @@ export const students = [
         programCode: "BTME",
         batchYear: 2023,
         advisorEmployeeId: "+a5",
-        id: "+s30",
     },
 ];
 
@@ -856,19 +815,19 @@ export const courses = [
 ];
 
 export const prerequisites = [
-    { courseCode: "CS201", prerequisiteCode: "CS101", id: "+pre1" },
-    { courseCode: "CS301", prerequisiteCode: "CS201", id: "+pre2" },
-    { courseCode: "CS401", prerequisiteCode: "CS201", id: "+pre3" },
-    { courseCode: "CS501", prerequisiteCode: "CS301", id: "+pre4" },
-    { courseCode: "CS501", prerequisiteCode: "MATH201", id: "+pre5" },
-    { courseCode: "CS202", prerequisiteCode: "CS101", id: "+pre6" },
-    { courseCode: "CS302", prerequisiteCode: "CS201", id: "+pre7" },
-    { courseCode: "CS402", prerequisiteCode: "CS201", id: "+pre8" },
-    { courseCode: "EE201", prerequisiteCode: "EE101", id: "+pre9" },
-    { courseCode: "EE301", prerequisiteCode: "EE201", id: "+pre10" },
-    { courseCode: "EE401", prerequisiteCode: "EE201", id: "+pre11" },
-    { courseCode: "ME201", prerequisiteCode: "ME101", id: "+pre12" },
-    { courseCode: "ME301", prerequisiteCode: "ME101", id: "+pre13" },
+    { courseCode: "CS201", prerequisiteCode: "CS101" },
+    { courseCode: "CS301", prerequisiteCode: "CS201" },
+    { courseCode: "CS401", prerequisiteCode: "CS201" },
+    { courseCode: "CS501", prerequisiteCode: "CS301" },
+    { courseCode: "CS501", prerequisiteCode: "MATH201" },
+    { courseCode: "CS202", prerequisiteCode: "CS101" },
+    { courseCode: "CS302", prerequisiteCode: "CS201" },
+    { courseCode: "CS402", prerequisiteCode: "CS201" },
+    { courseCode: "EE201", prerequisiteCode: "EE101" },
+    { courseCode: "EE301", prerequisiteCode: "EE201" },
+    { courseCode: "EE401", prerequisiteCode: "EE201" },
+    { courseCode: "ME201", prerequisiteCode: "ME101" },
+    { courseCode: "ME301", prerequisiteCode: "ME101" },
 ];
 
 export const semesters = [
@@ -902,16 +861,16 @@ export const semesters = [
 ];
 
 export const classrooms = [
-    { room: "A101", capacity: 60, type: "LECTURE" as const, id: "+cr1" },
-    { room: "A102", capacity: 60, type: "LECTURE" as const, id: "+cr2" },
-    { room: "A103", capacity: 40, type: "TUTORIAL" as const, id: "+cr3" },
-    { room: "B201", capacity: 50, type: "LECTURE" as const, id: "+cr4" },
-    { room: "B202", capacity: 30, type: "LAB" as const, id: "+cr5" },
-    { room: "B203", capacity: 30, type: "LAB" as const, id: "+cr6" },
-    { room: "C301", capacity: 80, type: "SEMINAR" as const, id: "+cr7" },
-    { room: "C302", capacity: 40, type: "TUTORIAL" as const, id: "+cr8" },
-    { room: "D101", capacity: 25, type: "LAB" as const, id: "+cr9" },
-    { room: "D102", capacity: 60, type: "LECTURE" as const, id: "+cr10" },
+    { room: "A101", capacity: 60, type: "LECTURE" as const },
+    { room: "A102", capacity: 60, type: "LECTURE" as const },
+    { room: "A103", capacity: 40, type: "TUTORIAL" as const },
+    { room: "B201", capacity: 50, type: "LECTURE" as const },
+    { room: "B202", capacity: 30, type: "LAB" as const },
+    { room: "B203", capacity: 30, type: "LAB" as const },
+    { room: "C301", capacity: 80, type: "SEMINAR" as const },
+    { room: "C302", capacity: 40, type: "TUTORIAL" as const },
+    { room: "D101", capacity: 25, type: "LAB" as const },
+    { room: "D102", capacity: 60, type: "LECTURE" as const },
 ];
 
 export const timeSlots = [
@@ -919,67 +878,56 @@ export const timeSlots = [
         dayOfWeek: "MONDAY" as const,
         sessionType: "THEORY" as const,
         theoryPeriod: "PC-1" as const,
-        id: "+ts1",
     },
     {
         dayOfWeek: "MONDAY" as const,
         sessionType: "THEORY" as const,
         theoryPeriod: "PC-2" as const,
-        id: "+ts2",
     },
     {
         dayOfWeek: "MONDAY" as const,
         sessionType: "LAB" as const,
         labPeriod: "LAB-3H-1" as const,
-        id: "+ts3",
     },
     {
         dayOfWeek: "TUESDAY" as const,
         sessionType: "THEORY" as const,
         theoryPeriod: "PC-3" as const,
-        id: "+ts4",
     },
     {
         dayOfWeek: "TUESDAY" as const,
         sessionType: "TUTORIAL" as const,
         tutorialPeriod: "T-PC-1" as const,
-        id: "+ts5",
     },
     {
         dayOfWeek: "WEDNESDAY" as const,
         sessionType: "THEORY" as const,
         theoryPeriod: "PC-4" as const,
-        id: "+ts6",
     },
     {
         dayOfWeek: "WEDNESDAY" as const,
         sessionType: "THEORY" as const,
         theoryPeriod: "PCPE" as const,
-        id: "+ts7",
     },
     {
         dayOfWeek: "THURSDAY" as const,
         sessionType: "THEORY" as const,
         theoryPeriod: "HSME" as const,
-        id: "+ts8",
     },
     {
         dayOfWeek: "THURSDAY" as const,
         sessionType: "LAB" as const,
         labPeriod: "LAB-2H-1" as const,
-        id: "+ts9",
     },
     {
         dayOfWeek: "FRIDAY" as const,
         sessionType: "THEORY" as const,
         theoryPeriod: "PCDE" as const,
-        id: "+ts10",
     },
     {
         dayOfWeek: "FRIDAY" as const,
         sessionType: "TUTORIAL" as const,
         tutorialPeriod: "T-PC-2" as const,
-        id: "+ts11",
     },
 ];
 
@@ -989,7 +937,6 @@ export const feedbackQuestions = [
         questionType: "RATING" as const,
         isRequired: true,
         order: 1,
-        id: "+fq1",
     },
     {
         questionText:
@@ -997,7 +944,6 @@ export const feedbackQuestions = [
         questionType: "RATING" as const,
         isRequired: true,
         order: 2,
-        id: "+fq2",
     },
     {
         questionText:
@@ -1005,14 +951,12 @@ export const feedbackQuestions = [
         questionType: "RATING" as const,
         isRequired: true,
         order: 3,
-        id: "+fq3",
     },
     {
         questionText: "The assignments and projects enhanced my understanding",
         questionType: "RATING" as const,
         isRequired: true,
         order: 4,
-        id: "+fq4",
     },
     {
         questionText:
@@ -1020,42 +964,36 @@ export const feedbackQuestions = [
         questionType: "RATING" as const,
         isRequired: true,
         order: 5,
-        id: "+fq5",
     },
     {
         questionText: "Would you recommend this course to other students?",
         questionType: "YES_NO" as const,
         isRequired: true,
         order: 6,
-        id: "+fq6",
     },
     {
         questionText: "What did you like most about this course?",
         questionType: "DESCRIPTIVE" as const,
         isRequired: false,
         order: 7,
-        id: "+fq7",
     },
     {
         questionText: "What improvements would you suggest for this course?",
         questionType: "DESCRIPTIVE" as const,
         isRequired: false,
         order: 8,
-        id: "+fq8",
     },
     {
         questionText: "The pace of the course was appropriate",
         questionType: "RATING" as const,
         isRequired: true,
         order: 9,
-        id: "+fq9",
     },
     {
         questionText: "The grading system was fair and transparent",
         questionType: "RATING" as const,
         isRequired: true,
         order: 10,
-        id: "+fq10",
     },
 ];
 
@@ -1066,7 +1004,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i1",
         batchYears: [2023],
         programCode: "BTCS",
-        id: "+co1",
     },
     {
         courseCode: "CS201",
@@ -1074,7 +1011,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i2",
         batchYears: [2022],
         programCode: "BTCS",
-        id: "+co2",
     },
     {
         courseCode: "CS301",
@@ -1082,7 +1018,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i3",
         batchYears: [2021],
         programCode: "BTCS",
-        id: "+co3",
     },
     {
         courseCode: "CS102",
@@ -1090,7 +1025,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i1",
         batchYears: [2023],
         programCode: "BTCS",
-        id: "+co4",
     },
     {
         courseCode: "CS202",
@@ -1098,7 +1032,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i2",
         batchYears: [2022],
         programCode: "BTCS",
-        id: "+co5",
     },
     {
         courseCode: "EE101",
@@ -1106,7 +1039,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i4",
         batchYears: [2023],
         programCode: "BTEE",
-        id: "+co6",
     },
     {
         courseCode: "EE201",
@@ -1114,7 +1046,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i5",
         batchYears: [2022],
         programCode: "BTEE",
-        id: "+co7",
     },
     {
         courseCode: "EE301",
@@ -1122,7 +1053,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i4",
         batchYears: [2021],
         programCode: "BTEE",
-        id: "+co8",
     },
     {
         courseCode: "ME101",
@@ -1130,7 +1060,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i6",
         batchYears: [2023],
         programCode: "BTME",
-        id: "+co9",
     },
     {
         courseCode: "ME201",
@@ -1138,7 +1067,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i7",
         batchYears: [2022],
         programCode: "BTME",
-        id: "+co10",
     },
     {
         courseCode: "MATH101",
@@ -1146,7 +1074,6 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i3",
         batchYears: [2023],
         programCode: "BTCS",
-        id: "+co11",
     },
     {
         courseCode: "MATH201",
@@ -1154,6 +1081,5 @@ export const courseOfferings2025Spring = [
         headEmployeeId: "+i2",
         batchYears: [2022],
         programCode: "BTCS",
-        id: "+co12",
     },
 ];

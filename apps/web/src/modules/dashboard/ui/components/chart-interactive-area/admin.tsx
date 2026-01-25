@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+
 import {
     Card,
     CardAction,
@@ -8,11 +9,13 @@ import {
     CardHeader,
     CardTitle,
 } from "@workspace/ui/components/card";
+
 import {
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
 } from "@workspace/ui/components/chart";
+
 import {
     Select,
     SelectContent,
@@ -20,16 +23,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@workspace/ui/components/select";
+
 import type { ChartConfig } from "@workspace/ui/components/chart";
 import { useMetricCharts } from "@/modules/dashboard/hooks/use-metrics";
 
 const chartConfig = {
-    enrollments: {
-        label: "Enrollments",
-    },
-    approved: {
-        label: "Approved",
+    instructorApproved: {
+        label: "Instructor Approved",
         color: "var(--primary)",
+    },
+    advisorApproved: {
+        label: "Advisor Approved",
+        color: "var(--success)",
     },
     pending: {
         label: "Pending",
@@ -52,8 +57,9 @@ export function AdminChartInteractiveArea() {
             <CardHeader>
                 <CardTitle>Enrollments</CardTitle>
                 <CardDescription>
-                    Approved vs Pending enrollments
+                    Instructor vs Advisor approvals vs Pending
                 </CardDescription>
+
                 <CardAction>
                     <Select value={range} onValueChange={handleRangeChange}>
                         <SelectTrigger className="w-40" size="sm">
@@ -73,7 +79,7 @@ export function AdminChartInteractiveArea() {
                     <AreaChart data={chartData}>
                         <defs>
                             <linearGradient
-                                id="approved"
+                                id="instructorApproved"
                                 x1="0"
                                 y1="0"
                                 x2="0"
@@ -81,15 +87,35 @@ export function AdminChartInteractiveArea() {
                             >
                                 <stop
                                     offset="5%"
-                                    stopColor="var(--color-approved)"
+                                    stopColor="var(--color-instructorApproved)"
                                     stopOpacity={0.8}
                                 />
                                 <stop
                                     offset="95%"
-                                    stopColor="var(--color-approved)"
+                                    stopColor="var(--color-instructorApproved)"
                                     stopOpacity={0.1}
                                 />
                             </linearGradient>
+
+                            <linearGradient
+                                id="advisorApproved"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                            >
+                                <stop
+                                    offset="5%"
+                                    stopColor="var(--color-advisorApproved)"
+                                    stopOpacity={0.8}
+                                />
+                                <stop
+                                    offset="95%"
+                                    stopColor="var(--color-advisorApproved)"
+                                    stopOpacity={0.1}
+                                />
+                            </linearGradient>
+
                             <linearGradient
                                 id="pending"
                                 x1="0"
@@ -111,6 +137,7 @@ export function AdminChartInteractiveArea() {
                         </defs>
 
                         <CartesianGrid vertical={false} />
+
                         <XAxis
                             dataKey="date"
                             tickFormatter={(v) =>
@@ -139,12 +166,21 @@ export function AdminChartInteractiveArea() {
                         />
 
                         <Area
-                            dataKey="approved"
+                            dataKey="instructorApproved"
                             stackId="a"
                             type="natural"
-                            fill="url(#approved)"
-                            stroke="var(--color-approved)"
+                            fill="url(#instructorApproved)"
+                            stroke="var(--color-instructorApproved)"
                         />
+
+                        <Area
+                            dataKey="advisorApproved"
+                            stackId="a"
+                            type="natural"
+                            fill="url(#advisorApproved)"
+                            stroke="var(--color-advisorApproved)"
+                        />
+
                         <Area
                             dataKey="pending"
                             stackId="a"
@@ -168,7 +204,6 @@ export const AdminChartInteractiveAreaSkeleton = () => {
                         <div className="h-5 w-32 rounded bg-muted animate-pulse" />
                         <div className="h-4 w-48 rounded bg-muted animate-pulse" />
                     </div>
-
                     <div className="h-8 w-40 rounded bg-muted animate-pulse" />
                 </div>
             </CardHeader>

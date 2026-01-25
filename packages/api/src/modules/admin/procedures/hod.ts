@@ -1,24 +1,17 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import {
-    createHodInputSchema,
     getHodByIdInputSchema,
     listHodsInputSchema,
-    updateHodInputSchema,
 } from "../schema";
 import { adminProcedure } from "../middleware";
 import {
     db,
     hod,
     department,
-    logAuditEvent,
     user,
-    account,
-    twoFactor,
 } from "@workspace/db";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { auth } from "@workspace/auth";
-import { randomHex } from "../utils";
 
 export const hodManagement = createTRPCRouter({
     list: adminProcedure.input(listHodsInputSchema).query(async ({ input }) => {
@@ -71,9 +64,9 @@ export const hodManagement = createTRPCRouter({
 
         const nextCursor = hasNextPage
             ? {
-                  createdAt: items[items.length - 1]!.hod.createdAt,
-                  id: items[items.length - 1]!.hod.id,
-              }
+                createdAt: items[items.length - 1]!.hod.createdAt,
+                id: items[items.length - 1]!.hod.id,
+            }
             : null;
 
         return {
@@ -108,188 +101,5 @@ export const hodManagement = createTRPCRouter({
             }
 
             return uniqueHod;
-        }),
-
-    create: adminProcedure
-        .input(createHodInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            const { departmentCode, email, name, employeeId } = input;
-            const { user: currentUser } = ctx.session;
-
-            const dept = await db.query.department.findFirst({
-                where: (d, { eq }) => eq(d.code, departmentCode),
-            });
-
-            if (!dept) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "No department found",
-                });
-            }
-
-            const existingHod = await db.query.hod.findFirst({
-                where: eq(hod.departmentId, dept.id),
-            });
-
-            if (existingHod) {
-                throw new TRPCError({
-                    code: "CONFLICT",
-                    message: "Department already has a HOD",
-                });
-            }
-
-            const existingUser = await db.query.user.findFirst({
-                where: eq(user.email, email.toLowerCase()),
-            });
-
-            if (existingUser) {
-                throw new TRPCError({
-                    code: "CONFLICT",
-                    message: "User with this email already exists",
-                });
-            }
-
-            const created = await db.transaction(async (tx) => {
-                const userId = crypto.randomUUID();
-                const password = randomHex();
-                const hashFn = (await auth.$context).password.hash;
-                const hashedPassword = await hashFn(password);
-
-                await tx.insert(user).values({
-                    id: userId,
-                    email: email.toLowerCase(),
-                    name,
-                    role: "HOD",
-                    emailVerified: true,
-                    twoFactorEnabled: true,
-                });
-
-                await tx.insert(account).values({
-                    userId,
-                    accountId: userId,
-                    providerId: "credential",
-                    password: hashedPassword,
-                });
-
-                await tx.insert(twoFactor).values({
-                    userId,
-                    backupCodes: JSON.stringify([]),
-                });
-
-                const [createdHod] = await tx
-                    .insert(hod)
-                    .values({
-                        departmentId: dept.id,
-                        userId,
-                        employeeId,
-                    })
-                    .returning();
-
-                return createdHod;
-            });
-
-            if (!created) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to create HOD",
-                });
-            }
-
-            await logAuditEvent({
-                userId: currentUser.id,
-                action: "CREATE",
-                entityType: "HOD",
-                entityId: created.id,
-                after: created,
-            });
-
-            return created;
-        }),
-
-    update: adminProcedure
-        .input(updateHodInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            const { id, departmentCode, email, name, employeeId } = input;
-            const { user: currentUser } = ctx.session;
-
-            const existing = await db.query.hod.findFirst({
-                where: eq(hod.id, id),
-            });
-
-            if (!existing) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "HOD not found",
-                });
-            }
-
-            let departmentId: string | undefined;
-
-            if (departmentCode) {
-                const dept = await db.query.department.findFirst({
-                    where: (d, { eq }) => eq(d.code, departmentCode),
-                });
-
-                if (!dept) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "No department found",
-                    });
-                }
-
-                if (dept.id !== existing.departmentId) {
-                    const existingHod = await db.query.hod.findFirst({
-                        where: eq(hod.departmentId, dept.id),
-                    });
-
-                    if (existingHod) {
-                        throw new TRPCError({
-                            code: "CONFLICT",
-                            message: "Department already has a HOD",
-                        });
-                    }
-                }
-
-                departmentId = dept.id;
-            }
-
-            const updated = await db.transaction(async (tx) => {
-                const [updatedHod] = await tx
-                    .update(hod)
-                    .set({
-                        ...(departmentId && { departmentId }),
-                        ...(employeeId && { employeeId }),
-                    })
-                    .where(eq(hod.id, id))
-                    .returning();
-
-                await tx
-                    .update(user)
-                    .set({
-                        ...(email && { email: email.toLowerCase() }),
-                        ...(name && { name }),
-                    })
-                    .where(eq(user.id, existing.userId));
-
-                return updatedHod;
-            });
-
-            if (!updated) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to update HOD",
-                });
-            }
-
-            await logAuditEvent({
-                userId: currentUser.id,
-                action: "UPDATE",
-                entityType: "HOD",
-                entityId: id,
-                before: existing,
-                after: updated,
-            });
-
-            return updated;
         }),
 });

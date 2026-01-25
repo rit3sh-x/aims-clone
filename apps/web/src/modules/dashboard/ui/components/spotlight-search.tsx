@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Search, Loader2Icon } from "lucide-react";
+import { ArrowUpRight, Loader2Icon } from "lucide-react";
 import {
     Command,
     CommandDialog,
@@ -48,12 +48,11 @@ export const SpotlightSearch = () => {
     return (
         <>
             <button
-                className="inline-flex h-9 md:min-w-lg w-fit rounded-full border px-6 py-2 text-sm"
+                className="inline-flex h-9 items-center justify-between md:min-w-lg w-fit rounded-full border px-6 py-2 text-sm"
                 onClick={() => setOpen(true)}
             >
-                <Search size={16} className="me-3 opacity-70" />
                 <span className="text-muted-foreground">Search</span>
-                <kbd className="ms-12 text-xs">⌘K</kbd>
+                <kbd className="text-xs">⌘K</kbd>
             </button>
 
             <CommandDialog
@@ -63,12 +62,12 @@ export const SpotlightSearch = () => {
             >
                 <Command>
                     <CommandInput
-                        placeholder="Search..."
+                        placeholder="SearchIcon..."
                         value={searchValue}
                         onValueChange={onSearchChange}
                     />
 
-                    <CommandList>
+                    <CommandList className="max-h-150 overflow-y-auto scroll-smooth">
                         {isLoading && hasSearchValue && (
                             <div className="flex justify-center py-6">
                                 <Loader2Icon className="h-5 w-5 animate-spin" />
@@ -84,17 +83,13 @@ export const SpotlightSearch = () => {
                                 >
                                     {group.items.map((item) => (
                                         <CommandItem
-                                            key={`${item.url}-${item.param}`}
+                                            key={item.url}
                                             onSelect={() => {
                                                 navigate({
                                                     to: `${item.url}/$`,
-                                                    params: {
-                                                        _splat: item.param,
-                                                    },
                                                 });
                                                 setOpen(false);
                                             }}
-                                            value={`${item.field} ${item.param}`}
                                         >
                                             <div className="flex items-center gap-2">
                                                 <ArrowUpRight

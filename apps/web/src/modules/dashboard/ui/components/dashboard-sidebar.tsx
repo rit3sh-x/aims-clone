@@ -1,26 +1,32 @@
-import { LogOutIcon } from "lucide-react";
+import { LogOutIcon, ChevronRight } from "lucide-react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
     SidebarGroup,
-    SidebarGroupContent,
     SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarRail,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
 } from "@workspace/ui/components/sidebar";
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@workspace/ui/components/collapsible";
 import { cn } from "@workspace/ui/lib/utils";
 import { authClient } from "@/lib/auth/client";
-import { RoleType } from "@workspace/auth";
+import type { UserRole } from "@workspace/db";
 import { getSidebarOptions } from "../../constants/sidebar-options";
 import { useEffect, useRef, useState } from "react";
 
 interface DashboardSidebarProps {
-    role: RoleType;
+    role: UserRole;
 }
 
 export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
@@ -40,6 +46,10 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
     const isActive = (url: string) => {
         if (url === "/dashboard") return pathname === "/dashboard";
         return pathname.startsWith(url);
+    };
+
+    const isSectionActive = (items: Array<{ url: string }>) => {
+        return items.some((item) => isActive(item.url));
     };
 
     useEffect(() => {
@@ -71,7 +81,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
     }, []);
 
     return (
-        <Sidebar className="group h-screen flex flex-col" collapsible="icon">
+        <Sidebar className="group" collapsible="icon" variant="inset">
             <SidebarHeader className="shrink-0">
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -89,6 +99,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                         width={24}
                                         height={24}
                                         loading="eager"
+                                        className="p-px bg-neutral-50 rounded-xs"
                                     />
                                     <p className="text-lg font-bold group-data-[collapsible=icon]:hidden!">
                                         AIMS
@@ -116,68 +127,77 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                         />
 
                         <SidebarGroup>
-                            <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
-                            <SidebarGroupContent>
-                                <SidebarMenu>
-                                    {sidebarOptions.dashboard.map((item) => (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton
-                                                isActive={isActive(item.url)}
-                                                className={cn(
-                                                    isActive(item.url) &&
-                                                        "bg-[#0b63f3]! text-sidebar-primary-foreground hover:bg-[#0b63f3]/90!"
-                                                )}
-                                                render={
-                                                    <Link to={item.url}>
-                                                        <item.icon className="size-4" />
+                            <SidebarGroupLabel>Options</SidebarGroupLabel>
+                            {sidebarOptions.sections.map((section) => (
+                                <SidebarMenu key={section.title}>
+                                    <Collapsible
+                                        defaultOpen={isSectionActive(
+                                            section.items
+                                        )}
+                                        className="group/collapsible"
+                                    >
+                                        <SidebarMenuItem>
+                                            <CollapsibleTrigger
+                                                render={(props) => (
+                                                    <SidebarMenuButton
+                                                        {...props}
+                                                        tooltip={section.title}
+                                                    >
+                                                        {section.icon && (
+                                                            <section.icon className="size-4" />
+                                                        )}
                                                         <span>
-                                                            {item.title}
+                                                            {section.title}
                                                         </span>
-                                                    </Link>
-                                                }
+                                                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                                    </SidebarMenuButton>
+                                                )}
                                             />
+                                            <CollapsibleContent>
+                                                <SidebarMenuSub>
+                                                    {section.items.map(
+                                                        (item) => (
+                                                            <SidebarMenuSubItem
+                                                                key={item.title}
+                                                            >
+                                                                <SidebarMenuSubButton
+                                                                    isActive={isActive(
+                                                                        item.url
+                                                                    )}
+                                                                    className={cn(
+                                                                        isActive(
+                                                                            item.url
+                                                                        ) &&
+                                                                        "bg-[#0b63f3]! text-sidebar-primary-foreground! hover:bg-[#0b63f3]/90!"
+                                                                    )}
+                                                                    render={(
+                                                                        props
+                                                                    ) => (
+                                                                        <Link
+                                                                            {...props}
+                                                                            to={
+                                                                                item.url
+                                                                            }
+                                                                        >
+                                                                            <item.icon className="size-4" />
+                                                                            <span>
+                                                                                {
+                                                                                    item.title
+                                                                                }
+                                                                            </span>
+                                                                        </Link>
+                                                                    )}
+                                                                />
+                                                            </SidebarMenuSubItem>
+                                                        )
+                                                    )}
+                                                </SidebarMenuSub>
+                                            </CollapsibleContent>
                                         </SidebarMenuItem>
-                                    ))}
+                                    </Collapsible>
                                 </SidebarMenu>
-                            </SidebarGroupContent>
+                            ))}
                         </SidebarGroup>
-
-                        {sidebarOptions.sections.map((section) => (
-                            <SidebarGroup key={section.title}>
-                                <SidebarGroupLabel>
-                                    {section.title}
-                                </SidebarGroupLabel>
-                                <SidebarGroupContent>
-                                    <SidebarMenu>
-                                        {section.items.map((item) => (
-                                            <SidebarMenuItem key={item.title}>
-                                                <SidebarMenuButton
-                                                    isActive={isActive(
-                                                        item.url
-                                                    )}
-                                                    className={cn(
-                                                        isActive(item.url) &&
-                                                            "bg-[#0b63f3]! text-sidebar-primary-foreground! hover:bg-[#0b63f3]/90!"
-                                                    )}
-                                                    render={(props) => (
-                                                        <Link
-                                                            to={item.url}
-                                                            {...props}
-                                                        >
-                                                            <item.icon className="size-4" />
-                                                            <span>
-                                                                {item.title}
-                                                            </span>
-                                                        </Link>
-                                                    )}
-                                                />
-                                            </SidebarMenuItem>
-                                        ))}
-                                    </SidebarMenu>
-                                </SidebarGroupContent>
-                            </SidebarGroup>
-                        ))}
-
                         <div
                             ref={bottomSentinelRef}
                             className="h-0 pointer-events-none"
@@ -192,6 +212,23 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
 
             <SidebarFooter className="shrink-0">
                 <SidebarMenu>
+                    {sidebarOptions.footer?.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                            <SidebarMenuButton
+                                isActive={isActive(item.url)}
+                                className={cn(
+                                    isActive(item.url) &&
+                                    "bg-[#0b63f3]! text-sidebar-primary-foreground hover:bg-[#0b63f3]/90!"
+                                )}
+                                render={(props) => (
+                                    <Link {...props} to={item.url}>
+                                        <item.icon className="size-4" />
+                                        <span>{item.title}</span>
+                                    </Link>
+                                )}
+                            />
+                        </SidebarMenuItem>
+                    ))}
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             onClick={() => {
@@ -210,8 +247,6 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
-
-            <SidebarRail />
         </Sidebar>
     );
 };

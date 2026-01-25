@@ -4,9 +4,8 @@ import {
     getDepartmentByIdInputSchema,
     listDepartmentFacultyInputSchema,
     listDepartmentsInputSchema,
-    updateDepartmentInputSchema,
 } from "../schema";
-import { db, department, instructor, logAuditEvent, user } from "@workspace/db";
+import { db, department, instructor, user } from "@workspace/db";
 import { and, asc, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
@@ -18,9 +17,9 @@ export const departmentManagement = createTRPCRouter({
             const departments = await db.query.department.findMany({
                 where: search
                     ? or(
-                          ilike(department.name, `%${search}%`),
-                          ilike(department.code, `%${search}%`)
-                      )
+                        ilike(department.name, `%${search}%`),
+                        ilike(department.code, `%${search}%`)
+                    )
                     : undefined,
                 orderBy: [asc(department.code)],
             });
@@ -79,9 +78,9 @@ export const departmentManagement = createTRPCRouter({
 
             const nextCursor = hasNextPage
                 ? {
-                      createdAt: items[items.length - 1]!.instructor.createdAt,
-                      id: items[items.length - 1]!.instructor.id,
-                  }
+                    createdAt: items[items.length - 1]!.instructor.createdAt,
+                    id: items[items.length - 1]!.instructor.id,
+                }
                 : null;
 
             return {
@@ -117,42 +116,5 @@ export const departmentManagement = createTRPCRouter({
             };
 
             return currentDepartment;
-        }),
-
-    update: adminProcedure
-        .input(updateDepartmentInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            const { user } = ctx.session;
-            const { id, name, code } = input;
-            const beforeDepartment = await db.query.department.findFirst({
-                where: (d, { eq }) => eq(d.id, id),
-            });
-
-            if (!beforeDepartment) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Department not found",
-                });
-            }
-
-            const [updated] = await db
-                .update(department)
-                .set({
-                    name,
-                    code,
-                })
-                .where(eq(department.id, id))
-                .returning();
-
-            await logAuditEvent({
-                userId: user.id,
-                action: "UPDATE",
-                entityType: "DEPARTMENT",
-                entityId: id,
-                after: updated,
-                before: beforeDepartment,
-            });
-
-            return updated;
         }),
 });

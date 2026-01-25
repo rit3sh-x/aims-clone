@@ -10,7 +10,9 @@ services:
       POSTGRES_USER: aims_user
       POSTGRES_PASSWORD: aims_password
     volumes:
-      - postgres_data:/var/lib/postgresql/18
+      - aims_postgres_data:/var/lib/postgresql/18
+    networks:
+      - aims_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U aims_user -d aims"]
       interval: 10s
@@ -29,7 +31,9 @@ services:
       MINIO_ROOT_USER: aimsadmin
       MINIO_ROOT_PASSWORD: aimspassword123
     volumes:
-      - minio_data:/data
+      - aims_minio_data:/data
+    networks:
+      - aims_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
@@ -48,8 +52,16 @@ services:
       mc mb -p aims/aims-bucket &&
       mc anonymous set download aims/aims-bucket || true
       "
+    networks:
+      - aims_network
     restart: "no"
 
 volumes:
-  postgres_data:
-  minio_data:
+  aims_postgres_data:
+    name: aims_postgres_data
+  aims_minio_data:
+    name: aims_minio_data
+
+networks:
+  aims_network:
+    name: aims_network

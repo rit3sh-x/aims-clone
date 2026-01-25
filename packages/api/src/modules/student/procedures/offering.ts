@@ -18,7 +18,7 @@ import {
 } from "@workspace/db";
 import { and, asc, eq, gt, inArray, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { MAX_CREDITS_PER_SEMESTER } from "src/modules/constants";
+import { MAX_CREDITS_PER_SEMESTER } from "../../constants";
 
 export const offeringManagement = createTRPCRouter({
     list: studentProcedure

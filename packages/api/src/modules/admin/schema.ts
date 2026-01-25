@@ -3,9 +3,13 @@ import {
     auditActionEnum,
     auditEntityEnum,
     classroomTypeEnum,
-    degreeTypeEnum,
+    dayOfWeekEnum,
+    labPeriodEnum,
     semesterStatusEnum,
     semesterTypeEnum,
+    sessionTypeEnum,
+    theoryPeriodEnum,
+    tutorialPeriodEnum,
 } from "@workspace/db";
 import {
     LIST_DEFAULT_PAGE_SIZE,
@@ -59,12 +63,6 @@ export const getDepartmentByIdInputSchema = z.object({
     id: z.string(),
 });
 
-export const updateDepartmentInputSchema = z.object({
-    id: z.string(),
-    name: z.string().optional(),
-    code: z.string().optional(),
-});
-
 export const listProgramsInputSchema = z.object({
     departmentId: z.string().optional(),
     search: z.string().optional(),
@@ -80,19 +78,6 @@ export const listProgramsInputSchema = z.object({
         .max(LIST_MAX_PAGE_SIZE)
         .default(LIST_DEFAULT_PAGE_SIZE),
 });
-
-export const createProgramSchema = z.object({
-    name: z.string(),
-    code: z.string().max(5),
-    degreeType: z.enum(degreeTypeEnum.enumValues),
-    departmentId: z.string(),
-});
-
-export const updateProgramSchema = createProgramSchema.partial().extend({
-    id: z.string(),
-});
-
-export const deleteProgramSchema = z.object({ id: z.string() });
 
 export const listBatchesInputSchema = z.object({
     departmentCode: z.string().optional(),
@@ -110,17 +95,6 @@ export const listBatchesInputSchema = z.object({
         .max(LIST_MAX_PAGE_SIZE)
         .default(LIST_DEFAULT_PAGE_SIZE),
 });
-
-export const createBatchInputSchema = z.object({
-    year: z.number().min(2000).max(2100),
-    programId: z.string(),
-});
-
-export const updateBatchInputSchema = createBatchInputSchema.partial().extend({
-    id: z.string(),
-});
-
-export const deleteBatchSchema = z.object({ id: z.string() });
 
 export const listStudentsInputSchema = z.object({
     search: z.string().optional(),
@@ -144,23 +118,6 @@ export const getStudentByIdSchema = z.object({
     id: z.string(),
 });
 
-export const createManyStudentsInputSchema = z.array(
-    z.object({
-        email: z.email(),
-        name: z.string().min(1),
-        rollNo: z.string().max(12),
-        programCode: z.string().min(1),
-        year: z.number().min(2000).max(2100),
-        advisorId: z.string().min(1).toUpperCase(),
-    })
-);
-
-export const updateStudentInputSchema = createManyStudentsInputSchema.element
-    .partial()
-    .extend({
-        id: z.string(),
-    });
-
 export const listInstructorsInputSchema = z.object({
     departmentCode: z.string().optional(),
     search: z.string().optional(),
@@ -180,20 +137,6 @@ export const listInstructorsInputSchema = z.object({
 export const getInstructorsByIdInputSchema = z.object({
     id: z.string(),
 });
-
-export const createInstructorInputSchema = z.object({
-    email: z.email(),
-    name: z.string().min(1),
-    departmentCode: z.string(),
-    designation: z.string().max(100).optional(),
-    employeeId: z.string().min(1).toUpperCase(),
-});
-
-export const updateInstructorInputSchema = createInstructorInputSchema
-    .partial()
-    .extend({
-        id: z.string(),
-    });
 
 export const listOfferingsInputSchema = z.object({
     cursor: z
@@ -234,19 +177,6 @@ export const getAdvisorByIdInputSchema = z.object({
     id: z.string(),
 });
 
-export const createAdvisorInputSchema = z.object({
-    name: z.string().min(1).max(255),
-    email: z.email(),
-    departmentCode: z.string().length(5).toUpperCase(),
-    employeeId: z.string().min(1).toUpperCase(),
-});
-
-export const updateAdvisorInputSchema = createAdvisorInputSchema
-    .partial()
-    .extend({
-        id: z.string(),
-    });
-
 export const listHodsInputSchema = z.object({
     cursor: z
         .object({
@@ -264,17 +194,6 @@ export const listHodsInputSchema = z.object({
 });
 
 export const getHodByIdInputSchema = z.object({
-    id: z.string(),
-});
-
-export const createHodInputSchema = z.object({
-    name: z.string().min(1).max(255),
-    email: z.email(),
-    departmentCode: z.string().length(5).toUpperCase(),
-    employeeId: z.string().min(1).toUpperCase(),
-});
-
-export const updateHodInputSchema = createHodInputSchema.partial().extend({
     id: z.string(),
 });
 
@@ -357,21 +276,6 @@ export const classroomListInputSchema = z.object({
         .default(LIST_DEFAULT_PAGE_SIZE),
 });
 
-export const createClassroomInputSchema = z.object({
-    room: z.string().max(20),
-    building: z.string().max(100).optional(),
-    capacity: z.number().min(1).optional(),
-    type: z.enum(classroomTypeEnum.enumValues),
-});
-
-export const updateClassroomInputSchema = createClassroomInputSchema
-    .partial()
-    .extend({
-        roomCode: z.string(),
-    });
-
-export const deleteClassroomInputSchema = z.object({ roomCode: z.string() });
-
 export const listLogsInputSchema = z.object({
     pageSize: z.number().min(1).max(100).default(20),
     cursor: z
@@ -402,7 +306,7 @@ export const listSchedulesInputSchema = z.object({
         .default(LIST_DEFAULT_PAGE_SIZE),
     offeringId: z.string().optional(),
     roomCode: z.string().optional(),
-    dayOfWeek: z.number().min(0).max(6).optional(),
+    dayOfWeek: z.enum(dayOfWeekEnum.enumValues).optional(),
 });
 
 export const getScheduleByIdInputSchema = z.object({
@@ -446,18 +350,34 @@ export const deleteScheduleInputSchema = z.object({
 });
 
 export const listTimeSlotsInputSchema = z.object({
-    dayOfWeek: z.number().min(0).max(6).optional(),
+    dayOfWeek: z.enum(dayOfWeekEnum.enumValues).optional(),
 });
 
-export const createTimeSlotInputSchema = z.object({
-    dayOfWeek: z.number().min(0).max(6),
-    startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-        message: "Invalid time format. Use HH:MM (24-hour format)",
-    }),
-    endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-        message: "Invalid time format. Use HH:MM (24-hour format)",
-    }),
-});
+export const createTimeSlotInputSchema = z
+    .object({
+        dayOfWeek: z.enum(dayOfWeekEnum.enumValues),
+        sessionType: z.enum(sessionTypeEnum.enumValues),
+        theoryPeriod: z.enum(theoryPeriodEnum.enumValues).optional(),
+        tutorialPeriod: z.enum(tutorialPeriodEnum.enumValues).optional(),
+        labPeriod: z.enum(labPeriodEnum.enumValues).optional(),
+    })
+    .refine(
+        (data) => {
+            switch (data.sessionType) {
+                case "THEORY":
+                    return data.theoryPeriod !== undefined && !data.tutorialPeriod && !data.labPeriod;
+                case "TUTORIAL":
+                    return data.tutorialPeriod !== undefined && !data.theoryPeriod && !data.labPeriod;
+                case "LAB":
+                    return data.labPeriod !== undefined && !data.theoryPeriod && !data.tutorialPeriod;
+                default:
+                    return false;
+            }
+        },
+        {
+            message: "Period must match session type: THEORY requires theoryPeriod, TUTORIAL requires tutorialPeriod, LAB requires labPeriod",
+        }
+    );
 
 export const deleteTimeSlotInputSchema = z.object({
     id: z.string(),

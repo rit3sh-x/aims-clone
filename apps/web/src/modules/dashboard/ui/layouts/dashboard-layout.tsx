@@ -1,6 +1,9 @@
-import { SidebarProvider } from "@workspace/ui/components/sidebar";
+import {
+    SidebarProvider,
+    SidebarInset,
+} from "@workspace/ui/components/sidebar";
 import { DashboardSidebar } from "../components/dashboard-sidebar";
-import { RoleType } from "@workspace/auth";
+import type { UserRole } from "@workspace/db";
 import { DashboardHeader } from "../components/dashboard-header";
 
 interface DashboardLayoutProps {
@@ -8,7 +11,7 @@ interface DashboardLayoutProps {
     name: string;
     image?: string | null;
     defaultOpen: boolean;
-    role: RoleType;
+    role: UserRole;
 }
 
 export const DashboardLayout = ({
@@ -21,12 +24,10 @@ export const DashboardLayout = ({
     return (
         <SidebarProvider defaultOpen={defaultOpen}>
             <DashboardSidebar role={role} />
-            <main className="flex flex-col h-full w-full overflow-hidden">
+            <SidebarInset className="rounded-xl overflow-hidden">
                 <DashboardHeader image={image} name={name} />
-                <div className="flex-1 overflow-y-auto thin-scroll">
-                    {children}
-                </div>
-            </main>
+                <div className="flex-1 overflow-y-auto">{children}</div>
+            </SidebarInset>
         </SidebarProvider>
     );
 };

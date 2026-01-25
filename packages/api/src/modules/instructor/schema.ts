@@ -50,7 +50,6 @@ export const proposeOfferingInputSchema = z.object({
     batchIds: z.array(z.string()).min(1),
     prerequisiteCourseIds: z.array(z.string().min(1)).default([]),
     instructorIds: z.array(z.string().min(1)).default([]),
-    headInstructorId: z.string().min(1),
     assessmentTemplates: z.array(assessmentTemplateSchema),
 });
 

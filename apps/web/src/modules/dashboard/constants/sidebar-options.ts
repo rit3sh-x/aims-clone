@@ -13,9 +13,9 @@ import {
     BellIcon,
     FileTextIcon,
     ShieldIcon,
-    KeyIcon,
+    LockIcon,
     HistoryIcon,
-    GaugeIcon,
+    BarChartIcon,
     SettingsIcon,
     CalendarDaysIcon,
     BuildingIcon,
@@ -23,10 +23,14 @@ import {
     ClipboardCheckIcon,
     StarIcon,
     LayoutGridIcon,
-    BarChartIcon,
-    LockIcon,
+    BookMarkedIcon,
+    SchoolIcon,
+    CalendarClockIcon,
+    UserCogIcon,
 } from "lucide-react";
-import { RoleType } from "@workspace/auth";
+import { UserRole } from "@workspace/db";
+
+// TODO: Correct the urls and make them according to app
 
 export const academics = [
     {
@@ -87,7 +91,7 @@ export const settings = [
     { title: "Semesters", url: "/settings/semesters", icon: CalendarDaysIcon },
 ];
 
-export function getSidebarOptions(role: RoleType) {
+export function getSidebarOptions(role: UserRole) {
     const commonDashboard = [
         { title: "Overview", url: "/dashboard", icon: BarChartIcon },
     ];
@@ -104,10 +108,33 @@ export function getSidebarOptions(role: RoleType) {
                     },
                 ],
                 sections: [
-                    { title: "Academics", items: academics },
-                    { title: "Teaching & Learning", items: teachingLearning },
-                    { title: "Scheduling", items: scheduling },
-                    { title: "Settings", items: settings },
+                    {
+                        title: "Academics",
+                        icon: SchoolIcon,
+                        items: academics,
+                    },
+                    {
+                        title: "Teaching & Learning",
+                        icon: BookMarkedIcon,
+                        items: teachingLearning,
+                    },
+                    {
+                        title: "Scheduling",
+                        icon: CalendarClockIcon,
+                        items: scheduling,
+                    },
+                    {
+                        title: "Settings",
+                        icon: SettingsIcon,
+                        items: settings,
+                    },
+                ],
+                footer: [
+                    {
+                        title: "System Logs",
+                        icon: ClipboardListIcon,
+                        url: "/logs",
+                    },
                 ],
             };
 
@@ -117,6 +144,7 @@ export function getSidebarOptions(role: RoleType) {
                 sections: [
                     {
                         title: "My Academics",
+                        icon: SchoolIcon,
                         items: [
                             {
                                 title: "My Courses",
@@ -142,6 +170,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Schedule",
+                        icon: CalendarClockIcon,
                         items: [
                             {
                                 title: "Class Schedule",
@@ -157,6 +186,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Communication",
+                        icon: MessageSquareIcon,
                         items: [
                             {
                                 title: "Announcements",
@@ -177,6 +207,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Profile",
+                        icon: UserCogIcon,
                         items: [
                             {
                                 title: "Personal Info",
@@ -204,6 +235,7 @@ export function getSidebarOptions(role: RoleType) {
                 sections: [
                     {
                         title: "My Courses",
+                        icon: BookMarkedIcon,
                         items: [
                             {
                                 title: "Course Offerings",
@@ -239,6 +271,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Schedule",
+                        icon: CalendarClockIcon,
                         items: [
                             {
                                 title: "My Class Schedule",
@@ -254,6 +287,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Communication",
+                        icon: MessageSquareIcon,
                         items: [
                             {
                                 title: "Announcements",
@@ -270,12 +304,13 @@ export function getSidebarOptions(role: RoleType) {
                 ],
             };
 
-        case "BATCHADVISOR":
+        case "ADVISOR":
             return {
                 dashboard: commonDashboard,
                 sections: [
                     {
                         title: "My Batch",
+                        icon: LayersIcon,
                         items: [
                             {
                                 title: "Students",
@@ -306,6 +341,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Schedule",
+                        icon: CalendarClockIcon,
                         items: [
                             {
                                 title: "Class Schedule",
@@ -321,6 +357,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Communication",
+                        icon: MessageSquareIcon,
                         items: [
                             {
                                 title: "Announcements",
@@ -337,12 +374,13 @@ export function getSidebarOptions(role: RoleType) {
                 ],
             };
 
-        case "SUPERVISOR":
+        case "HOD":
             return {
                 dashboard: commonDashboard,
                 sections: [
                     {
                         title: "Academics",
+                        icon: SchoolIcon,
                         items: [
                             {
                                 title: "Batches",
@@ -363,6 +401,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Teaching & Learning",
+                        icon: BookMarkedIcon,
                         items: [
                             {
                                 title: "Course Offerings",
@@ -393,6 +432,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Scheduling",
+                        icon: CalendarClockIcon,
                         items: [
                             {
                                 title: "Class Schedules",
@@ -413,6 +453,7 @@ export function getSidebarOptions(role: RoleType) {
                     },
                     {
                         title: "Communication",
+                        icon: MessageSquareIcon,
                         items: [
                             {
                                 title: "Announcements",

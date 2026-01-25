@@ -25,8 +25,8 @@ export const DashboardHeader = ({ image, name }: DashboardHeaderProps) => {
     return (
         <header className="flex w-full justify-between items-center h-14 shrink-0 gap-2 px-4 bg-background border-b">
             <div className="flex items-center justify-center gap-2">
-                <SidebarTrigger className="md:hidden" />
-                <p className="text-2xl hidden md:flex">{pageTitle}</p>
+                <SidebarTrigger />
+                <p className="text-2xl">{pageTitle}</p>
             </div>
             <SpotlightSearch />
             <UserProfile image={image} name={name} />

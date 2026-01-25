@@ -32,9 +32,7 @@ export function UserProfile({ name, image }: UserProfileProps) {
                         {name?.charAt(0).toUpperCase() || "?"}
                     </AvatarFallback>
                 </Avatar>
-
                 <span className="font-medium leading-none">{name}</span>
-
                 <AnimatedThemeToggler />
             </Badge>
             <ProfilePhoto

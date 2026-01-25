@@ -1,24 +1,17 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import {
-    createAdvisorInputSchema,
     getAdvisorByIdInputSchema,
     listAdvisorsInputSchema,
-    updateAdvisorInputSchema,
 } from "../schema";
 import { adminProcedure } from "../middleware";
 import {
     db,
     advisor,
     department,
-    logAuditEvent,
     user,
-    account,
-    twoFactor,
 } from "@workspace/db";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { auth } from "@workspace/auth";
-import { randomHex } from "../utils";
 
 export const advisorManagement = createTRPCRouter({
     list: adminProcedure
@@ -110,174 +103,5 @@ export const advisorManagement = createTRPCRouter({
             }
 
             return uniqueAdvisor;
-        }),
-
-    create: adminProcedure
-        .input(createAdvisorInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            const { departmentCode, email, name, employeeId } = input;
-            const { user: currentUser } = ctx.session;
-
-            const dept = await db.query.department.findFirst({
-                where: (d, { eq }) => eq(d.code, departmentCode),
-            });
-
-            if (!dept) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "No department found",
-                });
-            }
-
-            const existingUser = await db.query.user.findFirst({
-                where: eq(user.email, email.toLowerCase()),
-            });
-
-            if (existingUser) {
-                throw new TRPCError({
-                    code: "CONFLICT",
-                    message: "User with this email already exists",
-                });
-            }
-
-            const existingEmployee = await db.query.user.findFirst({
-                where: eq(advisor.employeeId, employeeId),
-            });
-
-            if (existingEmployee) {
-                throw new TRPCError({
-                    code: "CONFLICT",
-                    message: "Advisor with this employee ID already exists",
-                });
-            }
-
-            const created = await db.transaction(async (tx) => {
-                const userId = crypto.randomUUID();
-                const password = randomHex();
-                const hashFn = (await auth.$context).password.hash;
-                const hashedPassword = await hashFn(password);
-
-                await tx.insert(user).values({
-                    id: userId,
-                    email: email.toLowerCase(),
-                    name,
-                    role: "ADVISOR",
-                    emailVerified: true,
-                    twoFactorEnabled: true,
-                });
-
-                await tx.insert(account).values({
-                    userId,
-                    accountId: userId,
-                    providerId: "credential",
-                    password: hashedPassword,
-                });
-
-                await tx.insert(twoFactor).values({
-                    userId,
-                    backupCodes: JSON.stringify([]),
-                });
-
-                const [createdAdvisor] = await tx
-                    .insert(advisor)
-                    .values({
-                        departmentId: dept.id,
-                        employeeId,
-                        userId,
-                    })
-                    .returning();
-
-                return createdAdvisor;
-            });
-
-            if (!created) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to create advisor",
-                });
-            }
-
-            await logAuditEvent({
-                userId: currentUser.id,
-                action: "CREATE",
-                entityType: "ADVISOR",
-                entityId: created.id,
-                after: created,
-            });
-
-            return created;
-        }),
-
-    update: adminProcedure
-        .input(updateAdvisorInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            const { id, departmentCode, email, name } = input;
-            const { user: currentUser } = ctx.session;
-
-            const existing = await db.query.advisor.findFirst({
-                where: eq(advisor.id, id),
-            });
-
-            if (!existing) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Advisor not found",
-                });
-            }
-
-            let departmentId: string | undefined;
-
-            if (departmentCode) {
-                const dept = await db.query.department.findFirst({
-                    where: (d, { eq }) => eq(d.code, departmentCode),
-                });
-
-                if (!dept) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "No department found",
-                    });
-                }
-
-                departmentId = dept.id;
-            }
-
-            const updated = await db.transaction(async (tx) => {
-                const [updatedAdvisor] = await tx
-                    .update(advisor)
-                    .set({
-                        ...(departmentId && { departmentId }),
-                    })
-                    .where(eq(advisor.id, id))
-                    .returning();
-
-                await tx
-                    .update(user)
-                    .set({
-                        ...(email && { email: email.toLowerCase() }),
-                        ...(name && { name }),
-                    })
-                    .where(eq(user.id, existing.userId));
-
-                return updatedAdvisor;
-            });
-
-            if (!updated) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to update advisor",
-                });
-            }
-
-            await logAuditEvent({
-                userId: currentUser.id,
-                action: "UPDATE",
-                entityType: "ADVISOR",
-                entityId: id,
-                before: existing,
-                after: updated,
-            });
-
-            return updated;
         }),
 });

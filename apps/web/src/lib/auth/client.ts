@@ -12,14 +12,14 @@ import { toast } from "sonner";
 export const authClient = createAuthClient({
     baseURL: process.env.VITE_APP_URL!,
     plugins: [
+        inferAdditionalFields<Auth>(),
+        customSessionClient<Auth>(),
         emailOTPClient(),
         adminClient(),
         twoFactorClient(),
-        inferAdditionalFields<Auth>(),
-        customSessionClient<Auth>(),
     ],
     fetchOptions: {
-        onError: async (context) => {
+        onError: async (context: { response: Response }) => {
             if (context.response.status === 429) {
                 const retryAfter =
                     context.response.headers.get("X-Retry-After");

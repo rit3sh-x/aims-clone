@@ -9,8 +9,6 @@ import { sendLoginOTP, sendPasswordResetEmail } from "@workspace/infra";
 import { ROLE_VALUES, ROLES, ac, ROLE_MAP } from "./schema";
 
 const appUrl = process.env.VITE_APP_URL;
-const mobileSchemes = process.env.MOBILE_SCHEMES;
-const mobileSchemesArray = mobileSchemes?.split(",");
 const isProd = process.env.NODE_ENV === "production";
 
 export const options = {
@@ -29,6 +27,7 @@ export const options = {
         twoFactor({
             otpOptions: {
                 async sendOTP({ user, otp }) {
+                    console.log(otp);
                     await sendLoginOTP(user.email, otp);
                 },
                 digits: 6,
@@ -51,17 +50,17 @@ export const options = {
         oAuthProxy({ productionURL: appUrl }),
         expo(),
         tanstackStartCookies(),
-    ],
+    ] as const,
     rateLimit: {
-        storage: "memory",
+        storage: "memory" as const,
         enabled: isProd,
         window: 60,
         max: 100,
         customRules: {
-            "sign-in/email": { window: 15, max: 5 },
-            "email-otp/*": { window: 10, max: 3 },
-            "two-factor/*": { window: 10, max: 5 },
-            "oauth/*": { window: 10, max: 10 },
+            "/sign-in/email": { window: 15, max: 5 },
+            "/email-otp/send-verification-otp": { window: 10, max: 3 },
+            "/two-factor/verify": { window: 10, max: 5 },
+            "/callback/*": { window: 10, max: 10 },
         },
     },
     emailAndPassword: {
@@ -72,7 +71,7 @@ export const options = {
     },
     socialProviders: {
         google: {
-            prompt: "select_account",
+            prompt: "select_account" as const,
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         },
@@ -84,17 +83,17 @@ export const options = {
                 attributes: {
                     maxAge: undefined,
                     secure: isProd,
-                    sameSite: "Lax",
+                    sameSite: "Lax" as const,
                     httpOnly: true,
                 },
             },
         },
         database: {
-            generateId: "uuid",
+            generateId: "uuid" as const,
         },
     },
     trustedOrigins: [
-        ...(mobileSchemesArray ? mobileSchemesArray : []),
+        ...(process.env.MOBILE_SCHEMES?.split(",") || []),
         ...(appUrl ? [appUrl] : []),
     ],
     session: {
@@ -109,13 +108,13 @@ export const options = {
     account: {
         accountLinking: {
             enabled: true,
-            trustedProviders: ["google"],
+            trustedProviders: ["google"] as const,
         },
     },
     user: {
         additionalFields: {
             disabled: {
-                type: "boolean",
+                type: "boolean" as const,
                 defaultValue: false,
                 input: false,
             },
@@ -165,11 +164,11 @@ export const options = {
             create: {
                 before: async (user) => {
                     const emailDomain = user.email.split("@")[1];
-                    if (!emailDomain)
+                    if (!emailDomain) {
                         throw new APIError("FORBIDDEN", {
                             message: "Email is invalid",
                         });
-
+                    }
                     const allowedDomains =
                         process.env.ALLOWED_EMAIL_DOMAINS?.split(",") || [];
                     if (

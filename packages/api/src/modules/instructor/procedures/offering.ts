@@ -29,28 +29,15 @@ export const offeringManagement = createTRPCRouter({
                 semesterId,
                 batchIds,
                 instructorIds,
-                headInstructorId,
                 prerequisiteCourseIds,
                 assessmentTemplates,
             } = input;
 
-            if (headInstructorId !== currentInstructor.id) {
-                throw new TRPCError({
-                    code: "FORBIDDEN",
-                    message: "Only the head instructor can propose an offering",
-                });
-            }
-
-            if (!instructorIds.includes(headInstructorId)) {
-                throw new TRPCError({
-                    code: "BAD_REQUEST",
-                    message:
-                        "Head instructor must be included in instructorIds",
-                });
-            }
-
             const courseRecord = await db
-                .select({ status: course.status })
+                .select({
+                    status: course.status,
+                    departmentId: course.departmentId,
+                })
                 .from(course)
                 .where(eq(course.id, courseId))
                 .then((r) => r[0]);
@@ -58,20 +45,48 @@ export const offeringManagement = createTRPCRouter({
             if (!courseRecord || courseRecord.status !== "ADMIN_ACCEPTED") {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
-                    message: "Only ACTIVE courses can be offered",
+                    message: "Only ADMIN_ACCEPTED courses can be offered",
                 });
             }
 
-            const instructors = await db
-                .select({ id: instructor.id })
-                .from(instructor)
-                .where(inArray(instructor.id, instructorIds));
-
-            if (instructors.length !== instructorIds.length) {
+            if (courseRecord.departmentId !== currentInstructor.departmentId) {
                 throw new TRPCError({
-                    code: "BAD_REQUEST",
-                    message: "Invalid instructor list",
+                    code: "FORBIDDEN",
+                    message:
+                        "You can only propose offerings for courses in your department",
                 });
+            }
+
+            const instructorsToAdd =
+                instructorIds.length > 0 ? instructorIds : [];
+
+            if (instructorsToAdd.length > 0) {
+                const instructorRecords = await db
+                    .select({
+                        id: instructor.id,
+                        departmentId: instructor.departmentId,
+                    })
+                    .from(instructor)
+                    .where(inArray(instructor.id, instructorsToAdd));
+
+                if (instructorRecords.length !== instructorsToAdd.length) {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message: "Invalid instructor list",
+                    });
+                }
+
+                const invalidInstructors = instructorRecords.filter(
+                    (inst) => inst.departmentId !== courseRecord.departmentId
+                );
+
+                if (invalidInstructors.length > 0) {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message:
+                            "All instructors must be from the course's department",
+                    });
+                }
             }
 
             const totalWeightage = assessmentTemplates.reduce(
@@ -122,11 +137,16 @@ export const offeringManagement = createTRPCRouter({
                     });
                 }
 
+                const allInstructorIds = [
+                    currentInstructor.id,
+                    ...instructorsToAdd,
+                ];
+
                 await tx.insert(courseOfferingInstructor).values(
-                    instructorIds.map((id) => ({
+                    allInstructorIds.map((id) => ({
                         offeringId: offering.id,
                         instructorId: id,
-                        isHead: id === headInstructorId,
+                        isHead: id === currentInstructor.id,
                     }))
                 );
 
@@ -163,8 +183,8 @@ export const offeringManagement = createTRPCRouter({
                     entityId: offering.id,
                     after: {
                         offering,
-                        instructorIds,
-                        headInstructorId,
+                        instructorIds: allInstructorIds,
+                        headInstructorId: currentInstructor.id,
                         batchIds,
                         prerequisiteCourseIds,
                         assessmentTemplates,

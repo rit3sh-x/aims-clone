@@ -70,10 +70,7 @@ export const scheduleManagement = createTRPCRouter({
                 .from(schedule)
                 .innerJoin(timeSlot, eq(schedule.timeSlotId, timeSlot.id))
                 .innerJoin(classroom, eq(schedule.classroomId, classroom.id))
-                .innerJoin(
-                    courseOffering,
-                    eq(schedule.offeringId, courseOffering.id)
-                )
+                .innerJoin(courseOffering, eq(schedule.offeringId, courseOffering.id))
                 .innerJoin(course, eq(courseOffering.courseId, course.id))
                 .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
                 .where(where)
@@ -85,24 +82,17 @@ export const scheduleManagement = createTRPCRouter({
 
             const nextCursor = hasNextPage
                 ? {
-                      createdAt:
-                          schedules[schedules.length - 1]!.schedule.createdAt,
+                      createdAt: schedules[schedules.length - 1]!.schedule.createdAt,
                       id: schedules[schedules.length - 1]!.schedule.id,
                   }
                 : null;
 
-            return {
-                schedules,
-                nextCursor,
-                hasNextPage,
-            };
+            return { schedules, nextCursor, hasNextPage };
         }),
 
     getSchedule: adminProcedure
         .input(getScheduleByIdInputSchema)
         .query(async ({ input }) => {
-            const { id } = input;
-
             const result = await db
                 .select({
                     schedule,
@@ -115,13 +105,10 @@ export const scheduleManagement = createTRPCRouter({
                 .from(schedule)
                 .innerJoin(timeSlot, eq(schedule.timeSlotId, timeSlot.id))
                 .innerJoin(classroom, eq(schedule.classroomId, classroom.id))
-                .innerJoin(
-                    courseOffering,
-                    eq(schedule.offeringId, courseOffering.id)
-                )
+                .innerJoin(courseOffering, eq(schedule.offeringId, courseOffering.id))
                 .innerJoin(course, eq(courseOffering.courseId, course.id))
                 .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
-                .where(eq(schedule.id, id))
+                .where(eq(schedule.id, input.id))
                 .limit(1)
                 .then((r) => r[0]);
 
@@ -138,10 +125,8 @@ export const scheduleManagement = createTRPCRouter({
     getOfferingSchedule: adminProcedure
         .input(getScheduleByIdInputSchema)
         .query(async ({ input }) => {
-            const { id: offeringId } = input;
-
             const offering = await db.query.courseOffering.findFirst({
-                where: eq(courseOffering.id, offeringId),
+                where: eq(courseOffering.id, input.id),
             });
 
             if (!offering) {
@@ -160,8 +145,8 @@ export const scheduleManagement = createTRPCRouter({
                 .from(schedule)
                 .innerJoin(timeSlot, eq(schedule.timeSlotId, timeSlot.id))
                 .innerJoin(classroom, eq(schedule.classroomId, classroom.id))
-                .where(eq(schedule.offeringId, offeringId))
-                .orderBy(timeSlot.dayOfWeek, timeSlot.startTime);
+                .where(eq(schedule.offeringId, input.id))
+                .orderBy(timeSlot.dayOfWeek);
 
             return schedules;
         }),
@@ -169,14 +154,7 @@ export const scheduleManagement = createTRPCRouter({
     createSchedule: adminProcedure
         .input(createScheduleInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { user } = ctx.session;
-            const {
-                offeringId,
-                roomCode,
-                timeSlotId,
-                effectiveFrom,
-                effectiveTo,
-            } = input;
+            const { offeringId, roomCode, timeSlotId, effectiveFrom, effectiveTo } = input;
 
             return await db.transaction(async (tx) => {
                 const offering = await tx.query.courseOffering.findFirst({
@@ -197,7 +175,7 @@ export const scheduleManagement = createTRPCRouter({
                 if (!classroomRecord) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
-                        message: `Classroom with room code '${roomCode}' not found`,
+                        message: `Classroom '${roomCode}' not found`,
                     });
                 }
 
@@ -222,8 +200,7 @@ export const scheduleManagement = createTRPCRouter({
                 if (classroomConflict) {
                     throw new TRPCError({
                         code: "CONFLICT",
-                        message:
-                            "Classroom is already booked for this time slot",
+                        message: "Classroom is already booked for this time slot",
                     });
                 }
 
@@ -237,8 +214,7 @@ export const scheduleManagement = createTRPCRouter({
                 if (offeringConflict) {
                     throw new TRPCError({
                         code: "CONFLICT",
-                        message:
-                            "Course offering already has a class at this time slot",
+                        message: "Course offering already has a class at this time slot",
                     });
                 }
 
@@ -261,7 +237,7 @@ export const scheduleManagement = createTRPCRouter({
                 }
 
                 await logAuditEvent({
-                    userId: user.id,
+                    userId: ctx.session.user.id,
                     action: "CREATE",
                     entityType: "SCHEDULE",
                     entityId: created.id,
@@ -275,7 +251,6 @@ export const scheduleManagement = createTRPCRouter({
     updateSchedule: adminProcedure
         .input(updateScheduleInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { user } = ctx.session;
             const { id, roomCode, ...restData } = input;
 
             return await db.transaction(async (tx) => {
@@ -299,21 +274,17 @@ export const scheduleManagement = createTRPCRouter({
                     if (!classroomRecord) {
                         throw new TRPCError({
                             code: "NOT_FOUND",
-                            message: `Classroom with room code '${roomCode}' not found`,
+                            message: `Classroom '${roomCode}' not found`,
                         });
                     }
                     resolvedClassroomId = classroomRecord.id;
                 }
 
-                const newClassroomId =
-                    resolvedClassroomId ?? before.classroomId;
+                const newClassroomId = resolvedClassroomId ?? before.classroomId;
                 const newTimeSlotId = restData.timeSlotId ?? before.timeSlotId;
                 const newOfferingId = restData.offeringId ?? before.offeringId;
 
-                if (
-                    restData.timeSlotId &&
-                    restData.timeSlotId !== before.timeSlotId
-                ) {
+                if (restData.timeSlotId && restData.timeSlotId !== before.timeSlotId) {
                     const timeSlotRecord = await tx.query.timeSlot.findFirst({
                         where: eq(timeSlot.id, restData.timeSlotId),
                     });
@@ -327,21 +298,18 @@ export const scheduleManagement = createTRPCRouter({
                 }
 
                 if (resolvedClassroomId || restData.timeSlotId) {
-                    const classroomConflict = await tx.query.schedule.findFirst(
-                        {
-                            where: and(
-                                eq(schedule.classroomId, newClassroomId),
-                                eq(schedule.timeSlotId, newTimeSlotId),
-                                sql`${schedule.id} != ${id}`
-                            ),
-                        }
-                    );
+                    const classroomConflict = await tx.query.schedule.findFirst({
+                        where: and(
+                            eq(schedule.classroomId, newClassroomId),
+                            eq(schedule.timeSlotId, newTimeSlotId),
+                            sql`${schedule.id} != ${id}`
+                        ),
+                    });
 
                     if (classroomConflict) {
                         throw new TRPCError({
                             code: "CONFLICT",
-                            message:
-                                "Classroom is already booked for this time slot",
+                            message: "Classroom is already booked for this time slot",
                         });
                     }
                 }
@@ -358,17 +326,14 @@ export const scheduleManagement = createTRPCRouter({
                     if (offeringConflict) {
                         throw new TRPCError({
                             code: "CONFLICT",
-                            message:
-                                "Course offering already has a class at this time slot",
+                            message: "Course offering already has a class at this time slot",
                         });
                     }
                 }
 
                 const updateData = {
                     ...restData,
-                    ...(resolvedClassroomId && {
-                        classroomId: resolvedClassroomId,
-                    }),
+                    ...(resolvedClassroomId && { classroomId: resolvedClassroomId }),
                 };
 
                 const [after] = await tx
@@ -385,7 +350,7 @@ export const scheduleManagement = createTRPCRouter({
                 }
 
                 await logAuditEvent({
-                    userId: user.id,
+                    userId: ctx.session.user.id,
                     action: "UPDATE",
                     entityType: "SCHEDULE",
                     entityId: id,
@@ -400,12 +365,9 @@ export const scheduleManagement = createTRPCRouter({
     deleteSchedule: adminProcedure
         .input(deleteScheduleInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { user } = ctx.session;
-            const { id } = input;
-
             return await db.transaction(async (tx) => {
                 const before = await tx.query.schedule.findFirst({
-                    where: eq(schedule.id, id),
+                    where: eq(schedule.id, input.id),
                 });
 
                 if (!before) {
@@ -415,13 +377,13 @@ export const scheduleManagement = createTRPCRouter({
                     });
                 }
 
-                await tx.delete(schedule).where(eq(schedule.id, id));
+                await tx.delete(schedule).where(eq(schedule.id, input.id));
 
                 await logAuditEvent({
-                    userId: user.id,
+                    userId: ctx.session.user.id,
                     action: "DELETE",
                     entityType: "SCHEDULE",
-                    entityId: id,
+                    entityId: input.id,
                     before,
                 });
 
@@ -442,28 +404,34 @@ export const scheduleManagement = createTRPCRouter({
 
             const where = conditions.length ? and(...conditions) : undefined;
 
-            const slots = await db
+            return await db
                 .select()
                 .from(timeSlot)
                 .where(where)
-                .orderBy(timeSlot.dayOfWeek, timeSlot.startTime);
-
-            return slots;
+                .orderBy(timeSlot.dayOfWeek, timeSlot.sessionType);
         }),
 
     createTimeSlot: adminProcedure
         .input(createTimeSlotInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { user } = ctx.session;
-            const { dayOfWeek, startTime, endTime } = input;
+            const { dayOfWeek, sessionType, theoryPeriod, tutorialPeriod, labPeriod } = input;
 
             return await db.transaction(async (tx) => {
+                const conditions = [
+                    eq(timeSlot.dayOfWeek, dayOfWeek),
+                    eq(timeSlot.sessionType, sessionType),
+                ];
+
+                if (sessionType === "THEORY" && theoryPeriod) {
+                    conditions.push(eq(timeSlot.theoryPeriod, theoryPeriod));
+                } else if (sessionType === "TUTORIAL" && tutorialPeriod) {
+                    conditions.push(eq(timeSlot.tutorialPeriod, tutorialPeriod));
+                } else if (sessionType === "LAB" && labPeriod) {
+                    conditions.push(eq(timeSlot.labPeriod, labPeriod));
+                }
+
                 const existing = await tx.query.timeSlot.findFirst({
-                    where: and(
-                        eq(timeSlot.dayOfWeek, dayOfWeek),
-                        eq(timeSlot.startTime, startTime),
-                        eq(timeSlot.endTime, endTime)
-                    ),
+                    where: and(...conditions),
                 });
 
                 if (existing) {
@@ -477,8 +445,10 @@ export const scheduleManagement = createTRPCRouter({
                     .insert(timeSlot)
                     .values({
                         dayOfWeek,
-                        startTime,
-                        endTime,
+                        sessionType,
+                        theoryPeriod: sessionType === "THEORY" ? theoryPeriod : null,
+                        tutorialPeriod: sessionType === "TUTORIAL" ? tutorialPeriod : null,
+                        labPeriod: sessionType === "LAB" ? labPeriod : null,
                     })
                     .returning();
 
@@ -490,7 +460,7 @@ export const scheduleManagement = createTRPCRouter({
                 }
 
                 await logAuditEvent({
-                    userId: user.id,
+                    userId: ctx.session.user.id,
                     action: "CREATE",
                     entityType: "TIME_SLOT",
                     entityId: created.id,
@@ -504,12 +474,9 @@ export const scheduleManagement = createTRPCRouter({
     deleteTimeSlot: adminProcedure
         .input(deleteTimeSlotInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { user } = ctx.session;
-            const { id } = input;
-
             return await db.transaction(async (tx) => {
                 const before = await tx.query.timeSlot.findFirst({
-                    where: eq(timeSlot.id, id),
+                    where: eq(timeSlot.id, input.id),
                 });
 
                 if (!before) {
@@ -520,24 +487,23 @@ export const scheduleManagement = createTRPCRouter({
                 }
 
                 const inUse = await tx.query.schedule.findFirst({
-                    where: eq(schedule.timeSlotId, id),
+                    where: eq(schedule.timeSlotId, input.id),
                 });
 
                 if (inUse) {
                     throw new TRPCError({
                         code: "PRECONDITION_FAILED",
-                        message:
-                            "Cannot delete time slot that is in use by schedules",
+                        message: "Cannot delete time slot that is in use by schedules",
                     });
                 }
 
-                await tx.delete(timeSlot).where(eq(timeSlot.id, id));
+                await tx.delete(timeSlot).where(eq(timeSlot.id, input.id));
 
                 await logAuditEvent({
-                    userId: user.id,
+                    userId: ctx.session.user.id,
                     action: "DELETE",
                     entityType: "TIME_SLOT",
-                    entityId: id,
+                    entityId: input.id,
                     before,
                 });
 
@@ -548,19 +514,12 @@ export const scheduleManagement = createTRPCRouter({
     createBulkSchedules: adminProcedure
         .input(createManySchedulesInputSchema)
         .mutation(async ({ input, ctx }) => {
-            const { user } = ctx.session;
             const { schedules: scheduleInputs } = input;
 
             return await db.transaction(async (tx) => {
-                const offeringIds = [
-                    ...new Set(scheduleInputs.map((s) => s.offeringId)),
-                ];
-                const roomCodes = [
-                    ...new Set(scheduleInputs.map((s) => s.roomCode)),
-                ];
-                const timeSlotIds = [
-                    ...new Set(scheduleInputs.map((s) => s.timeSlotId)),
-                ];
+                const offeringIds = [...new Set(scheduleInputs.map((s) => s.offeringId))];
+                const roomCodes = [...new Set(scheduleInputs.map((s) => s.roomCode))];
+                const timeSlotIds = [...new Set(scheduleInputs.map((s) => s.timeSlotId))];
 
                 const [offerings, classrooms, timeSlots] = await Promise.all([
                     tx.query.courseOffering.findMany({
@@ -575,9 +534,7 @@ export const scheduleManagement = createTRPCRouter({
                 ]);
 
                 const offeringMap = new Map(offerings.map((o) => [o.id, o]));
-                const classroomByRoomCode = new Map(
-                    classrooms.map((c) => [c.room, c])
-                );
+                const classroomByRoomCode = new Map(classrooms.map((c) => [c.room, c]));
                 const timeSlotMap = new Map(timeSlots.map((t) => [t.id, t]));
 
                 const classroomIds = classrooms.map((c) => c.id);
@@ -590,38 +547,22 @@ export const scheduleManagement = createTRPCRouter({
                               .where(
                                   or(
                                       and(
-                                          inArray(
-                                              schedule.classroomId,
-                                              classroomIds
-                                          ),
-                                          inArray(
-                                              schedule.timeSlotId,
-                                              timeSlotIds
-                                          )
+                                          inArray(schedule.classroomId, classroomIds),
+                                          inArray(schedule.timeSlotId, timeSlotIds)
                                       ),
                                       and(
-                                          inArray(
-                                              schedule.offeringId,
-                                              offeringIds
-                                          ),
-                                          inArray(
-                                              schedule.timeSlotId,
-                                              timeSlotIds
-                                          )
+                                          inArray(schedule.offeringId, offeringIds),
+                                          inArray(schedule.timeSlotId, timeSlotIds)
                                       )
                                   )
                               )
                         : [];
 
                 const existingClassroomSlots = new Set(
-                    existingSchedules.map(
-                        (s) => `${s.classroomId}-${s.timeSlotId}`
-                    )
+                    existingSchedules.map((s) => `${s.classroomId}-${s.timeSlotId}`)
                 );
                 const existingOfferingSlots = new Set(
-                    existingSchedules.map(
-                        (s) => `${s.offeringId}-${s.timeSlotId}`
-                    )
+                    existingSchedules.map((s) => `${s.offeringId}-${s.timeSlotId}`)
                 );
 
                 const batchClassroomSlots = new Set<string>();
@@ -655,7 +596,7 @@ export const scheduleManagement = createTRPCRouter({
                     if (!classroomRecord) {
                         failed.push({
                             input: scheduleInput,
-                            reason: `Classroom with room code '${roomCode}' not found`,
+                            reason: `Classroom '${roomCode}' not found`,
                         });
                         continue;
                     }
@@ -682,7 +623,7 @@ export const scheduleManagement = createTRPCRouter({
                     if (existingOfferingSlots.has(offeringSlotKey)) {
                         failed.push({
                             input: scheduleInput,
-                            reason: `Course offering already has a class at this time slot`,
+                            reason: "Course offering already has a class at this time slot",
                         });
                         continue;
                     }
@@ -698,7 +639,7 @@ export const scheduleManagement = createTRPCRouter({
                     if (batchOfferingSlots.has(offeringSlotKey)) {
                         failed.push({
                             input: scheduleInput,
-                            reason: `Duplicate offering assignment in batch for this time slot`,
+                            reason: "Duplicate offering assignment in batch for this time slot",
                         });
                         continue;
                     }
@@ -730,7 +671,7 @@ export const scheduleManagement = createTRPCRouter({
                     .returning();
 
                 await logAuditEvent({
-                    userId: user.id,
+                    userId: ctx.session.user.id,
                     action: "CREATE",
                     entityType: "SCHEDULE",
                     after: {

@@ -38,8 +38,8 @@
         "typescript": "^5.9.2"
     },
     "exports": {
-        "./lib/*": "./src/lib/*.ts",
-        "./components/*": "./src/components/*.tsx",
-        "./hooks/*": "./src/hooks/*.ts"
+        "./lib/*": "./src/lib/*",
+        "./components/*": "./src/components/*",
+        "./hooks/*": "./src/hooks/*"
     }
 }

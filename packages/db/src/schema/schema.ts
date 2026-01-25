@@ -31,6 +31,11 @@ import {
     semesterStatusEnum,
     userRoleEnum,
     gradeTypeEnum,
+    dayOfWeekEnum,
+    sessionTypeEnum,
+    theoryPeriodEnum,
+    tutorialPeriodEnum,
+    labPeriodEnum,
 } from "./enums";
 
 export const user = pgTable(
@@ -174,6 +179,7 @@ export const department = pgTable(
             .primaryKey(),
         name: text("name").notNull(),
         code: varchar("code", { length: 5 }).notNull().unique(),
+        website: varchar("website", { length: 255 }).notNull().unique(),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
@@ -199,6 +205,8 @@ export const hod = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" })
             .unique(),
+        phoneNumber: varchar("phone_number", { length: 16 }).notNull().unique(),
+        website: varchar("website", { length: 255 }).notNull().unique(),
         employeeId: varchar("employee_id", { length: 20 }).notNull().unique(),
         departmentId: uuid("department_id")
             .notNull()
@@ -262,6 +270,8 @@ export const advisor = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" })
             .unique(),
+        phoneNumber: varchar("phone_number", { length: 16 }).notNull().unique(),
+        website: varchar("website", { length: 255 }).notNull().unique(),
         employeeId: varchar("employee_id", { length: 20 }).notNull().unique(),
         departmentId: uuid("department_id")
             .notNull()
@@ -352,6 +362,8 @@ export const instructor = pgTable(
             .references(() => user.id, { onDelete: "cascade" })
             .unique(),
         employeeId: varchar("employee_id", { length: 20 }).notNull().unique(),
+        phoneNumber: varchar("phone_number", { length: 16 }).notNull().unique(),
+        website: varchar("website", { length: 255 }).notNull().unique(),
         departmentId: uuid("department_id")
             .notNull()
             .references(() => department.id, { onDelete: "restrict" }),
@@ -365,6 +377,10 @@ export const instructor = pgTable(
     (table) => [
         index("instructor_user_idx").on(table.userId),
         index("instructor_dept_idx").on(table.departmentId),
+        check(
+            "instructor_phone_e164",
+            sql`${table.phoneNumber} ~ '^\\+[1-9][0-9]{7,14}$'`
+        ),
     ]
 );
 
@@ -458,7 +474,6 @@ export const courseOffering = pgTable(
             .notNull()
             .references(() => semester.id, { onDelete: "restrict" }),
         status: offeringStatusEnum("status").default("PROPOSED").notNull(),
-        rejectionReason: text("rejection_reason"),
         createdAt: timestamp("created_at").defaultNow().notNull(),
         updatedAt: timestamp("updated_at")
             .defaultNow()
@@ -472,13 +487,6 @@ export const courseOffering = pgTable(
         uniqueIndex("offering_unique_course_semester").on(
             t.courseId,
             t.semesterId
-        ),
-        check(
-            "offering_rejection_reason_required",
-            sql`
-                ${t.status} != 'REJECTED'
-                OR ${t.rejectionReason} IS NOT NULL
-            `
         ),
     ]
 );
@@ -693,10 +701,11 @@ export const timeSlot = pgTable(
         id: uuid("id")
             .default(sql`pg_catalog.gen_random_uuid()`)
             .primaryKey(),
-        dayOfWeek: integer("day_of_week").notNull(),
-        startTime: varchar("start_time", { length: 10 }).notNull(),
-        endTime: varchar("end_time", { length: 10 }).notNull(),
-        createdAt: timestamp("created_at").notNull().defaultNow(),
+        dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
+        sessionType: sessionTypeEnum("session_type").notNull(),
+        theoryPeriod: theoryPeriodEnum("theory_period"),
+        tutorialPeriod: tutorialPeriodEnum("tutorial_period"),
+        labPeriod: labPeriodEnum("lab_period"),
         updatedAt: timestamp("updated_at")
             .notNull()
             .defaultNow()
@@ -704,14 +713,29 @@ export const timeSlot = pgTable(
     },
     (table) => [
         index("time_slot_day_idx").on(table.dayOfWeek),
-        uniqueIndex("time_slot_unique").on(
-            table.dayOfWeek,
-            table.startTime,
-            table.endTime
-        ),
+        index("time_slot_type_idx").on(table.sessionType),
         check(
-            "time_slot_day_range",
-            sql`${table.dayOfWeek} >= 0 AND ${table.dayOfWeek} <= 6`
+            "time_slot_session_period_check",
+            sql`
+                (
+                    ${table.sessionType} = 'THEORY'
+                    AND ${table.theoryPeriod} IS NOT NULL
+                    AND ${table.tutorialPeriod} IS NULL
+                    AND ${table.labPeriod} IS NULL
+                )
+                OR (
+                    ${table.sessionType} = 'TUTORIAL'
+                    AND ${table.tutorialPeriod} IS NOT NULL
+                    AND ${table.theoryPeriod} IS NULL
+                    AND ${table.labPeriod} IS NULL
+                )
+                OR (
+                    ${table.sessionType} = 'LAB'
+                    AND ${table.labPeriod} IS NOT NULL
+                    AND ${table.theoryPeriod} IS NULL
+                    AND ${table.tutorialPeriod} IS NULL
+                )
+            `
         ),
     ]
 );

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as DashboardIndexRouteImport } from './routes/_dashboard/index'
+import { Route as DashboardLogsRouteImport } from './routes/_dashboard/logs'
 import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
@@ -29,6 +30,11 @@ const AuthRouteRoute = AuthRouteRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardLogsRoute = DashboardLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/': typeof DashboardIndexRoute
   '/login': typeof AuthLoginRoute
   '/reset-password': typeof AuthResetPasswordRoute
+  '/logs': typeof DashboardLogsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profile/$userId': typeof ApiProfileUserIdRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/': typeof DashboardIndexRoute
   '/login': typeof AuthLoginRoute
   '/reset-password': typeof AuthResetPasswordRoute
+  '/logs': typeof DashboardLogsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profile/$userId': typeof ApiProfileUserIdRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/_dashboard': typeof DashboardRouteRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/reset-password': typeof AuthResetPasswordRoute
+  '/_dashboard/logs': typeof DashboardLogsRoute
   '/_dashboard/': typeof DashboardIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profile/$userId': typeof ApiProfileUserIdRoute
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/reset-password'
+    | '/logs'
     | '/api/auth/$'
     | '/api/profile/$userId'
     | '/api/trpc/$'
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/reset-password'
+    | '/logs'
     | '/api/auth/$'
     | '/api/profile/$userId'
     | '/api/trpc/$'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/_dashboard'
     | '/_auth/login'
     | '/_auth/reset-password'
+    | '/_dashboard/logs'
     | '/_dashboard/'
     | '/api/auth/$'
     | '/api/profile/$userId'
@@ -142,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/_dashboard/logs': {
+      id: '/_dashboard/logs'
+      path: '/logs'
+      fullPath: '/logs'
+      preLoaderRoute: typeof DashboardLogsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/_auth/reset-password': {
@@ -197,10 +216,12 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 )
 
 interface DashboardRouteRouteChildren {
+  DashboardLogsRoute: typeof DashboardLogsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardLogsRoute: DashboardLogsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 

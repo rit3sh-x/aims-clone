@@ -1,8 +1,6 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import { adminProcedure } from "../middleware";
-import {
-    classroomListInputSchema,
-} from "../schema";
+import { classroomListInputSchema } from "../schema";
 import { and, asc, eq, gt, ilike, or } from "drizzle-orm";
 import { classroom, db } from "@workspace/db";
 
@@ -52,9 +50,9 @@ export const classroomManagement = createTRPCRouter({
 
             const nextCursor = hasNextPage
                 ? {
-                    room: items[items.length - 1]!.room,
-                    id: items[items.length - 1]!.id,
-                }
+                      room: items[items.length - 1]!.room,
+                      id: items[items.length - 1]!.id,
+                  }
                 : null;
 
             return {

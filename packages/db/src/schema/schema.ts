@@ -36,6 +36,7 @@ import {
     theoryPeriodEnum,
     tutorialPeriodEnum,
     labPeriodEnum,
+    feedbackQuestionTypeEnum,
 } from "./enums";
 
 export const user = pgTable(
@@ -437,6 +438,9 @@ export const semester = pgTable(
         enrollmentDeadline: date("enrollment_deadline", {
             mode: "date",
         }).notNull(),
+        feedbackFormStartDate: date("feedback_form_start_date", {
+            mode: "date",
+        }).notNull(),
         endDate: date("end_date", { mode: "date" }).notNull(),
         semester: semesterTypeEnum("semester").notNull(),
         status: semesterStatusEnum("status").default("UPCOMING").notNull(),
@@ -457,6 +461,14 @@ export const semester = pgTable(
                 AND
                 ${t.enrollmentDeadline} <= ${t.endDate}
             `
+        ),
+        check(
+            "semester_feedback_date_range_chk",
+            sql`${t.feedbackFormStartDate} < ${t.endDate}`
+        ),
+        check(
+            "semester_feedback_after_start_chk",
+            sql`${t.feedbackFormStartDate} > ${t.startDate}`
         ),
     ]
 );
@@ -834,6 +846,28 @@ export const prerequisite = pgTable(
     ]
 );
 
+export const feedbackQuestion = pgTable(
+    "feedback_question",
+    {
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        questionText: text("question_text").notNull(),
+        questionType: feedbackQuestionTypeEnum("question_type").notNull(),
+        isRequired: boolean("is_required").notNull().default(true),
+        order: integer("order").notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at")
+            .defaultNow()
+            .$onUpdate(() => new Date())
+            .notNull(),
+    },
+    (table) => [
+        uniqueIndex("feedback_question_unique_order").on(table.order),
+        check("feedback_question_order_positive", sql`${table.order} > 0`),
+    ]
+);
+
 export const courseFeedback = pgTable(
     "course_feedback",
     {
@@ -844,16 +878,66 @@ export const courseFeedback = pgTable(
             .notNull()
             .references(() => enrollment.id, { onDelete: "cascade" })
             .unique(),
-        rating: integer("rating").notNull(),
-        comments: text("comments"),
         createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at")
+            .defaultNow()
+            .$onUpdate(() => new Date())
+            .notNull(),
+    },
+    (table) => [index("feedback_enrollment_idx").on(table.enrollmentId)]
+);
+
+export const feedbackResponse = pgTable(
+    "feedback_response",
+    {
+        id: uuid("id")
+            .default(sql`pg_catalog.gen_random_uuid()`)
+            .primaryKey(),
+        feedbackId: uuid("feedback_id")
+            .notNull()
+            .references(() => courseFeedback.id, { onDelete: "cascade" }),
+        questionId: uuid("question_id")
+            .notNull()
+            .references(() => feedbackQuestion.id, { onDelete: "restrict" }),
+        descriptiveAnswer: text("descriptive_answer"),
+        yesNoAnswer: boolean("yes_no_answer"),
+        ratingAnswer: integer("rating_answer"),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at")
+            .defaultNow()
+            .$onUpdate(() => new Date())
+            .notNull(),
     },
     (table) => [
-        index("feedback_enrollment_idx").on(table.enrollmentId),
-        index("feedback_rating_idx").on(table.rating),
+        uniqueIndex("feedback_response_unique").on(
+            table.feedbackId,
+            table.questionId
+        ),
+        index("feedback_response_feedback_idx").on(table.feedbackId),
+        index("feedback_response_question_idx").on(table.questionId),
         check(
-            "feedback_rating_range_chk",
-            sql`${table.rating} BETWEEN 1 AND 10`
+            "feedback_response_rating_range",
+            sql`${table.ratingAnswer} IS NULL OR (${table.ratingAnswer} BETWEEN 1 AND 5)`
+        ),
+        check(
+            "feedback_response_single_answer",
+            sql`
+                (
+                    ${table.descriptiveAnswer} IS NOT NULL 
+                    AND ${table.yesNoAnswer} IS NULL 
+                    AND ${table.ratingAnswer} IS NULL
+                )
+                OR (
+                    ${table.descriptiveAnswer} IS NULL 
+                    AND ${table.yesNoAnswer} IS NOT NULL 
+                    AND ${table.ratingAnswer} IS NULL
+                )
+                OR (
+                    ${table.descriptiveAnswer} IS NULL 
+                    AND ${table.yesNoAnswer} IS NULL 
+                    AND ${table.ratingAnswer} IS NOT NULL
+                )
+            `
         ),
     ]
 );
@@ -1159,12 +1243,37 @@ export const prerequisiteRelations = relations(prerequisite, ({ one }) => ({
     }),
 }));
 
-export const courseFeedbackRelations = relations(courseFeedback, ({ one }) => ({
-    enrollment: one(enrollment, {
-        fields: [courseFeedback.enrollmentId],
-        references: [enrollment.id],
-    }),
-}));
+export const feedbackQuestionRelations = relations(
+    feedbackQuestion,
+    ({ many }) => ({
+        responses: many(feedbackResponse),
+    })
+);
+
+export const courseFeedbackRelations = relations(
+    courseFeedback,
+    ({ one, many }) => ({
+        enrollment: one(enrollment, {
+            fields: [courseFeedback.enrollmentId],
+            references: [enrollment.id],
+        }),
+        responses: many(feedbackResponse),
+    })
+);
+
+export const feedbackResponseRelations = relations(
+    feedbackResponse,
+    ({ one }) => ({
+        feedback: one(courseFeedback, {
+            fields: [feedbackResponse.feedbackId],
+            references: [courseFeedback.id],
+        }),
+        question: one(feedbackQuestion, {
+            fields: [feedbackResponse.questionId],
+            references: [feedbackQuestion.id],
+        }),
+    })
+);
 
 export const auditLogRelations = relations(auditLog, ({ one }) => ({
     user: one(user, {

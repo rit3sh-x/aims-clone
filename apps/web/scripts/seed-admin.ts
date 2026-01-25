@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { auth } from "@workspace/auth";
-import { db, twoFactor, user, account } from "@workspace/db";
+import { db, user } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { createUser } from "./utils";
 
 async function main() {
     const email = process.env.SEED_ADMIN_EMAIL;
@@ -26,31 +26,11 @@ async function main() {
 
     console.log("🚀 Creating admin:", email);
 
-    const userId = crypto.randomUUID();
-    const hashFn = (await auth.$context).password.hash;
-    const hashedPassword = await hashFn(password);
-
-    await db.transaction(async (tx) => {
-        await tx.insert(user).values({
-            id: userId,
-            email: email.toLowerCase(),
-            name,
-            role: "ADMIN",
-            emailVerified: true,
-            twoFactorEnabled: true,
-        });
-
-        await tx.insert(account).values({
-            userId,
-            accountId: userId,
-            providerId: "credential",
-            password: hashedPassword,
-        });
-
-        await tx.insert(twoFactor).values({
-            userId,
-            backupCodes: JSON.stringify([]),
-        });
+    await createUser({
+        email,
+        name,
+        role: "ADMIN",
+        password,
     });
 
     console.log("✅ Admin user created successfully");

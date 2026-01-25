@@ -1,15 +1,7 @@
 import { createTRPCRouter } from "@workspace/api/init";
-import {
-    getAdvisorByIdInputSchema,
-    listAdvisorsInputSchema,
-} from "../schema";
+import { getAdvisorByIdInputSchema, listAdvisorsInputSchema } from "../schema";
 import { adminProcedure } from "../middleware";
-import {
-    db,
-    advisor,
-    department,
-    user,
-} from "@workspace/db";
+import { db, advisor, department, user } from "@workspace/db";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 

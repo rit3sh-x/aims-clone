@@ -10,6 +10,7 @@ import { ROLE_VALUES, ROLES, ac, ROLE_MAP } from "./schema";
 
 const appUrl = process.env.VITE_APP_URL;
 const isProd = process.env.NODE_ENV === "production";
+const allowedDomains = process.env.ALLOWED_EMAIL_DOMAINS?.split(",") || [];
 
 export const options = {
     database: drizzleAdapter(db, {
@@ -74,6 +75,31 @@ export const options = {
             prompt: "select_account" as const,
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            disableImplicitSignUp: true,
+            mapProfileToUser: (profile) => {
+                const emailDomain = profile.email?.split("@")[1];
+                if (!emailDomain) {
+                    throw new APIError("FORBIDDEN", {
+                        message: "Email is invalid",
+                    });
+                }
+
+                if (
+                    allowedDomains.length > 0 &&
+                    !allowedDomains.includes(emailDomain?.toLowerCase())
+                ) {
+                    throw new APIError("UNAUTHORIZED", {
+                        message: `Email domain ${emailDomain} is not allowed`,
+                    });
+                }
+
+                return {
+                    email: profile.email,
+                    name: profile.name,
+                    image: profile.picture,
+                    emailVerified: profile.email_verified,
+                };
+            },
         },
     },
     advanced: {
@@ -159,18 +185,33 @@ export const options = {
             }
         }),
     },
+
     databaseHooks: {
         user: {
             create: {
-                before: async (user) => {
+                before: async (user, ctx) => {
+                    if (ctx?.context?.session) {
+                        const currentUser = ctx.context.session.user;
+                        if (currentUser.role !== ROLES.ADMIN) {
+                            throw new APIError("FORBIDDEN", {
+                                message:
+                                    "Only administrators can create user accounts",
+                            });
+                        }
+                    } else {
+                        throw new APIError("FORBIDDEN", {
+                            message:
+                                "User creation requires admin authentication",
+                        });
+                    }
+
                     const emailDomain = user.email.split("@")[1];
                     if (!emailDomain) {
                         throw new APIError("FORBIDDEN", {
                             message: "Email is invalid",
                         });
                     }
-                    const allowedDomains =
-                        process.env.ALLOWED_EMAIL_DOMAINS?.split(",") || [];
+
                     if (
                         allowedDomains.length > 0 &&
                         !allowedDomains.includes(emailDomain.toLowerCase())
@@ -179,6 +220,7 @@ export const options = {
                             message: `Email domain ${emailDomain} is not allowed`,
                         });
                     }
+
                     return {
                         data: {
                             ...user,

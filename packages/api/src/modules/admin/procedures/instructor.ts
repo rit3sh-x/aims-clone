@@ -4,12 +4,7 @@ import {
     listInstructorsInputSchema,
 } from "../schema";
 import { adminProcedure } from "../middleware";
-import {
-    db,
-    department,
-    instructor,
-    user,
-} from "@workspace/db";
+import { db, department, instructor, user } from "@workspace/db";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 

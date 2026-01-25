@@ -15,8 +15,9 @@ import { sendLoginOTP, sendPasswordResetEmail } from "@workspace/infra";
 import { ROLE_VALUES, ROLES, ac, ROLE_MAP } from "./schema";
 import { options } from "./options";
 
-const appUrl = process.env.VITE_APP_URL;
+const appUrl = process.env.VITE_APP_URL!;
 const isProd = process.env.NODE_ENV === "production";
+const allowedDomains = process.env.ALLOWED_EMAIL_DOMAINS?.split(",") || [];
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -70,7 +71,7 @@ export const auth = betterAuth({
         }, options),
     ],
     rateLimit: {
-        storage: "memory" as const,
+        storage: "memory",
         enabled: isProd,
         window: 60,
         max: 100,
@@ -89,9 +90,34 @@ export const auth = betterAuth({
     },
     socialProviders: {
         google: {
-            prompt: "select_account" as const,
+            prompt: "select_account",
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            disableImplicitSignUp: true,
+            mapProfileToUser(profile) {
+                const emailDomain = profile.email?.split("@")[1];
+                if (!emailDomain) {
+                    throw new APIError("FORBIDDEN", {
+                        message: "Email is invalid",
+                    });
+                }
+
+                if (
+                    allowedDomains.length > 0 &&
+                    !allowedDomains.includes(emailDomain.toLowerCase())
+                ) {
+                    throw new APIError("UNAUTHORIZED", {
+                        message: `Email domain ${emailDomain} is not allowed`,
+                    });
+                }
+
+                return {
+                    email: profile.email,
+                    name: profile.name,
+                    image: profile.picture,
+                    emailVerified: profile.email_verified,
+                };
+            },
         },
     },
     advanced: {
@@ -101,19 +127,16 @@ export const auth = betterAuth({
                 attributes: {
                     maxAge: undefined,
                     secure: isProd,
-                    sameSite: "Lax" as const,
+                    sameSite: "Lax",
                     httpOnly: true,
                 },
             },
         },
         database: {
-            generateId: "uuid" as const,
+            generateId: "uuid",
         },
     },
-    trustedOrigins: [
-        ...(process.env.MOBILE_SCHEMES?.split(",") || []),
-        ...(appUrl ? [appUrl] : []),
-    ],
+    trustedOrigins: [...(process.env.MOBILE_SCHEMES?.split(",") || []), appUrl],
     session: {
         expiresIn: 60 * 60 * 24 * 7,
         updateAge: 60 * 60 * 24,
@@ -126,13 +149,13 @@ export const auth = betterAuth({
     account: {
         accountLinking: {
             enabled: true,
-            trustedProviders: ["google"] as const,
+            trustedProviders: ["google"],
         },
     },
     user: {
         additionalFields: {
             disabled: {
-                type: "boolean" as const,
+                type: "boolean",
                 defaultValue: false,
                 input: false,
             },
@@ -153,20 +176,20 @@ export const auth = betterAuth({
                         "This account has been disabled.",
                 });
             }
-            if (
-                context.session?.user &&
-                context.session.user.disabled === true
-            ) {
+
+            if (context.session?.user?.disabled) {
                 throw new APIError("FORBIDDEN", {
                     message:
                         "Access denied. Graduated accounts are deactivated.",
                 });
             }
+
             if (path === "/sign-up/email") {
                 throw new APIError("FORBIDDEN", {
                     message: "Account creation is restricted to administrators",
                 });
             }
+
             if (
                 path === "/two-factor/enable" ||
                 path === "/two-factor/disable"
@@ -180,15 +203,24 @@ export const auth = betterAuth({
     databaseHooks: {
         user: {
             create: {
-                before: async (user) => {
+                before: async (user, ctx) => {
+                    const sessionUser = ctx?.context?.session?.user;
+
+                    if (!sessionUser || sessionUser.role !== ROLES.ADMIN) {
+                        throw new APIError("FORBIDDEN", {
+                            message:
+                                "Only administrators can create user accounts",
+                        });
+                    }
+
                     const emailDomain = user.email.split("@")[1];
+
                     if (!emailDomain) {
                         throw new APIError("FORBIDDEN", {
                             message: "Email is invalid",
                         });
                     }
-                    const allowedDomains =
-                        process.env.ALLOWED_EMAIL_DOMAINS?.split(",") || [];
+
                     if (
                         allowedDomains.length > 0 &&
                         !allowedDomains.includes(emailDomain.toLowerCase())
@@ -197,6 +229,7 @@ export const auth = betterAuth({
                             message: `Email domain ${emailDomain} is not allowed`,
                         });
                     }
+
                     return {
                         data: {
                             ...user,
@@ -205,17 +238,8 @@ export const auth = betterAuth({
                         },
                     };
                 },
-                after: async (user) => {
-                    await logAuditEvent({
-                        userId: user.id,
-                        action: "CREATE",
-                        entityType: "USER",
-                        entityId: user.id,
-                        before: {},
-                        after: user,
-                    });
-                },
             },
+
             update: {
                 after: async (user) => {
                     await logAuditEvent({

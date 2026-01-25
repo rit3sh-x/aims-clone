@@ -17,9 +17,9 @@ export const departmentManagement = createTRPCRouter({
             const departments = await db.query.department.findMany({
                 where: search
                     ? or(
-                        ilike(department.name, `%${search}%`),
-                        ilike(department.code, `%${search}%`)
-                    )
+                          ilike(department.name, `%${search}%`),
+                          ilike(department.code, `%${search}%`)
+                      )
                     : undefined,
                 orderBy: [asc(department.code)],
             });
@@ -78,9 +78,9 @@ export const departmentManagement = createTRPCRouter({
 
             const nextCursor = hasNextPage
                 ? {
-                    createdAt: items[items.length - 1]!.instructor.createdAt,
-                    id: items[items.length - 1]!.instructor.id,
-                }
+                      createdAt: items[items.length - 1]!.instructor.createdAt,
+                      id: items[items.length - 1]!.instructor.id,
+                  }
                 : null;
 
             return {

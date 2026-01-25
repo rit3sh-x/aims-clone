@@ -1,18 +1,8 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import { adminProcedure } from "../middleware";
-import {
-    getStudentByIdSchema,
-    listStudentsInputSchema,
-} from "../schema";
+import { getStudentByIdSchema, listStudentsInputSchema } from "../schema";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
-import {
-    batch,
-    db,
-    department,
-    program,
-    student,
-    user,
-} from "@workspace/db";
+import { batch, db, department, program, student, user } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 
 export const studentManagement = createTRPCRouter({

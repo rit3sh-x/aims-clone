@@ -168,7 +168,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                                                         isActive(
                                                                             item.url
                                                                         ) &&
-                                                                        "bg-[#0b63f3]! text-sidebar-primary-foreground! hover:bg-[#0b63f3]/90!"
+                                                                            "bg-[#0b63f3]! text-sidebar-primary-foreground! hover:bg-[#0b63f3]/90!"
                                                                     )}
                                                                     render={(
                                                                         props
@@ -218,7 +218,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                 isActive={isActive(item.url)}
                                 className={cn(
                                     isActive(item.url) &&
-                                    "bg-[#0b63f3]! text-sidebar-primary-foreground hover:bg-[#0b63f3]/90!"
+                                        "bg-[#0b63f3]! text-sidebar-primary-foreground hover:bg-[#0b63f3]/90!"
                                 )}
                                 render={(props) => (
                                     <Link {...props} to={item.url}>

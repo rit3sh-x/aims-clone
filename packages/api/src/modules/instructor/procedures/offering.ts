@@ -36,7 +36,6 @@ export const offeringManagement = createTRPCRouter({
             const courseRecord = await db
                 .select({
                     status: course.status,
-                    departmentId: course.departmentId,
                 })
                 .from(course)
                 .where(eq(course.id, courseId))
@@ -49,23 +48,15 @@ export const offeringManagement = createTRPCRouter({
                 });
             }
 
-            if (courseRecord.departmentId !== currentInstructor.departmentId) {
-                throw new TRPCError({
-                    code: "FORBIDDEN",
-                    message:
-                        "You can only propose offerings for courses in your department",
-                });
-            }
-
-            const instructorsToAdd =
-                instructorIds.length > 0 ? instructorIds : [];
+            const instructorsToAdd = Array.from(
+                new Set(
+                    instructorIds.filter((id) => id !== currentInstructor.id)
+                )
+            );
 
             if (instructorsToAdd.length > 0) {
                 const instructorRecords = await db
-                    .select({
-                        id: instructor.id,
-                        departmentId: instructor.departmentId,
-                    })
+                    .select({ id: instructor.id })
                     .from(instructor)
                     .where(inArray(instructor.id, instructorsToAdd));
 
@@ -73,18 +64,6 @@ export const offeringManagement = createTRPCRouter({
                     throw new TRPCError({
                         code: "BAD_REQUEST",
                         message: "Invalid instructor list",
-                    });
-                }
-
-                const invalidInstructors = instructorRecords.filter(
-                    (inst) => inst.departmentId !== courseRecord.departmentId
-                );
-
-                if (invalidInstructors.length > 0) {
-                    throw new TRPCError({
-                        code: "BAD_REQUEST",
-                        message:
-                            "All instructors must be from the course's department",
                     });
                 }
             }
@@ -102,8 +81,11 @@ export const offeringManagement = createTRPCRouter({
             }
 
             return db.transaction(async (tx) => {
-                const exists = await tx
-                    .select({ id: courseOffering.id })
+                const existingOffering = await tx
+                    .select({
+                        id: courseOffering.id,
+                        status: courseOffering.status,
+                    })
                     .from(courseOffering)
                     .where(
                         and(
@@ -113,7 +95,10 @@ export const offeringManagement = createTRPCRouter({
                     )
                     .then((r) => r[0]);
 
-                if (exists) {
+                if (
+                    existingOffering &&
+                    existingOffering.status !== "REJECTED"
+                ) {
                     throw new TRPCError({
                         code: "CONFLICT",
                         message:

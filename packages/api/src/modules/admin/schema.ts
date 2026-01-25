@@ -4,6 +4,7 @@ import {
     auditEntityEnum,
     classroomTypeEnum,
     dayOfWeekEnum,
+    feedbackQuestionTypeEnum,
     labPeriodEnum,
     semesterStatusEnum,
     semesterTypeEnum,
@@ -15,6 +16,7 @@ import {
     LIST_DEFAULT_PAGE_SIZE,
     LIST_MAX_PAGE_SIZE,
     LIST_MIN_PAGE_SIZE,
+    MAX_POSSIBLE_QUESTIONS,
 } from "../constants";
 
 export const banUserInputSchema = z.object({
@@ -365,20 +367,83 @@ export const createTimeSlotInputSchema = z
         (data) => {
             switch (data.sessionType) {
                 case "THEORY":
-                    return data.theoryPeriod !== undefined && !data.tutorialPeriod && !data.labPeriod;
+                    return (
+                        data.theoryPeriod !== undefined &&
+                        !data.tutorialPeriod &&
+                        !data.labPeriod
+                    );
                 case "TUTORIAL":
-                    return data.tutorialPeriod !== undefined && !data.theoryPeriod && !data.labPeriod;
+                    return (
+                        data.tutorialPeriod !== undefined &&
+                        !data.theoryPeriod &&
+                        !data.labPeriod
+                    );
                 case "LAB":
-                    return data.labPeriod !== undefined && !data.theoryPeriod && !data.tutorialPeriod;
+                    return (
+                        data.labPeriod !== undefined &&
+                        !data.theoryPeriod &&
+                        !data.tutorialPeriod
+                    );
                 default:
                     return false;
             }
         },
         {
-            message: "Period must match session type: THEORY requires theoryPeriod, TUTORIAL requires tutorialPeriod, LAB requires labPeriod",
+            message:
+                "Period must match session type: THEORY requires theoryPeriod, TUTORIAL requires tutorialPeriod, LAB requires labPeriod",
         }
     );
 
 export const deleteTimeSlotInputSchema = z.object({
     id: z.string(),
+});
+
+export const createFeedbackQuestionsInputSchema = z.object({
+    questions: z
+        .array(
+            z.object({
+                questionText: z.string().min(1).max(500),
+                questionType: z.enum(feedbackQuestionTypeEnum.enumValues),
+                isRequired: z.boolean().default(true),
+                order: z.number().int().positive(),
+                isDefault: z.boolean().default(false),
+            })
+        )
+        .min(1)
+        .max(MAX_POSSIBLE_QUESTIONS),
+});
+
+export const updateFeedbackQuestionInputSchema = z.object({
+    id: z.string(),
+    questionText: z.string().min(1).max(500).optional(),
+    questionType: z.enum(feedbackQuestionTypeEnum.enumValues).optional(),
+    isRequired: z.boolean().optional(),
+    order: z.number().int().positive().optional(),
+    isDefault: z.boolean().optional(),
+});
+
+export const deleteFeedbackQuestionsInputSchema = z.object({
+    ids: z
+        .array(z.string())
+        .min(1, "At least one question ID is required")
+        .max(
+            MAX_POSSIBLE_QUESTIONS,
+            `Cannot delete more than ${MAX_POSSIBLE_QUESTIONS} questions at once`
+        ),
+});
+
+export const reorderFeedbackQuestionsInputSchema = z.object({
+    questions: z
+        .array(
+            z.object({
+                id: z.string(),
+                order: z.number().int().positive().max(MAX_POSSIBLE_QUESTIONS),
+            })
+        )
+        .min(1)
+        .max(MAX_POSSIBLE_QUESTIONS),
+});
+
+export const enrollmentChartDataInputSchema = z.object({
+    days: z.number().max(100).min(1),
 });

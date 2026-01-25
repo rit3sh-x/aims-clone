@@ -13,6 +13,8 @@ import { logsViewer } from "./procedures/logs";
 import { hodManagement } from "./procedures/hod";
 import { advisorManagement } from "./procedures/advisor";
 import { scheduleManagement } from "./procedures/schedule";
+import { feedbackManagement } from "./procedures/feedback";
+import { metricsViewer } from "./procedures/metrics";
 
 export const adminRouter = createTRPCRouter({
     user: userManagement,
@@ -29,4 +31,6 @@ export const adminRouter = createTRPCRouter({
     hod: hodManagement,
     advisor: advisorManagement,
     schedule: scheduleManagement,
+    feedback: feedbackManagement,
+    metrics: metricsViewer,
 });

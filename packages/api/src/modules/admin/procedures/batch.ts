@@ -1,8 +1,6 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import { adminProcedure } from "../middleware";
-import {
-    listBatchesInputSchema,
-} from "../schema";
+import { listBatchesInputSchema } from "../schema";
 import { and, desc, eq, lt, or } from "drizzle-orm";
 import { batch, db, program, department } from "@workspace/db";
 

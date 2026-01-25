@@ -143,3 +143,18 @@ export const attendanceSummaryCursorInput = z.object({
         .max(LIST_MAX_PAGE_SIZE)
         .default(LIST_DEFAULT_PAGE_SIZE),
 });
+
+export const getInstructorFeedbackResultsInputSchema = z.object({
+    offeringId: z.string(),
+});
+
+export const getDescriptiveAnswersInputSchema = z.object({
+    offeringId: z.string(),
+    questionId: z.string(),
+    pageSize: z
+        .number()
+        .min(LIST_MIN_PAGE_SIZE)
+        .max(LIST_MAX_PAGE_SIZE)
+        .default(LIST_DEFAULT_PAGE_SIZE),
+    cursor: z.string().optional(),
+});

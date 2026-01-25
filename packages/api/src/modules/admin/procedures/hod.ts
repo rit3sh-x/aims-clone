@@ -1,15 +1,7 @@
 import { createTRPCRouter } from "@workspace/api/init";
-import {
-    getHodByIdInputSchema,
-    listHodsInputSchema,
-} from "../schema";
+import { getHodByIdInputSchema, listHodsInputSchema } from "../schema";
 import { adminProcedure } from "../middleware";
-import {
-    db,
-    hod,
-    department,
-    user,
-} from "@workspace/db";
+import { db, hod, department, user } from "@workspace/db";
 import { and, desc, eq, ilike, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
@@ -64,9 +56,9 @@ export const hodManagement = createTRPCRouter({
 
         const nextCursor = hasNextPage
             ? {
-                createdAt: items[items.length - 1]!.hod.createdAt,
-                id: items[items.length - 1]!.hod.id,
-            }
+                  createdAt: items[items.length - 1]!.hod.createdAt,
+                  id: items[items.length - 1]!.hod.id,
+              }
             : null;
 
         return {

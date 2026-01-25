@@ -19,3 +19,6 @@ export type SidebarConfig = {
     dashboard: SidebarItemProps[];
     sections: SidebarSection[];
 };
+
+export type MetricLogs =
+    RouterOutputs["admin"]["metrics"]["recentLogs"][number];

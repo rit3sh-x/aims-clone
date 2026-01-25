@@ -135,6 +135,7 @@ export type GradeType = (typeof gradeTypeEnum.enumValues)[number];
 export const classroomTypeEnum = pgEnum("classroom_type", [
     "LECTURE",
     "LAB",
+    "TUTORIAL",
     "SEMINAR",
 ]);
 export type ClassroomType = (typeof classroomTypeEnum.enumValues)[number];
@@ -153,12 +154,14 @@ export const dayOfWeekEnum = pgEnum("day_of_week", [
     "THURSDAY",
     "FRIDAY",
 ]);
+export type DaysOfWeek = (typeof dayOfWeekEnum.enumValues)[number];
 
 export const sessionTypeEnum = pgEnum("session_type", [
     "THEORY",
     "TUTORIAL",
     "LAB",
 ]);
+export type SessionType = (typeof sessionTypeEnum.enumValues)[number];
 
 export const theoryPeriodEnum = pgEnum("theory_period", [
     "PC-1",
@@ -178,6 +181,7 @@ export const theoryPeriodEnum = pgEnum("theory_period", [
     "S",
     "T-PCOE",
 ]);
+export type TheoryPeriod = (typeof theoryPeriodEnum.enumValues)[number];
 
 export const tutorialPeriodEnum = pgEnum("tutorial_period", [
     "T-PCPE",
@@ -195,6 +199,7 @@ export const tutorialPeriodEnum = pgEnum("tutorial_period", [
     "T-PCOE",
     "T-PEOE",
 ]);
+export type TutorialPeriod = (typeof tutorialPeriodEnum.enumValues)[number];
 
 export const labPeriodEnum = pgEnum("lab_period", [
     "LAB-2H-1",
@@ -221,3 +226,12 @@ export const labPeriodEnum = pgEnum("lab_period", [
     "LAB-4H-6",
     "NCC/NSO/NSS",
 ]);
+export type LabPeriod = (typeof labPeriodEnum.enumValues)[number];
+
+export const feedbackQuestionTypeEnum = pgEnum("feedback_question_type", [
+    "DESCRIPTIVE",
+    "YES_NO",
+    "RATING",
+]);
+export type FeedbackQuestion =
+    (typeof feedbackQuestionTypeEnum.enumValues)[number];

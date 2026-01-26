@@ -7,7 +7,6 @@ import {
     oAuthProxy,
 } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
-import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware, APIError } from "better-auth/api";
 import { db, logAuditEvent, schema } from "@workspace/db";
@@ -56,7 +55,6 @@ export const auth = betterAuth({
         }),
         oAuthProxy({ productionURL: appUrl }),
         expo(),
-        tanstackStartCookies(),
         customSession(async ({ user, session }) => {
             return {
                 user: {

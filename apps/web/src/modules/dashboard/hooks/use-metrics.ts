@@ -1,4 +1,4 @@
-import { useTRPC } from "@/lib/trpc";
+import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const useMetricLogs = () => {

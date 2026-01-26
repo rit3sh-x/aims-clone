@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/auth/client";
+import { authClient } from "@/lib/auth-client";
 
 export async function loginWithPassword(email: string, password: string) {
     return authClient.signIn.email({

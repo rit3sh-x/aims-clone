@@ -1,42 +1,39 @@
-import { Route } from "@/routes/_dashboard";
 import { useCallback, useEffect, useState } from "react";
+import { useSpotlightParams } from "./use-spotlight-params";
 
 interface SpotlightOptions {
     debounceMs?: number;
 }
 
 export const useSpotlightSearch = ({ debounceMs = 500 }: SpotlightOptions) => {
-    const navigate = Route.useNavigate();
-    const { search: searchQuery } = Route.useSearch();
-    const [localSearch, setLocalSearch] = useState(searchQuery || "");
+    const [{ search }, setParams] = useSpotlightParams();
+    const [localSearch, setLocalSearch] = useState(search);
 
     useEffect(() => {
-        setLocalSearch(searchQuery || "");
-    }, [searchQuery]);
+        setLocalSearch(search);
+    }, [search]);
 
     useEffect(() => {
-        if (localSearch === searchQuery) return;
+        const trimmed = localSearch.trim();
+
+        if (trimmed === "" && search !== "") {
+            setParams({ search: "" });
+            return;
+        }
 
         const timer = setTimeout(() => {
-            navigate({
-                search: (prev) => ({
-                    ...prev,
-                    search: localSearch,
-                }),
-                replace: true,
-            });
+            if (trimmed !== search) {
+                setParams({ search: trimmed });
+            }
         }, debounceMs);
 
         return () => clearTimeout(timer);
-    }, [localSearch, searchQuery, debounceMs, navigate]);
+    }, [localSearch, search, debounceMs, setParams]);
 
     const clearSearch = useCallback(() => {
         setLocalSearch("");
-        navigate({
-            search: (prev) => ({ ...prev, search: "" }),
-            replace: true,
-        });
-    }, [navigate]);
+        setParams({ search: "" });
+    }, [setParams]);
 
     return {
         searchValue: localSearch,

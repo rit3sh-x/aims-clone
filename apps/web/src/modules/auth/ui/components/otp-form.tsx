@@ -1,5 +1,11 @@
+"use client";
+
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
+import { toast } from "sonner";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { RefreshCcwIcon } from "lucide-react";
+
 import { Field, FieldError } from "@workspace/ui/components/field";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -7,9 +13,6 @@ import {
     InputOTPGroup,
     InputOTPSlot,
 } from "@workspace/ui/components/input-otp";
-import { toast } from "sonner";
-import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { RefreshCcwIcon } from "lucide-react";
 
 const OTP_LENGTH = 6;
 
@@ -37,14 +40,18 @@ export const OtpForm = ({ onSubmit, onResend }: OtpFormProps) => {
         },
         onSubmit: async ({ value }) => {
             const cleanOtp = value.otp.replace(/\D/g, "").slice(0, OTP_LENGTH);
-            await onSubmit({
-                otp: cleanOtp,
-            });
+
+            await onSubmit({ otp: cleanOtp });
         },
     });
 
-    const handleResend = () => {
-        onResend();
+    const handleResend = async () => {
+        try {
+            await onResend();
+            toast.success("OTP resent");
+        } catch {
+            toast.error("Failed to resend OTP");
+        }
     };
 
     return (
@@ -75,7 +82,7 @@ export const OtpForm = ({ onSubmit, onResend }: OtpFormProps) => {
                             return (
                                 <Field data-invalid={isInvalid}>
                                     <InputOTP
-                                        maxLength={6}
+                                        maxLength={OTP_LENGTH}
                                         value={field.state.value}
                                         onChange={(value) => {
                                             const clean = value
@@ -87,30 +94,15 @@ export const OtpForm = ({ onSubmit, onResend }: OtpFormProps) => {
                                         className="w-full"
                                     >
                                         <InputOTPGroup className="text-white w-full justify-between gap-2">
-                                            <InputOTPSlot
-                                                index={0}
-                                                className="caret-white h-16 flex-1 text-xl rounded-sm border border-white"
-                                            />
-                                            <InputOTPSlot
-                                                index={1}
-                                                className="caret-white h-16 flex-1 text-xl rounded-sm border border-white"
-                                            />
-                                            <InputOTPSlot
-                                                index={2}
-                                                className="caret-white h-16 flex-1 text-xl rounded-sm border border-white"
-                                            />
-                                            <InputOTPSlot
-                                                index={3}
-                                                className="caret-white h-16 flex-1 text-xl rounded-sm border border-white"
-                                            />
-                                            <InputOTPSlot
-                                                index={4}
-                                                className="caret-white h-16 flex-1 text-xl rounded-sm border border-white"
-                                            />
-                                            <InputOTPSlot
-                                                index={5}
-                                                className="caret-white h-16 flex-1 text-xl rounded-sm border border-white"
-                                            />
+                                            {Array.from({
+                                                length: OTP_LENGTH,
+                                            }).map((_, i) => (
+                                                <InputOTPSlot
+                                                    key={i}
+                                                    index={i}
+                                                    className="caret-white h-16 flex-1 text-xl rounded-sm border border-white"
+                                                />
+                                            ))}
                                         </InputOTPGroup>
                                     </InputOTP>
 
@@ -123,15 +115,16 @@ export const OtpForm = ({ onSubmit, onResend }: OtpFormProps) => {
                             );
                         }}
                     </form.Field>
+
                     <Button
                         type="button"
                         variant="ghost"
                         size="xs"
                         onClick={handleResend}
-                        className="rounded-full text-white border border-white hover:bg-white transition-all hover:text-black flex items-center gap-1"
+                        className="rounded-full text-white border border-white hover:bg-white transition-all hover:text-black flex items-center gap-1 px-2"
                     >
                         <RefreshCcwIcon className="size-3" />
-                        <span>Resend OTP</span>
+                        <span className="text-[11px]">Resend OTP</span>
                     </Button>
                 </div>
 
@@ -139,9 +132,9 @@ export const OtpForm = ({ onSubmit, onResend }: OtpFormProps) => {
                     {(canSubmit) => (
                         <Button
                             type="submit"
-                            variant={"secondary"}
+                            variant="secondary"
                             disabled={!canSubmit}
-                            className="w-full"
+                            className="w-full bg-white text-black"
                         >
                             Verify OTP
                         </Button>

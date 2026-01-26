@@ -6,34 +6,34 @@ import { enrollmentChartDataInputSchema } from "../schema";
 
 export const metricsViewer = createTRPCRouter({
     chartData: adminProcedure
-    .input(enrollmentChartDataInputSchema)
-    .query(async ({ input }) => {
-        const { days } = input;
-        const rows = await db
-            .select({
-                date: sql<string>`date_trunc('day', ${enrollment.createdAt})::text`,
-                pending: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'PENDING')`,
-                instructorApproved: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'INSTRUCTOR_APPROVED')`,
-                advisorApproved: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'ADVISOR_APPROVED')`,
-                enrolled: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'ENROLLED')`,
-            })
-            .from(enrollment)
-            .where(
-                gte(
-                    enrollment.createdAt,
-                    sql`now() - (${days} * interval '1 day')`
+        .input(enrollmentChartDataInputSchema)
+        .query(async ({ input }) => {
+            const { days } = input;
+            const rows = await db
+                .select({
+                    date: sql<string>`date_trunc('day', ${enrollment.createdAt})::text`,
+                    pending: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'PENDING')`,
+                    instructorApproved: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'INSTRUCTOR_APPROVED')`,
+                    advisorApproved: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'ADVISOR_APPROVED')`,
+                    enrolled: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'ENROLLED')`,
+                })
+                .from(enrollment)
+                .where(
+                    gte(
+                        enrollment.createdAt,
+                        sql`now() - (${days} * interval '1 day')`
+                    )
                 )
-            )
-            .groupBy(sql`date_trunc('day', ${enrollment.createdAt})`)
-            .orderBy(sql`date_trunc('day', ${enrollment.createdAt})`);
-        return rows.map((r) => ({
-            date: r.date.slice(0, 10),
-            pending: r.pending,
-            instructorApproved: r.instructorApproved,
-            advisorApproved: r.advisorApproved,
-            enrolled: r.enrolled,
-        }));
-    }),
+                .groupBy(sql`date_trunc('day', ${enrollment.createdAt})`)
+                .orderBy(sql`date_trunc('day', ${enrollment.createdAt})`);
+            return rows.map((r) => ({
+                date: r.date.slice(0, 10),
+                pending: r.pending,
+                instructorApproved: r.instructorApproved,
+                advisorApproved: r.advisorApproved,
+                enrolled: r.enrolled,
+            }));
+        }),
 
     cardMetrics: adminProcedure.query(async ({ input }) => {
         const [{ count: usersCount } = { count: 0 }] = await db

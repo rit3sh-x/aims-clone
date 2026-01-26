@@ -1,15 +1,13 @@
+"use client";
+
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { useState } from "react";
-import {
-    Field,
-    FieldError,
-    FieldGroup,
-    FieldLabel,
-} from "@workspace/ui/components/field";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+
+import { Field, FieldError, FieldLabel } from "@workspace/ui/components/field";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useAuthLayoutContext } from "../../context/auth-context";
 
 const formSchema = z
@@ -17,7 +15,7 @@ const formSchema = z
         password: z.string().min(8, "Minimum 8 characters"),
         confirmPassword: z.string().min(8, "Minimum 8 characters"),
     })
-    .refine(({ confirmPassword, password }) => password === confirmPassword, {
+    .refine(({ password, confirmPassword }) => password === confirmPassword, {
         message: "Passwords don't match",
         path: ["confirmPassword"],
     });
@@ -32,9 +30,8 @@ export const ResetPasswordForm = ({ onSubmit }: ResetPasswordFormProps) => {
     const { setIsTyping, setPasswordExist, setShowPassword } =
         useAuthLayoutContext();
 
-    const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
-    const [showConfirmPassword, setShowConfirmPassword] =
-        useState<boolean>(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleVisibilityChange = (
         newPasswordVisible: boolean,
@@ -66,6 +63,7 @@ export const ResetPasswordForm = ({ onSubmit }: ResetPasswordFormProps) => {
                     Enter your new password below
                 </p>
             </div>
+
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -73,152 +71,150 @@ export const ResetPasswordForm = ({ onSubmit }: ResetPasswordFormProps) => {
                 }}
                 className="space-y-6 flex flex-col items-center justify-center"
             >
-                <FieldGroup>
-                    <form.Field name="password">
-                        {(field) => {
-                            const isInvalid =
-                                field.state.meta.isTouched &&
-                                !field.state.meta.isValid;
+                <form.Field name="password">
+                    {(field) => {
+                        const isInvalid =
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid;
 
-                            return (
-                                <Field data-invalid={isInvalid}>
-                                    <FieldLabel className="text-white">
-                                        New password
-                                    </FieldLabel>
-                                    <div className="relative">
-                                        <Input
-                                            type={
-                                                showNewPassword
-                                                    ? "text"
-                                                    : "password"
-                                            }
-                                            value={field.state.value}
-                                            onBlur={field.handleBlur}
-                                            className="text-white"
-                                            name="new-password"
-                                            autoComplete="off"
-                                            data-form-type="newPassword"
-                                            data-lpignore="true"
-                                            inputMode="text"
-                                            onChange={(e) => {
-                                                field.handleChange(
-                                                    e.target.value
-                                                );
-                                                setPasswordExist(
-                                                    e.target.value.length > 0
-                                                );
-                                                setIsTyping(true);
-                                                setTimeout(
-                                                    () => setIsTyping(false),
-                                                    600
-                                                );
-                                            }}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                const newValue =
-                                                    !showNewPassword;
-                                                setShowNewPassword(newValue);
-                                                handleVisibilityChange(
-                                                    newValue,
-                                                    showConfirmPassword
-                                                );
-                                            }}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white"
-                                        >
-                                            {showNewPassword ? (
-                                                <EyeOffIcon className="size-4" />
-                                            ) : (
-                                                <EyeIcon className="size-4" />
-                                            )}
-                                        </button>
-                                    </div>
-                                    {isInvalid && (
-                                        <FieldError
-                                            errors={field.state.meta.errors}
-                                        />
-                                    )}
-                                </Field>
-                            );
-                        }}
-                    </form.Field>
-                    <form.Field name="confirmPassword">
-                        {(field) => {
-                            const isInvalid =
-                                field.state.meta.isTouched &&
-                                !field.state.meta.isValid;
+                        return (
+                            <Field data-invalid={isInvalid}>
+                                <FieldLabel className="text-white">
+                                    New password
+                                </FieldLabel>
 
-                            return (
-                                <Field data-invalid={isInvalid}>
-                                    <FieldLabel className="text-white">
-                                        Confirm password
-                                    </FieldLabel>
-                                    <div className="relative">
-                                        <Input
-                                            type={
+                                <div className="relative">
+                                    <Input
+                                        type={
+                                            showNewPassword
+                                                ? "text"
+                                                : "password"
+                                        }
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        className="text-white"
+                                        name="new-password"
+                                        autoComplete="off"
+                                        data-form-type="newPassword"
+                                        data-lpignore="true"
+                                        inputMode="text"
+                                        onChange={(e) => {
+                                            field.handleChange(e.target.value);
+                                            setPasswordExist(
+                                                e.target.value.length > 0
+                                            );
+                                            setIsTyping(true);
+                                            setTimeout(
+                                                () => setIsTyping(false),
+                                                600
+                                            );
+                                        }}
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const next = !showNewPassword;
+                                            setShowNewPassword(next);
+                                            handleVisibilityChange(
+                                                next,
                                                 showConfirmPassword
-                                                    ? "text"
-                                                    : "password"
-                                            }
-                                            value={field.state.value}
-                                            onBlur={field.handleBlur}
-                                            name="confirm-new-password"
-                                            autoComplete="off"
-                                            data-form-type="confirmPassword"
-                                            data-lpignore="true"
-                                            inputMode="text"
-                                            onChange={(e) => {
-                                                field.handleChange(
-                                                    e.target.value
-                                                );
-                                                setIsTyping(true);
-                                                setTimeout(
-                                                    () => setIsTyping(false),
-                                                    600
-                                                );
-                                            }}
-                                            className="text-white"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                const newValue =
-                                                    !showConfirmPassword;
-                                                setShowConfirmPassword(
-                                                    newValue
-                                                );
-                                                handleVisibilityChange(
-                                                    showNewPassword,
-                                                    newValue
-                                                );
-                                            }}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white"
-                                        >
-                                            {showConfirmPassword ? (
-                                                <EyeOffIcon className="size-4" />
-                                            ) : (
-                                                <EyeIcon className="size-4" />
-                                            )}
-                                        </button>
-                                    </div>
-                                    {isInvalid && (
-                                        <FieldError
-                                            errors={field.state.meta.errors}
-                                        />
-                                    )}
-                                </Field>
-                            );
-                        }}
-                    </form.Field>
-                </FieldGroup>
+                                            );
+                                        }}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white"
+                                    >
+                                        {showNewPassword ? (
+                                            <EyeOffIcon className="size-4" />
+                                        ) : (
+                                            <EyeIcon className="size-4" />
+                                        )}
+                                    </button>
+                                </div>
+
+                                {isInvalid && (
+                                    <FieldError
+                                        errors={field.state.meta.errors}
+                                    />
+                                )}
+                            </Field>
+                        );
+                    }}
+                </form.Field>
+
+                <form.Field name="confirmPassword">
+                    {(field) => {
+                        const isInvalid =
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid;
+
+                        return (
+                            <Field data-invalid={isInvalid}>
+                                <FieldLabel className="text-white">
+                                    Confirm password
+                                </FieldLabel>
+
+                                <div className="relative">
+                                    <Input
+                                        type={
+                                            showConfirmPassword
+                                                ? "text"
+                                                : "password"
+                                        }
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        name="confirm-new-password"
+                                        autoComplete="off"
+                                        data-form-type="confirmPassword"
+                                        data-lpignore="true"
+                                        inputMode="text"
+                                        onChange={(e) => {
+                                            field.handleChange(e.target.value);
+                                            setIsTyping(true);
+                                            setTimeout(
+                                                () => setIsTyping(false),
+                                                600
+                                            );
+                                        }}
+                                        className="text-white"
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const next = !showConfirmPassword;
+                                            setShowConfirmPassword(next);
+                                            handleVisibilityChange(
+                                                showNewPassword,
+                                                next
+                                            );
+                                        }}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white"
+                                    >
+                                        {showConfirmPassword ? (
+                                            <EyeOffIcon className="size-4" />
+                                        ) : (
+                                            <EyeIcon className="size-4" />
+                                        )}
+                                    </button>
+                                </div>
+
+                                {isInvalid && (
+                                    <FieldError
+                                        errors={field.state.meta.errors}
+                                    />
+                                )}
+                            </Field>
+                        );
+                    }}
+                </form.Field>
+
                 <form.Subscribe selector={(s) => s.canSubmit}>
                     {(canSubmit) => (
                         <Button
                             type="submit"
                             variant="secondary"
                             disabled={!canSubmit}
-                            className="w-full"
+                            className="w-full bg-white text-black"
                         >
                             Reset password
                         </Button>

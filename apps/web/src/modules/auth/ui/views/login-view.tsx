@@ -1,38 +1,43 @@
+"use client";
+
 import { useState } from "react";
 import { toast } from "sonner";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+
 import {
     loginWithPassword,
     sendLoginOtp,
     verifyLoginOtp,
 } from "../../utils/auth-handlers";
+
 import { LoginForm, type LoginFormValues } from "../components/login-form";
 import { OtpForm, type OtpFormValues } from "../components/otp-form";
-import { AnimatePresence, motion } from "framer-motion";
-import { useNavigate } from "@tanstack/react-router";
 
 export const LoginView = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
-    const navigate = useNavigate();
+    const router = useRouter();
 
     const handleLogin = async ({ email, password }: LoginFormValues) => {
         try {
             const response = await loginWithPassword(email, password);
 
-            if (response.error) {
+            if (response?.error) {
                 toast.error("Error", {
                     description: response.error.message,
                 });
                 return;
             }
 
-            if (response.data && "twoFactorRedirect" in response.data) {
-                void sendLoginOtp();
+            if (response?.data && "twoFactorRedirect" in response.data) {
+                await sendLoginOtp();
                 setShowOtpForm(true);
-            } else {
-                toast.error("Error", {
-                    description: "Failed to connect to server",
-                });
+                return;
             }
+
+            toast.error("Error", {
+                description: "Failed to connect to server",
+            });
         } catch (error) {
             toast.error("Login failed", {
                 description:
@@ -49,7 +54,7 @@ export const LoginView = () => {
                 code: otp,
                 fetchOptions: {
                     onSuccess: () => {
-                        navigate({ to: "/" });
+                        router.push("/");
                     },
                     onError: ({ error }) => {
                         toast.error("Error", {
@@ -73,7 +78,7 @@ export const LoginView = () => {
         try {
             await sendLoginOtp();
             toast.success("OTP resent to your email");
-        } catch (error) {
+        } catch {
             toast.error("Failed to resend OTP");
         }
     };

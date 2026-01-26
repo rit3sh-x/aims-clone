@@ -1,19 +1,31 @@
-import { Outlet, useLocation } from "@tanstack/react-router";
+"use client";
+
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+
 import { AuthProvider, useAuthLayoutContext } from "../../context/auth-context";
 import { Watchers } from "../components/watchers";
 import { CollegeInfo } from "../components/college-info";
-import { ErrorBoundary } from "react-error-boundary";
 import { ErrorUI } from "@/components/error-ui";
-import { useEffect } from "react";
 
-const AuthLayoutInner = () => {
+interface AuthLayoutInnerProps {
+    children: React.ReactNode;
+}
+
+interface AuthLayoutProps {
+    children: React.ReactNode;
+}
+
+export const AuthLayoutInner = ({ children }: AuthLayoutInnerProps) => {
     const { isTyping, passwordExist, showPassword, reset } =
         useAuthLayoutContext();
-    const location = useLocation();
+
+    const pathname = usePathname();
 
     useEffect(() => {
         reset();
-    }, [location.pathname, reset]);
+    }, [pathname, reset]);
 
     return (
         <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2 p-6 bg-neutral-900">
@@ -21,6 +33,7 @@ const AuthLayoutInner = () => {
                 <div className="absolute top-4 left-4 z-20">
                     <CollegeInfo />
                 </div>
+
                 <Watchers
                     isTyping={isTyping}
                     passwordExist={passwordExist}
@@ -29,17 +42,17 @@ const AuthLayoutInner = () => {
             </div>
 
             <div className="flex items-center justify-center p-6 h-full w-full">
-                <Outlet />
+                {children}
             </div>
         </div>
     );
 };
 
-export const AuthLayout = () => {
+export const AuthLayout = ({ children }: AuthLayoutProps) => {
     return (
         <ErrorBoundary fallback={<ErrorUI />}>
             <AuthProvider>
-                <AuthLayoutInner />
+                <AuthLayoutInner>{children}</AuthLayoutInner>
             </AuthProvider>
         </ErrorBoundary>
     );

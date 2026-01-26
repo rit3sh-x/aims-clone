@@ -1,10 +1,12 @@
+"use client";
+
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
 } from "@workspace/ui/components/avatar";
 import { Badge } from "@workspace/ui/components/badge";
-import { AnimatedThemeToggler } from "@/theme/toggle-theme";
+import { AnimatedThemeToggler } from "@/components/toggle-theme";
 import { useState } from "react";
 import { ProfilePhoto } from "./profile-photo";
 
@@ -32,7 +34,9 @@ export function UserProfile({ name, image }: UserProfileProps) {
                         {name?.charAt(0).toUpperCase() || "?"}
                     </AvatarFallback>
                 </Avatar>
+
                 <span className="font-medium leading-none">{name}</span>
+
                 <AnimatedThemeToggler />
             </Badge>
             <ProfilePhoto

@@ -1,12 +1,12 @@
 import { ElementType } from "react";
 import { RouterOutputs } from "@workspace/api";
-import type { AppRoutes } from "@/types/routes";
+import type { Route } from "next";
 
 export type SpotlightOutput = RouterOutputs["spotlight"]["spotlightSearch"];
 
 export type SidebarItemProps = {
     title: string;
-    url: AppRoutes;
+    url: Route;
     icon: ElementType;
 };
 

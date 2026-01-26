@@ -1,16 +1,19 @@
-import { useTRPC } from "@/lib/trpc";
+import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
+import { useSpotlightParams } from "./use-spotlight-params";
 
-export const useSpotlight = (search: string) => {
+export const useSpotlight = () => {
+    const [{ search }] = useSpotlightParams();
     const trpc = useTRPC();
 
     return useQuery(
         trpc.spotlight.spotlightSearch.queryOptions(
             {
-                search,
+                search: search.trim(),
             },
             {
-                enabled: search.trim.length > 0,
+                enabled: search.trim().length > 0,
+                retry: false,
             }
         )
     );

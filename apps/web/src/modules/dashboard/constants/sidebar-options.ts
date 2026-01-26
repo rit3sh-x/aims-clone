@@ -28,7 +28,7 @@ import {
     CalendarClockIcon,
     UserCogIcon,
 } from "lucide-react";
-import { UserRole } from "@workspace/db";
+import type { UserRole } from "@workspace/db";
 
 // TODO: Correct the urls and make them according to app
 

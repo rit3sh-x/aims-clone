@@ -1,13 +1,11 @@
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import { UserProfile } from "./user-profile";
-import { useRouterState } from "@tanstack/react-router";
+import { headers as getHeaders } from "next/headers";
 import { SpotlightSearch } from "./spotlight-search";
 
 const getPageTitle = (pathname: string): string => {
     const segment = pathname.split("/").filter(Boolean)[0];
-
     if (!segment) return "Dashboard";
-
     return segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
@@ -16,17 +14,16 @@ interface DashboardHeaderProps {
     image?: string | null;
 }
 
-export const DashboardHeader = ({ image, name }: DashboardHeaderProps) => {
-    const pathname = useRouterState({
-        select: (s) => s.location.pathname,
-    });
+export const DashboardHeader = async ({ image, name }: DashboardHeaderProps) => {
+    const headers = await getHeaders();
+    const pathname = headers.get("x-path") || "";
     const pageTitle = getPageTitle(pathname);
 
     return (
         <header className="flex w-full justify-between items-center h-14 shrink-0 gap-2 px-4 bg-background border-b">
             <div className="flex items-center justify-center gap-2">
                 <SidebarTrigger />
-                <p className="text-2xl">{pageTitle}</p>
+                <p className="text-2xl hidden md:flex">{pageTitle}</p>
             </div>
             <SpotlightSearch />
             <UserProfile image={image} name={name} />

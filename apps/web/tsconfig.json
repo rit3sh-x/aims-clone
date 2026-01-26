@@ -1,27 +1,34 @@
 {
-  "extends": "@workspace/typescript-config/base.json",
+  "extends": "@workspace/typescript-config/nextjs.json",
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "ES2022",
-      "dom",
-      "dom.iterable"
-    ],
-    "baseUrl": ".",
-    "jsx": "preserve",
     "paths": {
-      "@/*": ["./src/*"],
-      "@workspace/ui/*": ["../../packages/ui/src/*"],
-      "@workspace/api": ["../../packages/api/src/index.ts"],
-      "@workspace/auth": ["../../packages/auth/src/index.ts"],
-      "@workspace/db": ["../../packages/db/src/index.ts"],
-      "@workspace/infra": ["../../packages/infra/src/index.ts"],
-    },
+      "@/*": [
+        "./src/*"
+      ],
+      "@workspace/ui/*": [
+        "../../packages/ui/src/*"
+      ],
+      "@workspace/api": [
+        "../../packages/api/src/index.ts"
+      ],
+      "@workspace/auth": [
+        "../../packages/auth/src/index.ts"
+      ],
+      "@workspace/db": [
+        "../../packages/db/src/index.ts"
+      ],
+      "@workspace/infra": [
+        "../../packages/infra/src/index.ts"
+      ],
+    }
   },
   "include": [
+    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "eslint.config.js"
+    ".next/types/**/*.ts",
+    "**/*.mts"
   ],
   "exclude": [
     "node_modules"

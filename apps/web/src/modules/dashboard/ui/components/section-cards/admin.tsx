@@ -15,7 +15,7 @@ export const AdminSectionCards = () => {
     const { data: cardMetrics } = useMetricCards();
 
     return (
-        <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-4 lg:px-6">
+        <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-4 *:data-[slot=card]:shadow-xs *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card">
             <Card>
                 <CardHeader>
                     <CardDescription>Total Users</CardDescription>

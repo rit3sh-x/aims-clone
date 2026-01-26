@@ -1,4 +1,6 @@
-import { UserRole } from "@workspace/db";
+"use client";
+
+import type { UserRole } from "@workspace/db";
 import { Suspense } from "react";
 import {
     AdminChartInteractiveArea,

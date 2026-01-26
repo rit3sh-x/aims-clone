@@ -1,5 +1,9 @@
-import { LogOutIcon, ChevronRight } from "lucide-react";
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+"use client";
+
+import { ChevronRightIcon, LogOutIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
     Sidebar,
     SidebarContent,
@@ -14,16 +18,17 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from "@workspace/ui/components/sidebar";
+import Image from "next/image";
+import { cn } from "@workspace/ui/lib/utils";
+import { authClient } from "@/lib/auth-client";
+import type { UserRole } from "@workspace/db";
+import { getSidebarOptions } from "../../constants/sidebar-options";
+import { useEffect, useRef, useState } from "react";
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@workspace/ui/components/collapsible";
-import { cn } from "@workspace/ui/lib/utils";
-import { authClient } from "@/lib/auth/client";
-import type { UserRole } from "@workspace/db";
-import { getSidebarOptions } from "../../constants/sidebar-options";
-import { useEffect, useRef, useState } from "react";
 
 interface DashboardSidebarProps {
     role: UserRole;
@@ -31,10 +36,8 @@ interface DashboardSidebarProps {
 
 export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
     const sidebarOptions = getSidebarOptions(role);
-    const pathname = useRouterState({
-        select: (s) => s.location.pathname,
-    });
-    const navigate = useNavigate();
+    const pathname = usePathname();
+    const router = useRouter();
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const topSentinelRef = useRef<HTMLDivElement>(null);
@@ -44,7 +47,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
     const [showBottomGradient, setShowBottomGradient] = useState(false);
 
     const isActive = (url: string) => {
-        if (url === "/dashboard") return pathname === "/dashboard";
+        if (url === "/") return pathname === "/";
         return pathname.startsWith(url);
     };
 
@@ -82,23 +85,23 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
 
     return (
         <Sidebar className="group" collapsible="icon" variant="inset">
-            <SidebarHeader className="shrink-0">
+            <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
                             render={(props) => (
                                 <Link
-                                    {...props}
-                                    to="/"
+                                {...props}
+                                    href="/"
                                     className="flex items-center justify-center gap-2"
                                 >
-                                    <img
+                                    <Image
                                         src="/logo.png"
                                         alt="IIT Ropar"
                                         width={24}
                                         height={24}
-                                        loading="eager"
+                                        priority
                                         className="p-px bg-neutral-50 rounded-xs"
                                     />
                                     <p className="text-lg font-bold group-data-[collapsible=icon]:hidden!">
@@ -111,7 +114,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent className="flex-1 min-h-0 overflow-hidden scrollbar-hide">
+            <SidebarContent className="flex-1 min-h-0 overflow-hidden scrollbar-hide border-r-0 shadow-none">
                 <div className="relative flex-1 min-h-0">
                     {showTopGradient && (
                         <div className="absolute top-0 left-0 right-0 h-12 bg-linear-to-b from-sidebar/95 to-transparent pointer-events-none z-40" />
@@ -123,7 +126,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                     >
                         <div
                             ref={topSentinelRef}
-                            className="h-0 pointer-events-none"
+                            className="h-0 pointer-events-none mb-4"
                         />
 
                         <SidebarGroup>
@@ -149,7 +152,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                                         <span>
                                                             {section.title}
                                                         </span>
-                                                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                                        <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                                                     </SidebarMenuButton>
                                                 )}
                                             />
@@ -168,14 +171,14 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                                                         isActive(
                                                                             item.url
                                                                         ) &&
-                                                                            "bg-[#0b63f3]! text-sidebar-primary-foreground! hover:bg-[#0b63f3]/90!"
+                                                                            "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
                                                                     )}
                                                                     render={(
                                                                         props
                                                                     ) => (
                                                                         <Link
                                                                             {...props}
-                                                                            to={
+                                                                            href={
                                                                                 item.url
                                                                             }
                                                                         >
@@ -218,10 +221,10 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                 isActive={isActive(item.url)}
                                 className={cn(
                                     isActive(item.url) &&
-                                        "bg-[#0b63f3]! text-sidebar-primary-foreground hover:bg-[#0b63f3]/90!"
+                                        "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
                                 )}
                                 render={(props) => (
-                                    <Link {...props} to={item.url}>
+                                    <Link {...props} href={item.url}>
                                         <item.icon className="size-4" />
                                         <span>{item.title}</span>
                                     </Link>
@@ -235,7 +238,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                 authClient.signOut({
                                     fetchOptions: {
                                         onSuccess: () => {
-                                            navigate({ to: "/login" });
+                                            router.push("/login")
                                         },
                                     },
                                 });

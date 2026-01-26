@@ -1,49 +1,63 @@
 "use client";
 
-import { ArrowUpRight, Loader2Icon } from "lucide-react";
+import { ArrowUpRightIcon, Loader2Icon } from "lucide-react";
 import {
-    Command,
     CommandDialog,
     CommandEmpty,
     CommandGroup,
     CommandInput,
     CommandItem,
     CommandList,
+    Command,
 } from "@workspace/ui/components/command";
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import Link from "next/link";
 import { useSpotlightSearch } from "../../hooks/use-spotlight-search";
 import { useSpotlight } from "../../hooks/use-spotlight";
+import { SpotlightOutput } from "../../types";
 
 export const SpotlightSearch = () => {
     const [open, setOpen] = useState(false);
-    const navigate = useNavigate();
-
     const { searchValue, onSearchChange, clearSearch } = useSpotlightSearch({
         debounceMs: 500,
     });
+    const { data, isLoading } = useSpotlight();
 
-    const { data: spotlightResult, isLoading } = useSpotlight(searchValue);
+    const spotlightResult: SpotlightOutput = data ?? [];
 
     useEffect(() => {
-        if (!open && searchValue) clearSearch();
+        if (!open && searchValue) {
+            clearSearch();
+        }
     }, [open, searchValue, clearSearch]);
 
     useEffect(() => {
-        const down = (e: KeyboardEvent) => {
+        const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                setOpen((o) => !o);
+                setOpen((prevOpen) => !prevOpen);
             }
-            if (e.key === "Escape") setOpen(false);
+            if (e.key === "Escape") {
+                setOpen(false);
+            }
         };
 
-        document.addEventListener("keydown", down);
-        return () => document.removeEventListener("keydown", down);
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
     }, []);
 
+    const handleOpenChange = (isOpen: boolean) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+            clearSearch();
+        }
+    };
+
     const hasSearchValue = searchValue.trim().length > 0;
-    const hasResults = (spotlightResult?.length ?? 0) > 0;
+    const hasResults = spotlightResult.length > 0;
+    const showEmptyState = hasSearchValue && !isLoading && !hasResults;
+    const showResults = hasSearchValue && hasResults;
+    const showDefaultCommands = !hasSearchValue && !isLoading;
 
     return (
         <>
@@ -54,15 +68,14 @@ export const SpotlightSearch = () => {
                 <span className="text-muted-foreground">Search</span>
                 <kbd className="text-xs">⌘K</kbd>
             </button>
-
             <CommandDialog
                 open={open}
-                onOpenChange={setOpen}
+                onOpenChange={handleOpenChange}
                 showCloseButton={false}
             >
                 <Command>
                     <CommandInput
-                        placeholder="SearchIcon..."
+                        placeholder="Search..."
                         value={searchValue}
                         onValueChange={onSearchChange}
                     />
@@ -74,39 +87,47 @@ export const SpotlightSearch = () => {
                             </div>
                         )}
 
-                        {hasSearchValue &&
-                            hasResults &&
-                            spotlightResult?.map((group) => (
+                        {showResults &&
+                            spotlightResult.map((group) => (
                                 <CommandGroup
                                     key={group.title}
                                     heading={group.title}
                                 >
                                     {group.items.map((item) => (
-                                        <CommandItem
+                                        <Link
                                             key={item.url}
-                                            onSelect={() => {
-                                                navigate({
-                                                    to: `${item.url}/$`,
-                                                });
-                                                setOpen(false);
-                                            }}
+                                            href={item.url}
+                                            className="block"
+                                            onClick={() => setOpen(false)}
                                         >
-                                            <div className="flex items-center gap-2">
-                                                <ArrowUpRight
-                                                    size={14}
-                                                    className="opacity-60"
-                                                />
-                                                <span className="truncate">
-                                                    {item.field}
-                                                </span>
-                                            </div>
-                                        </CommandItem>
+                                            <CommandItem value={item.url}>
+                                                <div className="flex items-center gap-2">
+                                                    <ArrowUpRightIcon
+                                                        size={14}
+                                                        className="opacity-60"
+                                                    />
+                                                    <span className="truncate">
+                                                        {item.field}
+                                                    </span>
+                                                </div>
+                                            </CommandItem>
+                                        </Link>
                                     ))}
                                 </CommandGroup>
                             ))}
 
-                        {hasSearchValue && !isLoading && !hasResults && (
+                        {showEmptyState && (
                             <CommandEmpty>No results found.</CommandEmpty>
+                        )}
+
+                        {showDefaultCommands && (
+                            <CommandGroup heading="Quick Actions">
+                                <CommandItem>
+                                    <span className="text-muted-foreground text-sm">
+                                        Start typing to search...
+                                    </span>
+                                </CommandItem>
+                            </CommandGroup>
                         )}
                     </CommandList>
                 </Command>

@@ -1,5 +1,9 @@
+"use client";
+
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
+import Link from "next/link";
+
 import {
     Field,
     FieldError,
@@ -9,7 +13,6 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { useAuthLayoutContext } from "../../context/auth-context";
-import { Link } from "@tanstack/react-router";
 
 const formSchema = z.object({
     email: z.email("Invalid email"),
@@ -42,10 +45,11 @@ export const ForgotPasswordForm = ({ onSubmit }: ForgotPasswordFormProps) => {
                 <h1 className="text-3xl font-bold tracking-tight text-white mb-2">
                     Forgot password?
                 </h1>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-white/40 text-sm">
                     Enter your email to receive a reset link
                 </p>
             </div>
+
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -65,6 +69,7 @@ export const ForgotPasswordForm = ({ onSubmit }: ForgotPasswordFormProps) => {
                                     <FieldLabel className="text-white">
                                         Email
                                     </FieldLabel>
+
                                     <Input
                                         value={field.state.value}
                                         onBlur={field.handleBlur}
@@ -77,8 +82,9 @@ export const ForgotPasswordForm = ({ onSubmit }: ForgotPasswordFormProps) => {
                                             );
                                         }}
                                         placeholder="you@iitrpr.ac.in"
-                                        className="text-white"
+                                        className="text-white px-2"
                                     />
+
                                     {isInvalid && (
                                         <FieldError
                                             errors={field.state.meta.errors}
@@ -89,19 +95,24 @@ export const ForgotPasswordForm = ({ onSubmit }: ForgotPasswordFormProps) => {
                         }}
                     </form.Field>
                 </FieldGroup>
+
                 <form.Subscribe selector={(s) => s.canSubmit}>
                     {(canSubmit) => (
                         <Button
                             type="submit"
                             variant="secondary"
                             disabled={!canSubmit}
-                            className="w-full"
+                            className="w-full bg-white text-black"
                         >
                             Send reset link
                         </Button>
                     )}
                 </form.Subscribe>
-                <Link to="/login" className="text-sm text-muted-foreground">
+
+                <Link
+                    href="/login"
+                    className="relative text-sm text-white/40 transition-colors hover:text-white after:absolute after:left-0 after:-bottom-0.5 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100"
+                >
                     Back to login
                 </Link>
             </form>

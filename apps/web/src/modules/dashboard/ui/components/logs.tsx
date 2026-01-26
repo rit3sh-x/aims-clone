@@ -1,3 +1,5 @@
+"use client";
+
 import {
     ColumnDef,
     flexRender,
@@ -5,7 +7,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -19,18 +21,24 @@ import {
 } from "@workspace/ui/components/table";
 import { useMetricLogs } from "../../hooks/use-metrics";
 import { MetricLogs } from "../../types";
+import { humanizeEnum } from "@/lib/formatters";
 
 const columns: ColumnDef<MetricLogs>[] = [
     {
         accessorKey: "action",
         header: "Action",
         cell: ({ row }) => (
-            <Badge variant="outline">{row.original.action}</Badge>
+            <Badge variant="outline">{humanizeEnum(row.original.action)}</Badge>
         ),
     },
     {
         accessorKey: "entityType",
         header: "Entity",
+        cell: ({ row }) => (
+            <Badge variant="outline">
+                {humanizeEnum(row.original.entityType)}
+            </Badge>
+        ),
     },
     {
         accessorKey: "entityId",
@@ -68,14 +76,14 @@ export const RecentLogs = () => {
     });
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 w-full">
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Recent Activity</h3>
                 <Button
                     variant="outline"
                     size="sm"
                     render={(props) => (
-                        <Link {...props} to="/logs">
+                        <Link {...props} href="/logs">
                             View all logs
                         </Link>
                     )}

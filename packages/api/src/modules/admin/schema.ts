@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
     auditActionEnum,
     auditEntityEnum,
@@ -279,17 +279,19 @@ export const classroomListInputSchema = z.object({
 });
 
 export const listLogsInputSchema = z.object({
-    pageSize: z.number().min(1).max(100).default(20),
+    pageSize: z
+        .number()
+        .min(LIST_MIN_PAGE_SIZE)
+        .max(LIST_MAX_PAGE_SIZE)
+        .default(LIST_DEFAULT_PAGE_SIZE),
     cursor: z
         .object({
             createdAt: z.date(),
             id: z.number(),
         })
         .optional(),
-    actorId: z.string().optional(),
     action: z.enum(auditActionEnum.enumValues).optional(),
     entityType: z.enum(auditEntityEnum.enumValues).optional(),
-    entityId: z.string().optional(),
     dateFrom: z.date().optional(),
     dateTo: z.date().optional(),
 });

@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import React, { useState } from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
 import {
     Modal,
@@ -11,7 +13,7 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import {
-    museModifyUserProfileImage,
+    useModifyUserProfileImage,
     useRemoveUserProfileImage,
 } from "../../hooks/use-profile-image";
 import { toast } from "sonner";
@@ -46,7 +48,7 @@ export const ProfilePhoto = ({
     );
     const [error, setError] = useState("");
 
-    const modifyProfileImage = museModifyUserProfileImage();
+    const modifyProfileImage = useModifyUserProfileImage();
     const removeProfileImage = useRemoveUserProfileImage();
 
     const isPending =
@@ -54,12 +56,6 @@ export const ProfilePhoto = ({
 
     const hasExistingImage = !!image;
     const hasNewImage = !!photo.file;
-
-    useEffect(() => {
-        if (open && image) {
-            setPhoto({ url: image, file: null });
-        }
-    }, [open, image]);
 
     const reset = () => {
         setCrop({ x: 0, y: 0 });
@@ -128,7 +124,11 @@ export const ProfilePhoto = ({
             open={open}
             onOpenChange={(val) => {
                 onOpenChange(val);
-                if (!val) reset();
+                if (val) {
+                    setPhoto({ url: image ?? "", file: null });
+                } else {
+                    reset();
+                }
             }}
         >
             <ModalContent className="md:max-w-md">

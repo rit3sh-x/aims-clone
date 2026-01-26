@@ -1,6 +1,6 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
-export const auditActionEnum = pgEnum("audit_action", [
+export const AUDIT_ACTIONS = [
     "CREATE",
     "UPDATE",
     "DELETE",
@@ -16,10 +16,11 @@ export const auditActionEnum = pgEnum("audit_action", [
     "REVOKE_ALL_SESSIONS",
     "IMPERSONATE",
     "STOP_IMPERSONATE",
-]);
-export type AuditAction = (typeof auditActionEnum.enumValues)[number];
+] as const;
+export type AuditAction = (typeof AUDIT_ACTIONS)[number];
+export const auditActionEnum = pgEnum("audit_action", AUDIT_ACTIONS);
 
-export const auditEntityEnum = pgEnum("audit_entity", [
+export const AUDIT_ENTITIES = [
     "USER",
     "STUDENT",
     "INSTRUCTOR",
@@ -38,8 +39,9 @@ export const auditEntityEnum = pgEnum("audit_entity", [
     "CLASSROOM",
     "SCHEDULE",
     "TIME_SLOT",
-]);
-export type AuditEntity = (typeof auditEntityEnum.enumValues)[number];
+] as const;
+export type AuditEntity = (typeof AUDIT_ENTITIES)[number];
+export const auditEntityEnum = pgEnum("audit_entity", AUDIT_ENTITIES);
 
 export const userRoleEnum = pgEnum("role", [
     "ADMIN",

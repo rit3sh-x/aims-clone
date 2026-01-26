@@ -1,24 +1,29 @@
+"use client";
+
 import { useState } from "react";
 import { toast } from "sonner";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+
 import {
     sendPasswordResetOtp,
     resetPasswordWithOtp,
 } from "../../utils/auth-handlers";
+
 import { ForgotPasswordForm } from "../components/forgot-password-form";
 import { OtpForm, type OtpFormValues } from "../components/otp-form";
 import { ResetPasswordForm } from "../components/reset-password-form";
-import { AnimatePresence, motion } from "framer-motion";
 import type { ForgotPasswordFormValues } from "../components/forgot-password-form";
 import type { ResetPasswordFormValues } from "../components/reset-password-form";
-import { useNavigate } from "@tanstack/react-router";
 
 type ResetPasswordStep = "email" | "otp" | "password";
 
 export const ResetPasswordView = () => {
     const [currentStep, setCurrentStep] = useState<ResetPasswordStep>("email");
-    const [email, setEmail] = useState<string>("");
-    const [otp, setOtp] = useState<string>("");
-    const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [otp, setOtp] = useState("");
+
+    const router = useRouter();
 
     const handleSendOtp = async ({ email }: ForgotPasswordFormValues) => {
         try {
@@ -49,7 +54,7 @@ export const ResetPasswordView = () => {
                 password,
                 fetchOptions: {
                     onSuccess: () => {
-                        navigate({ to: "/login" });
+                        router.push("/login");
                     },
                     onError: ({ error }) => {
                         toast.error("Error", {
@@ -73,7 +78,7 @@ export const ResetPasswordView = () => {
         try {
             await sendPasswordResetOtp(email);
             toast.success("OTP resent to your email");
-        } catch (error) {
+        } catch {
             toast.error("Failed to resend OTP");
         }
     };
@@ -93,6 +98,7 @@ export const ResetPasswordView = () => {
                         <ForgotPasswordForm onSubmit={handleSendOtp} />
                     </motion.div>
                 )}
+
                 {currentStep === "otp" && (
                     <motion.div
                         key="otp"
@@ -108,6 +114,7 @@ export const ResetPasswordView = () => {
                         />
                     </motion.div>
                 )}
+
                 {currentStep === "password" && (
                     <motion.div
                         key="password"

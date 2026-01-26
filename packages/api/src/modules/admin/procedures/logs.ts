@@ -7,16 +7,8 @@ import { listLogsInputSchema } from "../schema";
 
 export const logsViewer = createTRPCRouter({
     list: adminProcedure.input(listLogsInputSchema).query(async ({ input }) => {
-        const {
-            pageSize,
-            cursor,
-            actorId,
-            action,
-            entityType,
-            entityId,
-            dateFrom,
-            dateTo,
-        } = input;
+        const { pageSize, cursor, action, entityType, dateFrom, dateTo } =
+            input;
 
         if (dateFrom && dateTo && dateFrom > dateTo) {
             throw new TRPCError({
@@ -27,10 +19,8 @@ export const logsViewer = createTRPCRouter({
 
         const conditions = [];
 
-        if (actorId) conditions.push(eq(auditLog.actorId, actorId));
         if (action) conditions.push(eq(auditLog.action, action));
         if (entityType) conditions.push(eq(auditLog.entityType, entityType));
-        if (entityId) conditions.push(eq(auditLog.entityId, entityId));
         if (dateFrom) conditions.push(gte(auditLog.createdAt, dateFrom));
         if (dateTo) conditions.push(lte(auditLog.createdAt, dateTo));
         if (cursor) {

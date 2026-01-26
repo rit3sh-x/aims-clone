@@ -7,7 +7,7 @@ import {
     startSemesterInputSchema,
     updateSemesterInputSchema,
 } from "../schema";
-import { and, desc, eq, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, lt, or } from "drizzle-orm";
 import { db, logAuditEvent, semester } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 import { semesterOverlapCondition } from "../utils";
@@ -73,10 +73,10 @@ export const semesterManagement = createTRPCRouter({
 
             const nextCursor = hasNextPage
                 ? {
-                      year: items[items.length - 1]!.year,
-                      startDate: items[items.length - 1]!.startDate,
-                      id: items[items.length - 1]!.id,
-                  }
+                    year: items[items.length - 1]!.year,
+                    startDate: items[items.length - 1]!.startDate,
+                    id: items[items.length - 1]!.id,
+                }
                 : null;
 
             return {
@@ -95,6 +95,7 @@ export const semesterManagement = createTRPCRouter({
                 startDate,
                 endDate,
                 enrollmentDeadline,
+                feedbackFormStartDate,
             } = input;
 
             if (startDate >= endDate) {
@@ -137,6 +138,7 @@ export const semesterManagement = createTRPCRouter({
                         enrollmentDeadline,
                         endDate,
                         status: "UPCOMING",
+                        feedbackFormStartDate,
                     })
                     .returning();
 

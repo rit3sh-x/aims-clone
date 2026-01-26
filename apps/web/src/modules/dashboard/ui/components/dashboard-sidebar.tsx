@@ -92,7 +92,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                             size="lg"
                             render={(props) => (
                                 <Link
-                                {...props}
+                                    {...props}
                                     href="/"
                                     className="flex items-center justify-center gap-2"
                                 >
@@ -238,7 +238,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                 authClient.signOut({
                                     fetchOptions: {
                                         onSuccess: () => {
-                                            router.push("/login")
+                                            router.push("/login");
                                         },
                                     },
                                 });

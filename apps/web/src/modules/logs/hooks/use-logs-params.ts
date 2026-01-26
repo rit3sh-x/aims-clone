@@ -3,4 +3,4 @@ import { logsParams } from "../params";
 
 export const useLogsParams = () => {
     return useQueryStates(logsParams);
-}
+};

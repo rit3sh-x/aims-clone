@@ -1,4 +1,7 @@
-import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar";
+import {
+    SidebarInset,
+    SidebarProvider,
+} from "@workspace/ui/components/sidebar";
 import { DashboardSidebar } from "../components/dashboard-sidebar";
 import type { UserRole } from "@workspace/db";
 import { DashboardHeader } from "../components/dashboard-header";

@@ -10,4 +10,4 @@ export const logsParams = {
         .withOptions({ clearOnDefault: true }),
     dateFrom: parseAsIsoDate,
     dateTo: parseAsIsoDate,
-}
+};

@@ -1,10 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import {
-    UserPlus,
-    Trash2,
-    Edit3,
-    Info
-} from "lucide-react";
+import { UserPlus, Trash2, Edit3, Info } from "lucide-react";
 import { Card } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { humanizeEnum } from "@/lib/formatters";
@@ -12,7 +7,7 @@ import type { AuditAction, AuditEntity } from "../../constants";
 
 type AuditLog = {
     id: number;
-    action: AuditAction
+    action: AuditAction;
     entityType: AuditEntity;
     entityId: string | null;
     createdAt: Date;
@@ -39,9 +34,13 @@ export const LogCard = ({ log }: { log: AuditLog }) => {
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold text-sm leading-none capitalize">
-                                {humanizeEnum(log.action)} {humanizeEnum(log.entityType)}
+                                {humanizeEnum(log.action)}{" "}
+                                {humanizeEnum(log.entityType)}
                             </span>
-                            <Badge variant="outline" className="text-[10px] px-1 py-0 uppercase">
+                            <Badge
+                                variant="outline"
+                                className="text-[10px] px-1 py-0 uppercase"
+                            >
                                 ID: {log.entityId?.slice(0, 8) ?? "N/A"}
                             </Badge>
                         </div>
@@ -54,7 +53,9 @@ export const LogCard = ({ log }: { log: AuditLog }) => {
                 <div className="text-right shrink-0">
                     <p className="text-[11px] font-medium text-muted-foreground">
                         {/* Uses date-fns for relative timing */}
-                        {formatDistanceToNow(log.createdAt, { addSuffix: true })}
+                        {formatDistanceToNow(log.createdAt, {
+                            addSuffix: true,
+                        })}
                     </p>
                 </div>
             </div>

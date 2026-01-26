@@ -3,7 +3,7 @@ import { Inter, JetBrains_Mono, Merriweather } from "next/font/google";
 import { ThemeProvider } from "@/providers/theme";
 import { Toaster } from "@workspace/ui/components/sonner";
 import { TRPCReactProvider } from "@/trpc/client";
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
 const inter = Inter({

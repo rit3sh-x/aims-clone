@@ -251,6 +251,7 @@ export const createSemesterInputSchema = z.object({
     startDate: z.date(),
     endDate: z.date(),
     enrollmentDeadline: z.date(),
+    feedbackFormStartDate: z.date(),
 });
 
 export const startSemesterInputSchema = z.object({ id: z.string() });

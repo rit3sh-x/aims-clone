@@ -1,6 +1,6 @@
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { humanizeEnum } from "@/lib/formatters";
-import { AUDIT_ACTIONS,type AuditAction } from "../../constants";
+import { AUDIT_ACTIONS, type AuditAction } from "../../constants";
 
 interface ActionsFilterProps {
     value?: AuditAction;

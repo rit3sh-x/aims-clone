@@ -14,7 +14,10 @@ interface DashboardHeaderProps {
     image?: string | null;
 }
 
-export const DashboardHeader = async ({ image, name }: DashboardHeaderProps) => {
+export const DashboardHeader = async ({
+    image,
+    name,
+}: DashboardHeaderProps) => {
     const headers = await getHeaders();
     const pathname = headers.get("x-path") || "";
     const pageTitle = getPageTitle(pathname);

@@ -8,17 +8,16 @@ interface StockFilterProps {
     children: React.ReactNode;
 }
 
-export const SearchFilter = ({ title, className, children }: StockFilterProps) => {
+export const SearchFilter = ({
+    title,
+    className,
+    children,
+}: StockFilterProps) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const Icon = isOpen ? ChevronDownIcon : ChevronRightIcon;
 
     return (
-        <div
-            className={cn(
-                "p-4 border-b flex flex-col gap-2",
-                className
-            )}
-        >
+        <div className={cn("p-4 border-b flex flex-col gap-2", className)}>
             <div
                 onClick={() => setIsOpen((current) => !current)}
                 className="flex items-center justify-between cursor-pointer"

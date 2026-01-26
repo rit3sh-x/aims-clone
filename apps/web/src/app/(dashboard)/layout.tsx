@@ -10,11 +10,13 @@ const Layout = async ({ children }: Props) => {
     const { user } = await requireAuth();
 
     if (user.role === "ADMIN") {
-        prefetch(trpc.admin.metrics.recentLogs.queryOptions())
-        prefetch(trpc.admin.metrics.cardMetrics.queryOptions())
-        prefetch(trpc.admin.metrics.chartData.queryOptions({
-            days: 90,
-        }));
+        prefetch(trpc.admin.metrics.recentLogs.queryOptions());
+        prefetch(trpc.admin.metrics.cardMetrics.queryOptions());
+        prefetch(
+            trpc.admin.metrics.chartData.queryOptions({
+                days: 90,
+            })
+        );
     }
 
     return (
@@ -27,8 +29,7 @@ const Layout = async ({ children }: Props) => {
                 {children}
             </DashboardLayout>
         </HydrateClient>
-    )
-
-}
+    );
+};
 
 export default Layout;

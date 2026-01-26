@@ -6,7 +6,8 @@ import { cn } from "@workspace/ui/lib/utils";
 import { LogCard } from "./log-card";
 
 export const LogsList = () => {
-    const { logs, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteLogs();
+    const { logs, fetchNextPage, hasNextPage, isFetchingNextPage } =
+        useInfiniteLogs();
 
     return (
         <div className="space-y-4">

@@ -19,8 +19,8 @@ export const requireAuth = cache(async () => {
 });
 
 export const requireAdmin = cache(async () => {
-    const token = await getToken();
-    if (!token || token.user.role !== "ADMIN") {
+    const token = await requireAuth();
+    if (token.user.role !== "ADMIN") {
         redirect("/");
     }
     return token;

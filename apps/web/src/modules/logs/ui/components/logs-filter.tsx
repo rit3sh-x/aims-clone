@@ -11,7 +11,12 @@ export const LogsFilters = () => {
 
     const { action, entity, dateFrom, dateTo } = params;
 
-    const hasAnyFilters = !!(action === "" || entity === "" || dateFrom || dateTo);
+    const hasAnyFilters = !!(
+        action === "" ||
+        entity === "" ||
+        dateFrom ||
+        dateTo
+    );
 
     const updateSearch = (patch: Partial<typeof params>) => {
         setParams(patch);
@@ -41,7 +46,6 @@ export const LogsFilters = () => {
                 )}
             </div>
 
-
             <SearchFilter title="Action Type">
                 <ActionsFilter
                     value={action === "" ? undefined : action}
@@ -60,12 +64,14 @@ export const LogsFilters = () => {
                 <DateRangePicker
                     range={{
                         from: dateFrom ?? undefined,
-                        to: dateTo ?? undefined
+                        to: dateTo ?? undefined,
                     }}
-                    setRange={(range) => updateSearch({
-                        dateFrom: range?.from ?? null,
-                        dateTo: range?.to ?? null,
-                    })}
+                    setRange={(range) =>
+                        updateSearch({
+                            dateFrom: range?.from ?? null,
+                            dateTo: range?.to ?? null,
+                        })
+                    }
                 />
             </SearchFilter>
         </div>

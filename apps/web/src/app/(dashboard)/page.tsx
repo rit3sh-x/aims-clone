@@ -7,15 +7,9 @@ const Page = async () => {
 
     switch (user.role) {
         case "ADMIN": {
-            prefetch(
-                trpc.admin.metrics.recentLogs.queryOptions()
-            );
-            prefetch(
-                trpc.admin.metrics.cardMetrics.queryOptions()
-            );
-            prefetch(
-                trpc.admin.metrics.chartData.queryOptions({ days: 90 })
-            );
+            prefetch(trpc.admin.metrics.recentLogs.queryOptions());
+            prefetch(trpc.admin.metrics.cardMetrics.queryOptions());
+            prefetch(trpc.admin.metrics.chartData.queryOptions({ days: 90 }));
         }
     }
 
@@ -29,6 +23,6 @@ const Page = async () => {
         default:
             return null;
     }
-}
+};
 
 export default Page;

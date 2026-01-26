@@ -14,7 +14,7 @@ import { sendLoginOTP, sendPasswordResetEmail } from "@workspace/infra";
 import { ROLE_VALUES, ROLES, ac, ROLE_MAP } from "./schema";
 import { options } from "./options";
 
-const appUrl = process.env.VITE_APP_URL!;
+const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 const isProd = process.env.NODE_ENV === "production";
 const allowedDomains = process.env.ALLOWED_EMAIL_DOMAINS?.split(",") || [];
 

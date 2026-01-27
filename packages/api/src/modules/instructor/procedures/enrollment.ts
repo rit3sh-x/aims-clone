@@ -22,16 +22,12 @@ export const enrollmentManagement = createTRPCRouter({
         .input(listEnrollmentsInputSchema)
         .query(async ({ input, ctx }) => {
             const { id: instructorId } = ctx.instructor;
-            const { pageSize, cursor, status, courseCode } = input;
+            const { pageSize, cursor, courseCode } = input;
 
             const conditions: SQL[] = [
                 eq(courseOfferingInstructor.instructorId, instructorId),
                 eq(courseOfferingInstructor.isHead, true),
             ];
-
-            if (status) {
-                conditions.push(eq(enrollment.status, status));
-            }
 
             if (courseCode) {
                 conditions.push(eq(course.code, courseCode));
@@ -55,7 +51,6 @@ export const enrollmentManagement = createTRPCRouter({
                 .select({
                     enrollment,
                     student,
-                    course,
                 })
                 .from(enrollment)
                 .innerJoin(

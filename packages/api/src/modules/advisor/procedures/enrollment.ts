@@ -1,7 +1,14 @@
 import { and, eq, desc, lt, or, type SQL } from "drizzle-orm";
 import { createTRPCRouter } from "@workspace/api/init";
 import { advisorProcedure } from "../middleware";
-import { db, student, batch, enrollment, logAuditEvent } from "@workspace/db";
+import {
+    db,
+    student,
+    enrollment,
+    logAuditEvent,
+    course,
+    courseOffering,
+} from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 import {
     approveEnrollmentInputSchema,
@@ -14,12 +21,12 @@ export const enrollmentManagement = createTRPCRouter({
         .input(listEnrollmentsInputSchema)
         .query(async ({ input, ctx }) => {
             const { id: advisorId } = ctx.advisor;
-            const { pageSize, cursor, status } = input;
+            const { pageSize, cursor, courseCode } = input;
 
             const conditions: SQL[] = [eq(student.advisorId, advisorId)];
 
-            if (status) {
-                conditions.push(eq(enrollment.status, status));
+            if (courseCode) {
+                conditions.push(eq(course.code, courseCode));
             }
 
             if (cursor) {
@@ -42,6 +49,11 @@ export const enrollmentManagement = createTRPCRouter({
                     student,
                 })
                 .from(enrollment)
+                .innerJoin(
+                    courseOffering,
+                    eq(enrollment.offeringId, courseOffering.id)
+                )
+                .innerJoin(course, eq(courseOffering.courseId, course.id))
                 .innerJoin(student, eq(enrollment.studentId, student.id))
                 .where(and(...conditions))
                 .orderBy(desc(enrollment.createdAt), desc(enrollment.id))
@@ -65,7 +77,7 @@ export const enrollmentManagement = createTRPCRouter({
             };
         }),
 
-    approveEnrollment: advisorProcedure
+    approve: advisorProcedure
         .input(approveEnrollmentInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { enrollmentId } = input;
@@ -123,7 +135,7 @@ export const enrollmentManagement = createTRPCRouter({
             return updated;
         }),
 
-    rejectEnrollment: advisorProcedure
+    reject: advisorProcedure
         .input(rejectEnrollmentInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { enrollmentId, reason } = input;

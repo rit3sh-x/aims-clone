@@ -3,7 +3,6 @@ import {
     attendanceStatusEnum,
     attendanceTypeEnum,
     courseStatusEnum,
-    enrollmentStatusEnum,
     gradeTypeEnum,
     offeringStatusEnum,
 } from "@workspace/db";
@@ -26,7 +25,6 @@ export const listEnrollmentsInputSchema = z.object({
             id: z.string(),
         })
         .optional(),
-    status: z.enum(enrollmentStatusEnum.enumValues).optional(),
     courseCode: z.string().optional(),
 });
 
@@ -35,7 +33,7 @@ export const approveEnrollmentInputSchema = z.object({
 });
 
 export const rejectEnrollmentInputSchema = approveEnrollmentInputSchema.extend({
-    reason: z.string().min(3),
+    reason: z.string().min(3).optional(),
 });
 
 const assessmentTemplateSchema = z.object({

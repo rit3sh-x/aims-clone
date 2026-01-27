@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { GripVertical, Trash2Icon } from 'lucide-react';
-import { humanizeEnum } from '@/lib/formatters';
-import { SortableItemHandle } from '@/components/sortable';
-import { Input } from '@workspace/ui/components/input';
+import { useState } from "react";
+import { GripVertical, Trash2Icon } from "lucide-react";
+import { humanizeEnum } from "@/lib/formatters";
+import { SortableItemHandle } from "@/components/sortable";
+import { Input } from "@workspace/ui/components/input";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@workspace/ui/components/select';
-import { Switch } from '@workspace/ui/components/switch';
-import { QUESTIONS, QuestionType } from '../../constants';
+} from "@workspace/ui/components/select";
+import { Switch } from "@workspace/ui/components/switch";
+import { QUESTIONS, QuestionType } from "../../constants";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { Button } from '@workspace/ui/components/button';
+import { Button } from "@workspace/ui/components/button";
 
 interface Question {
     id: string;
@@ -80,8 +80,8 @@ export const QuestionCard = ({
                             value={text}
                             onChange={(e) => setText(e.target.value)}
                             onKeyDown={(e) => {
-                                if (e.key === 'Enter') commit();
-                                if (e.key === 'Escape') cancel();
+                                if (e.key === "Enter") commit();
+                                if (e.key === "Escape") cancel();
                             }}
                             autoFocus
                         />
@@ -162,7 +162,7 @@ export const QuestionCard = ({
             </Button>
         </div>
     );
-}
+};
 
 export const QuestionCardSkeleton = () => {
     return (
@@ -179,4 +179,4 @@ export const QuestionCardSkeleton = () => {
             </div>
         </div>
     );
-}
+};

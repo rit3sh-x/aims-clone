@@ -51,7 +51,13 @@ export const listDepartmentsInputSchema = z.object({
 
 export const listDepartmentFacultyInputSchema = z.object({
     departmentId: z.string().optional(),
-    search: z.string().min(1).optional(),
+    search: z.preprocess((val) => {
+        if (typeof val === "string") {
+            const trimmed = val.trim();
+            return trimmed === "" ? undefined : trimmed;
+        }
+        return val;
+    }, z.string().min(1).optional()),
     cursor: z
         .object({
             createdAt: z.date(),

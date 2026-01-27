@@ -1143,7 +1143,6 @@ export const courseOfferingRelations = relations(
         }),
         instructors: many(courseOfferingInstructor),
         enrollments: many(enrollment),
-        assessments: many(assessment),
         assessmentTemplates: many(assessmentTemplate),
         schedules: many(schedule),
         batches: many(offeringBatch),

@@ -61,7 +61,9 @@ function Sortable<T>({
     onDragStart,
     onDragEnd,
 }: SortableRootProps<T>) {
-    const [activeId, setActiveId] = React.useState<UniqueIdentifier | null>(null);
+    const [activeId, setActiveId] = React.useState<UniqueIdentifier | null>(
+        null
+    );
 
     const sensors = useSensors(
         useSensor(PointerSensor, {

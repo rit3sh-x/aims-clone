@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth-utils"
+import { requireAdmin } from "@/lib/auth-utils";
 import { AdminFeedbackView } from "@/modules/feedback/ui/views/admin-feedback-view";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
@@ -12,6 +12,6 @@ const Page = async () => {
             <AdminFeedbackView />
         </HydrateClient>
     );
-}
+};
 
 export default Page;

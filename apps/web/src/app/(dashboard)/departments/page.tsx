@@ -14,7 +14,7 @@ const Page = async ({ searchParams }: Props) => {
 
     prefetch(
         trpc.admin.department.list.queryOptions({
-            search: name,
+            search: name === "" ? undefined : name,
         })
     );
 

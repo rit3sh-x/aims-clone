@@ -82,6 +82,18 @@ export const userRouter = createTRPCRouter({
             }
         }),
 
+    getDepartmentCodes: protectedProcedure
+        .query(async () => {
+            const departments = await db.query.department.findMany({
+                columns: {
+                    code: true,
+                    id: true,
+                }
+            });
+
+            return departments;
+        }),
+
     removeProfileImage: protectedProcedure.mutation(async ({ ctx }) => {
         const { user: currentUser } = ctx.session;
         let oldKey: string | null = null;

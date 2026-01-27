@@ -24,7 +24,7 @@ const Page = async ({ params, searchParams }: Props) => {
     prefetch(
         trpc.admin.department.listFaculty.infiniteQueryOptions({
             departmentId,
-            search: name,
+            search: name === "" ? undefined : name,
         })
     );
 

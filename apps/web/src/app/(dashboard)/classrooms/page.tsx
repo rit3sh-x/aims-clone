@@ -13,7 +13,7 @@ const Page = async ({ searchParams }: Props) => {
     const { name } = await classroomParamsLoader(searchParams);
 
     prefetch(trpc.admin.classroom.list.infiniteQueryOptions({
-        search: name,
+        search: name === "" ? undefined: name,
     }));
 
     return (

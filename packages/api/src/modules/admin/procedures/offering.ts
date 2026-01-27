@@ -23,12 +23,17 @@ export const offeringManagement = createTRPCRouter({
                 semesterTerm,
                 instructorIds,
                 departmentCode,
+                courseId
             } = input;
 
             const conditions = [];
 
             if (courseCode) {
                 conditions.push(eq(course.code, courseCode));
+            }
+
+            if (courseId) {
+                conditions.push(eq(course.id, courseId));
             }
 
             if (semesterYear) {
@@ -73,7 +78,6 @@ export const offeringManagement = createTRPCRouter({
             const rows = await db
                 .select({
                     offering: courseOffering,
-                    course,
                     department,
                     semester,
                 })
@@ -93,9 +97,9 @@ export const offeringManagement = createTRPCRouter({
 
             const nextCursor = hasNextPage
                 ? {
-                      createdAt: items[items.length - 1]!.offering.createdAt,
-                      id: items[items.length - 1]!.offering.id,
-                  }
+                    createdAt: items[items.length - 1]!.offering.createdAt,
+                    id: items[items.length - 1]!.offering.id,
+                }
                 : null;
 
             return {

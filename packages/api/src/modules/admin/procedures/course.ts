@@ -112,8 +112,6 @@ export const courseManagement = createTRPCRouter({
                 );
             }
 
-            conditions.push(eq(course.status, "HOD_ACCEPTED"));
-
             if (departmentCode) {
                 conditions.push(eq(department.code, departmentCode));
             }
@@ -135,7 +133,6 @@ export const courseManagement = createTRPCRouter({
             const rows = await db
                 .select({
                     course,
-                    department,
                 })
                 .from(course)
                 .innerJoin(department, eq(course.departmentId, department.id))

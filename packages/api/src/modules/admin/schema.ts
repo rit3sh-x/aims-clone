@@ -159,6 +159,7 @@ export const listOfferingsInputSchema = z.object({
         .max(LIST_MAX_PAGE_SIZE)
         .default(LIST_DEFAULT_PAGE_SIZE),
     courseCode: z.string().optional(),
+    courseId: z.string().optional(),
     semesterYear: z.number().optional(),
     semesterTerm: z.enum(semesterTypeEnum.enumValues).optional(),
     instructorIds: z.array(z.string()).optional(),
@@ -210,7 +211,7 @@ export const acceptCourseInputSchema = z.object({
 });
 
 export const rejectCourseInputSchema = acceptCourseInputSchema.extend({
-    reason: z.string().min(3),
+    reason: z.string().min(3).optional(),
 });
 
 export const listCourseInputSchema = z.object({

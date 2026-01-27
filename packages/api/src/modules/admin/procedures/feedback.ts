@@ -6,8 +6,8 @@ import {
     deleteFeedbackQuestionsInputSchema,
     reorderFeedbackQuestionsInputSchema,
 } from "../schema";
-import { db, feedbackQuestion } from "@workspace/db";
-import { asc, eq, sql } from "drizzle-orm";
+import { db, feedbackQuestion, feedbackResponse } from "@workspace/db";
+import { asc, eq, inArray, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { MAX_POSSIBLE_QUESTIONS } from "../../constants";
 
@@ -70,14 +70,7 @@ export const feedbackManagement = createTRPCRouter({
     update: adminProcedure
         .input(updateFeedbackQuestionInputSchema)
         .mutation(async ({ input }) => {
-            const {
-                id,
-                questionText,
-                questionType,
-                isRequired,
-                order,
-                isDefault,
-            } = input;
+            const { id, questionText, questionType, isRequired, order } = input;
 
             const [existing] = await db
                 .select()
@@ -114,7 +107,6 @@ export const feedbackManagement = createTRPCRouter({
                 updateData.questionType = questionType;
             if (isRequired !== undefined) updateData.isRequired = isRequired;
             if (order !== undefined) updateData.order = order;
-            if (isDefault !== undefined) updateData.isDefault = isDefault;
 
             const updated = await db
                 .update(feedbackQuestion)
@@ -125,32 +117,46 @@ export const feedbackManagement = createTRPCRouter({
             return updated[0];
         }),
 
-    deleteTimeSlotInputSchema: adminProcedure
+    delete: adminProcedure
         .input(deleteFeedbackQuestionsInputSchema)
         .mutation(async ({ input }) => {
             const { ids } = input;
+
             const existing = await db
                 .select({ id: feedbackQuestion.id })
                 .from(feedbackQuestion)
-                .where(sql`${feedbackQuestion.id} IN ${ids}`);
+                .where(inArray(feedbackQuestion.id, ids));
 
             if (existing.length !== ids.length) {
                 const existingIds = existing.map((q) => q.id);
                 const missingIds = ids.filter(
                     (id) => !existingIds.includes(id)
                 );
+
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: `Questions not found: ${missingIds.join(", ")}`,
                 });
             }
-            const deleted = await db.transaction(async (tx) => {
-                const result = await tx
-                    .delete(feedbackQuestion)
-                    .where(sql`${feedbackQuestion.id} IN ${ids}`)
-                    .returning();
-                return result;
-            });
+
+            const used = await db
+                .select({ questionId: feedbackResponse.questionId })
+                .from(feedbackResponse)
+                .where(inArray(feedbackResponse.questionId, ids))
+                .limit(1);
+
+            if (used.length > 0) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message:
+                        "One or more questions already have responses and cannot be deleted",
+                });
+            }
+
+            const deleted = await db
+                .delete(feedbackQuestion)
+                .where(inArray(feedbackQuestion.id, ids))
+                .returning({ id: feedbackQuestion.id });
 
             return {
                 deletedCount: deleted.length,

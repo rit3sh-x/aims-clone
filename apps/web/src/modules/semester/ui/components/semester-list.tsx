@@ -23,7 +23,8 @@ export const SemesterList = () => {
     const updateSemester = useUpdateSemester();
 
     const [isModalOpen, setModalOpen] = useState(false);
-    const [editingSemester, setEditingSemester] = useState<SemesterFormValues | null>(null);
+    const [editingSemester, setEditingSemester] =
+        useState<SemesterFormValues | null>(null);
 
     const isBlocked =
         startSemester.isPending ||
@@ -64,7 +65,8 @@ export const SemesterList = () => {
                             startDate: semester.startDate,
                             endDate: semester.endDate,
                             enrollmentDeadline: semester.enrollmentDeadline,
-                            feedbackFormStartDate: semester.feedbackFormStartDate,
+                            feedbackFormStartDate:
+                                semester.feedbackFormStartDate,
                         })
                     }
                     onStart={(id) => startSemester.mutate({ id })}

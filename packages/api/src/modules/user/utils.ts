@@ -42,7 +42,6 @@ export async function uploadUserProfileImage(params: {
             key,
             body: buffer,
             contentType: mimeType,
-            ACL: "public-read",
         });
 
         return {
@@ -72,18 +71,5 @@ export async function removeUserProfileImage(params: {
             throw error;
         }
         throw new Error("Failed to upload profile image");
-    }
-}
-
-export function getProfilePublicUrl(params: { key: string }) {
-    const { key } = params;
-
-    try {
-        return s3Service.getPublicUrl({ key });
-    } catch (error) {
-        if (error instanceof Error) {
-            throw error;
-        }
-        throw new Error("Failed to get profile image");
     }
 }

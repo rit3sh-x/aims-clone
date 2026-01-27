@@ -1,6 +1,9 @@
 import { requireAdmin } from "@/lib/auth-utils";
 import { semesterParamsLoader } from "@/modules/semester/server/params-loader";
-import { SemestersViewSkeleton, SemesterView } from "@/modules/semester/ui/views/semesters-view";
+import {
+    SemestersViewSkeleton,
+    SemesterView,
+} from "@/modules/semester/ui/views/semesters-view";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
@@ -15,14 +18,12 @@ const Page = async ({ searchParams }: Props) => {
     const { status, type, year } = await semesterParamsLoader(searchParams);
 
     prefetch(
-        trpc.admin.semester.list.infiniteQueryOptions(
-            {
-                status: status === "" ? undefined : status,
-                semester: type === "" ? undefined : type,
-                year: year ?? undefined,
-            },
-        )
-    )
+        trpc.admin.semester.list.infiniteQueryOptions({
+            status: status === "" ? undefined : status,
+            semester: type === "" ? undefined : type,
+            year: year ?? undefined,
+        })
+    );
 
     return (
         <HydrateClient>

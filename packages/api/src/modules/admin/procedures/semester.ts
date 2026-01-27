@@ -73,10 +73,10 @@ export const semesterManagement = createTRPCRouter({
 
             const nextCursor = hasNextPage
                 ? {
-                    year: items[items.length - 1]!.year,
-                    startDate: items[items.length - 1]!.startDate,
-                    id: items[items.length - 1]!.id,
-                }
+                      year: items[items.length - 1]!.year,
+                      startDate: items[items.length - 1]!.startDate,
+                      id: items[items.length - 1]!.id,
+                  }
                 : null;
 
             return {

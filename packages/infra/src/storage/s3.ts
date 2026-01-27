@@ -60,28 +60,11 @@ class S3Service {
         };
     }
 
-    getPublicUrl(params: { key: string }) {
-        const encodedKey = encodeURIComponent(params.key).replace(/%2F/g, "/");
-
-        if (this.endpoint) {
-            const endpoint = this.endpoint.replace(/\/$/, "");
-
-            if (this.forcePathStyle) {
-                return `${endpoint}/${this.bucket}/${encodedKey}`;
-            }
-
-            return `${endpoint.replace("://", `://${this.bucket}.`)}/${encodedKey}`;
-        }
-
-        return `https://${this.bucket}.s3.amazonaws.com/${encodedKey}`;
-    }
-
     async uploadFile(params: {
         userId: string;
         key: string;
         body: Buffer | Uint8Array;
         contentType: string;
-        ACL?: "public-read";
     }) {
         await this.client.send(
             new PutObjectCommand({
@@ -89,9 +72,6 @@ class S3Service {
                 Key: params.key,
                 Body: params.body,
                 ContentType: params.contentType,
-                ...(params.ACL && {
-                    ACL: params.ACL,
-                }),
             })
         );
     }

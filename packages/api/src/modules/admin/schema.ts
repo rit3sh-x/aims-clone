@@ -409,7 +409,6 @@ export const createFeedbackQuestionsInputSchema = z.object({
                 questionType: z.enum(feedbackQuestionTypeEnum.enumValues),
                 isRequired: z.boolean().default(true),
                 order: z.number().int().positive(),
-                isDefault: z.boolean().default(false),
             })
         )
         .min(1)
@@ -422,7 +421,6 @@ export const updateFeedbackQuestionInputSchema = z.object({
     questionType: z.enum(feedbackQuestionTypeEnum.enumValues).optional(),
     isRequired: z.boolean().optional(),
     order: z.number().int().positive().optional(),
-    isDefault: z.boolean().optional(),
 });
 
 export const deleteFeedbackQuestionsInputSchema = z.object({

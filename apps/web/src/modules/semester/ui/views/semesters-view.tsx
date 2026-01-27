@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { SemesterFilter } from "../components/semester-filter";
-import { SemesterList,SemesterListSkeleton } from "../components/semester-list";
+import {
+    SemesterList,
+    SemesterListSkeleton,
+} from "../components/semester-list";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export const SemesterView = () => {

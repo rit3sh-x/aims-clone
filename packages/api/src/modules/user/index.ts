@@ -1,11 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@workspace/api/init";
 import { imageUploadInput } from "./schema";
 import { TRPCError } from "@trpc/server";
-import {
-    getProfilePublicUrl,
-    removeUserProfileImage,
-    uploadUserProfileImage,
-} from "./utils";
+import { removeUserProfileImage, uploadUserProfileImage } from "./utils";
 import { db, document, user } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
@@ -23,39 +19,40 @@ export const userRouter = createTRPCRouter({
                 userId: currentUser.id,
             });
 
-            const publicUrl = getProfilePublicUrl({ key });
-
             let oldKey: string | null = null;
+            let documentId: string | null = null;
 
             try {
                 await db.transaction(async (tx) => {
                     const existing = await tx.query.document.findFirst({
-                        where: (d, { and, eq }) => eq(d.userId, currentUser.id),
+                        where: (d, { eq }) => eq(d.userId, currentUser.id),
                     });
 
                     if (existing) {
                         oldKey = existing.key;
+                        documentId = existing.id;
 
                         await tx
                             .update(document)
-                            .set({
+                            .set({ key, mimeType, size })
+                            .where(eq(document.id, existing.id));
+                    } else {
+                        const [newDoc] = await tx
+                            .insert(document)
+                            .values({
                                 key,
                                 mimeType,
                                 size,
+                                userId: currentUser.id,
                             })
-                            .where(eq(document.id, existing.id));
-                    } else {
-                        await tx.insert(document).values({
-                            key,
-                            mimeType,
-                            size,
-                            userId: currentUser.id,
-                        });
+                            .returning({ id: document.id });
+
+                        documentId = newDoc!.id;
                     }
 
                     await tx
                         .update(user)
-                        .set({ image: publicUrl })
+                        .set({ image: `/api/image/${documentId}` })
                         .where(eq(user.id, currentUser.id));
                 });
 
@@ -67,7 +64,7 @@ export const userRouter = createTRPCRouter({
                 }
 
                 return {
-                    publicUrl,
+                    imageUrl: `/api/image/${documentId}`,
                 };
             } catch (error) {
                 await removeUserProfileImage({
@@ -92,7 +89,7 @@ export const userRouter = createTRPCRouter({
         try {
             await db.transaction(async (tx) => {
                 const existing = await tx.query.document.findFirst({
-                    where: (d, { and, eq }) => eq(d.userId, currentUser.id),
+                    where: (d, { eq }) => eq(d.userId, currentUser.id),
                 });
 
                 if (!existing) return;

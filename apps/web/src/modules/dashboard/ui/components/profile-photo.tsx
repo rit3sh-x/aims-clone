@@ -98,8 +98,8 @@ export const ProfilePhoto = ({
             formData.append("image", cropped.file);
 
             modifyProfileImage.mutate(formData, {
-                onSuccess: ({ publicUrl }) => {
-                    setImage(publicUrl);
+                onSuccess: ({ imageUrl }) => {
+                    setImage(imageUrl);
                     onOpenChange(false);
                 },
                 onError: () => toast.error("Failed to upload image"),

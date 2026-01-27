@@ -31,10 +31,7 @@ import { Calendar } from "@workspace/ui/components/calendar";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { SEMESTER_TYPE, type SemesterType } from "../../constants";
-import {
-    useCreateSemester,
-    useUpdateSemester,
-} from "../../hooks/use-semester";
+import { useCreateSemester, useUpdateSemester } from "../../hooks/use-semester";
 
 export const semesterFormSchema = z.object({
     id: z.string().optional(),
@@ -114,8 +111,14 @@ export const SemesterFormModal = ({
             form.setFieldValue("semester", initialValues.semester);
             form.setFieldValue("startDate", initialValues.startDate);
             form.setFieldValue("endDate", initialValues.endDate);
-            form.setFieldValue("enrollmentDeadline", initialValues.enrollmentDeadline);
-            form.setFieldValue("feedbackFormStartDate", initialValues.feedbackFormStartDate);
+            form.setFieldValue(
+                "enrollmentDeadline",
+                initialValues.enrollmentDeadline
+            );
+            form.setFieldValue(
+                "feedbackFormStartDate",
+                initialValues.feedbackFormStartDate
+            );
             if (initialValues.id) {
                 form.setFieldValue("id", initialValues.id);
             }
@@ -142,7 +145,9 @@ export const SemesterFormModal = ({
                 >
                     <form.Field name="year">
                         {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                            const isInvalid =
+                                field.state.meta.isTouched &&
+                                !field.state.meta.isValid;
                             return (
                                 <Field data-invalid={isInvalid}>
                                     <FieldLabel>Year</FieldLabel>
@@ -150,9 +155,17 @@ export const SemesterFormModal = ({
                                         type="number"
                                         value={field.state.value}
                                         onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                                        onChange={(e) =>
+                                            field.handleChange(
+                                                Number(e.target.value)
+                                            )
+                                        }
                                     />
-                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                    {isInvalid && (
+                                        <FieldError
+                                            errors={field.state.meta.errors}
+                                        />
+                                    )}
                                 </Field>
                             );
                         }}
@@ -162,7 +175,12 @@ export const SemesterFormModal = ({
                         {(field) => (
                             <Field>
                                 <FieldLabel>Semester</FieldLabel>
-                                <Select value={field.state.value} onValueChange={(v) => field.handleChange(v as SemesterType)}>
+                                <Select
+                                    value={field.state.value}
+                                    onValueChange={(v) =>
+                                        field.handleChange(v as SemesterType)
+                                    }
+                                >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Semester type" />
                                     </SelectTrigger>
@@ -180,33 +198,53 @@ export const SemesterFormModal = ({
 
                     <form.Field name="startDate">
                         {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                            const isInvalid =
+                                field.state.meta.isTouched &&
+                                !field.state.meta.isValid;
                             return (
                                 <Field data-invalid={isInvalid}>
                                     <FieldLabel>Start date</FieldLabel>
                                     <Popover>
-                                        <PopoverTrigger render={(props) => (
-                                            <Button
-                                                {...props}
-                                                variant="outline"
-                                                className={cn(
-                                                    "w-full justify-start text-left font-normal",
-                                                    !field.state.value && "text-muted-foreground"
-                                                )}
-                                            >
-                                                <CalendarIcon className="mr-2 size-4" />
-                                                {field.state.value ? format(field.state.value, "dd MMM yyyy") : "Pick a date"}
-                                            </Button>
-                                        )} />
-                                        <PopoverContent align="start" className="p-0">
+                                        <PopoverTrigger
+                                            render={(props) => (
+                                                <Button
+                                                    {...props}
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal",
+                                                        !field.state.value &&
+                                                            "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 size-4" />
+                                                    {field.state.value
+                                                        ? format(
+                                                              field.state.value,
+                                                              "dd MMM yyyy"
+                                                          )
+                                                        : "Pick a date"}
+                                                </Button>
+                                            )}
+                                        />
+                                        <PopoverContent
+                                            align="start"
+                                            className="p-0"
+                                        >
                                             <Calendar
                                                 mode="single"
                                                 selected={field.state.value}
-                                                onSelect={(date) => date && field.handleChange(date)}
+                                                onSelect={(date) =>
+                                                    date &&
+                                                    field.handleChange(date)
+                                                }
                                             />
                                         </PopoverContent>
                                     </Popover>
-                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                    {isInvalid && (
+                                        <FieldError
+                                            errors={field.state.meta.errors}
+                                        />
+                                    )}
                                 </Field>
                             );
                         }}
@@ -214,33 +252,53 @@ export const SemesterFormModal = ({
 
                     <form.Field name="endDate">
                         {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                            const isInvalid =
+                                field.state.meta.isTouched &&
+                                !field.state.meta.isValid;
                             return (
                                 <Field data-invalid={isInvalid}>
                                     <FieldLabel>End date</FieldLabel>
                                     <Popover>
-                                        <PopoverTrigger render={(props) => (
-                                            <Button
-                                                {...props}
-                                                variant="outline"
-                                                className={cn(
-                                                    "w-full justify-start text-left font-normal",
-                                                    !field.state.value && "text-muted-foreground"
-                                                )}
-                                            >
-                                                <CalendarIcon className="mr-2 size-4" />
-                                                {field.state.value ? format(field.state.value, "dd MMM yyyy") : "Pick a date"}
-                                            </Button>
-                                        )} />
-                                        <PopoverContent align="start" className="p-0">
+                                        <PopoverTrigger
+                                            render={(props) => (
+                                                <Button
+                                                    {...props}
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal",
+                                                        !field.state.value &&
+                                                            "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 size-4" />
+                                                    {field.state.value
+                                                        ? format(
+                                                              field.state.value,
+                                                              "dd MMM yyyy"
+                                                          )
+                                                        : "Pick a date"}
+                                                </Button>
+                                            )}
+                                        />
+                                        <PopoverContent
+                                            align="start"
+                                            className="p-0"
+                                        >
                                             <Calendar
                                                 mode="single"
                                                 selected={field.state.value}
-                                                onSelect={(date) => date && field.handleChange(date)}
+                                                onSelect={(date) =>
+                                                    date &&
+                                                    field.handleChange(date)
+                                                }
                                             />
                                         </PopoverContent>
                                     </Popover>
-                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                    {isInvalid && (
+                                        <FieldError
+                                            errors={field.state.meta.errors}
+                                        />
+                                    )}
                                 </Field>
                             );
                         }}
@@ -248,45 +306,74 @@ export const SemesterFormModal = ({
 
                     <form.Field name="enrollmentDeadline">
                         {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                            const isInvalid =
+                                field.state.meta.isTouched &&
+                                !field.state.meta.isValid;
                             return (
                                 <Field data-invalid={isInvalid}>
                                     <FieldLabel>Enrollment deadline</FieldLabel>
                                     <Popover>
-                                        <PopoverTrigger render={(props) => (
-                                            <Button
-                                                {...props}
-                                                variant="outline"
-                                                className={cn(
-                                                    "w-full justify-start text-left font-normal",
-                                                    !field.state.value && "text-muted-foreground"
-                                                )}
-                                            >
-                                                <CalendarIcon className="mr-2 size-4" />
-                                                {field.state.value ? format(field.state.value, "dd MMM yyyy") : "Pick a date"}
-                                            </Button>
-                                        )} />
-                                        <PopoverContent align="start" className="p-0">
+                                        <PopoverTrigger
+                                            render={(props) => (
+                                                <Button
+                                                    {...props}
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal",
+                                                        !field.state.value &&
+                                                            "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 size-4" />
+                                                    {field.state.value
+                                                        ? format(
+                                                              field.state.value,
+                                                              "dd MMM yyyy"
+                                                          )
+                                                        : "Pick a date"}
+                                                </Button>
+                                            )}
+                                        />
+                                        <PopoverContent
+                                            align="start"
+                                            className="p-0"
+                                        >
                                             <Calendar
                                                 mode="single"
                                                 selected={field.state.value}
-                                                onSelect={(date) => date && field.handleChange(date)}
+                                                onSelect={(date) =>
+                                                    date &&
+                                                    field.handleChange(date)
+                                                }
                                             />
                                         </PopoverContent>
                                     </Popover>
-                                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                                    {isInvalid && (
+                                        <FieldError
+                                            errors={field.state.meta.errors}
+                                        />
+                                    )}
                                 </Field>
                             );
                         }}
                     </form.Field>
 
                     <div className="flex justify-end gap-2 pt-4">
-                        <Button type="button" variant="outline" className={"flex-1"} onClick={onClose}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className={"flex-1"}
+                            onClick={onClose}
+                        >
                             Cancel
                         </Button>
                         <form.Subscribe selector={(s) => s.canSubmit}>
                             {(canSubmit) => (
-                                <Button type="submit" className="flex-1" disabled={!canSubmit || isPending}>
+                                <Button
+                                    type="submit"
+                                    className="flex-1"
+                                    disabled={!canSubmit || isPending}
+                                >
                                     {isEdit ? "Update" : "Create"}
                                 </Button>
                             )}

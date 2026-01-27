@@ -12,8 +12,7 @@ export const semesterParams = {
     type: parseAsStringLiteral([...SEMESTER_TYPE, ""])
         .withDefault("")
         .withOptions({ clearOnDefault: true }),
-    year: parseYearRange(2000, 2100)
-        .withOptions({ clearOnDefault: true }),
+    year: parseYearRange(2000, 2100).withOptions({ clearOnDefault: true }),
 };
 
 function parseYearRange(min: number, max: number) {

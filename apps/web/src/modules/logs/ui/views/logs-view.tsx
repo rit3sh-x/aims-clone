@@ -3,7 +3,6 @@ import { LogsFilters } from "../components/logs-filter";
 import { LogsList, LogsListSkeleton } from "../components/logs-list";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
-
 export const LogsView = () => {
     return (
         <div className="w-full px-4 lg:px-12 py-8 flex flex-col gap-4 h-[calc(100vh-4rem)] overflow-y-auto">
@@ -22,7 +21,6 @@ export const LogsView = () => {
         </div>
     );
 };
-
 
 export const LogsViewSkeleton = () => {
     return (

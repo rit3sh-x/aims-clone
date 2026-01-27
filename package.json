@@ -12,6 +12,7 @@
     "devDependencies": {
         "@workspace/eslint-config": "workspace:*",
         "@workspace/typescript-config": "workspace:*",
+        "depcheck": "^1.4.7",
         "prettier": "^3.7.4",
         "rimraf": "^6.1.2",
         "turbo": "^2.6.3",

@@ -3,6 +3,7 @@ import { hodProcedure } from "../middleware";
 import {
     acceptCourseOfferingInputSchema,
     listOfferingsInputSchema,
+    rejectCourseOfferingInputSchema,
 } from "../schema";
 import {
     course,
@@ -156,6 +157,75 @@ export const offeringManagement = createTRPCRouter({
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to accept course offering.",
+                });
+            }
+
+            await logAuditEvent({
+                userId: user.id,
+                action: "UPDATE",
+                entityType: "COURSE_OFFERING",
+                entityId: id,
+                before: offering,
+                after: updated,
+            });
+
+            return updated;
+        }),
+
+    reject: hodProcedure
+        .input(rejectCourseOfferingInputSchema)
+        .mutation(async ({ input, ctx }) => {
+            const { departmentId } = ctx.hod;
+            const { id } = input;
+            const { user } = ctx.session;
+
+            const currentSemester = await db.query.semester.findFirst({
+                where: (s, { eq }) => eq(s.status, "ONGOING"),
+            });
+
+            if (!currentSemester) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "No active semester found.",
+                });
+            }
+
+            const [offering] = await db
+                .select({
+                    offering: courseOffering,
+                })
+                .from(courseOffering)
+                .innerJoin(course, eq(courseOffering.courseId, course.id))
+                .where(
+                    and(
+                        eq(courseOffering.id, id),
+                        eq(course.departmentId, departmentId),
+                        eq(courseOffering.semesterId, currentSemester.id),
+                        eq(courseOffering.status, "PROPOSED")
+                    )
+                )
+                .limit(1);
+
+            if (!offering) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message:
+                        "Course offering not found, not in your department, or not eligible for rejection.",
+                });
+            }
+
+            const [updated] = await db
+                .update(courseOffering)
+                .set({
+                    status: "REJECTED",
+                })
+                .where(eq(courseOffering.id, id))
+                .returning();
+
+            if (!updated) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to reject course offering.",
                 });
             }
 

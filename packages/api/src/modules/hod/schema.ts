@@ -10,7 +10,7 @@ export const acceptCourseInputSchema = z.object({
 });
 
 export const rejectCourseInputSchema = acceptCourseInputSchema.extend({
-    reason: z.string().min(3),
+    reason: z.string().min(3).optional(),
 });
 
 export const listCourseInputSchema = z.object({
@@ -70,6 +70,8 @@ export const getInstructorsByIdInputSchema = z.object({
 export const acceptCourseOfferingInputSchema = z.object({
     id: z.string(),
 });
+
+export const rejectCourseOfferingInputSchema = acceptCourseOfferingInputSchema;
 
 export const listProgramsInputSchema = z.object({
     search: z.string().optional(),

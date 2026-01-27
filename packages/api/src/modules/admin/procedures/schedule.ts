@@ -1,16 +1,6 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import { adminProcedure } from "../middleware";
-import {
-    createScheduleInputSchema,
-    deleteScheduleInputSchema,
-    getScheduleByIdInputSchema,
-    listSchedulesInputSchema,
-    updateScheduleInputSchema,
-    createTimeSlotInputSchema,
-    listTimeSlotsInputSchema,
-    deleteTimeSlotInputSchema,
-    createManySchedulesInputSchema,
-} from "../schema";
+import { createBulkSchedulesInputSchema } from "../schema";
 import {
     classroom,
     course,
@@ -21,612 +11,145 @@ import {
     semester,
     timeSlot,
 } from "@workspace/db";
-import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
+import { and, eq, inArray, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { checkDateRangeOverlap } from "../utils";
 
 export const scheduleManagement = createTRPCRouter({
-    listSchedules: adminProcedure
-        .input(listSchedulesInputSchema)
-        .query(async ({ input }) => {
-            const { pageSize, cursor, offeringId, roomCode, dayOfWeek } = input;
-
-            const conditions = [];
-
-            if (offeringId) {
-                conditions.push(eq(schedule.offeringId, offeringId));
-            }
-
-            if (roomCode) {
-                conditions.push(eq(classroom.room, roomCode));
-            }
-
-            if (dayOfWeek !== undefined) {
-                conditions.push(eq(timeSlot.dayOfWeek, dayOfWeek));
-            }
-
-            if (cursor) {
-                conditions.push(
-                    or(
-                        lt(schedule.createdAt, cursor.createdAt),
-                        and(
-                            eq(schedule.createdAt, cursor.createdAt),
-                            lt(schedule.id, cursor.id)
-                        )
-                    )
-                );
-            }
-
-            const where = conditions.length ? and(...conditions) : undefined;
-
-            const rows = await db
-                .select({
-                    schedule,
-                    timeSlot,
-                    classroom,
-                    courseOffering,
-                    course,
-                    semester,
-                })
-                .from(schedule)
-                .innerJoin(timeSlot, eq(schedule.timeSlotId, timeSlot.id))
-                .innerJoin(classroom, eq(schedule.classroomId, classroom.id))
-                .innerJoin(
-                    courseOffering,
-                    eq(schedule.offeringId, courseOffering.id)
-                )
-                .innerJoin(course, eq(courseOffering.courseId, course.id))
-                .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
-                .where(where)
-                .orderBy(desc(schedule.createdAt), desc(schedule.id))
-                .limit(pageSize + 1);
-
-            const hasNextPage = rows.length > pageSize;
-            const schedules = hasNextPage ? rows.slice(0, pageSize) : rows;
-
-            const nextCursor = hasNextPage
-                ? {
-                      createdAt:
-                          schedules[schedules.length - 1]!.schedule.createdAt,
-                      id: schedules[schedules.length - 1]!.schedule.id,
-                  }
-                : null;
-
-            return { schedules, nextCursor, hasNextPage };
-        }),
-
-    getSchedule: adminProcedure
-        .input(getScheduleByIdInputSchema)
-        .query(async ({ input }) => {
-            const result = await db
-                .select({
-                    schedule,
-                    timeSlot,
-                    classroom,
-                    courseOffering,
-                    course,
-                    semester,
-                })
-                .from(schedule)
-                .innerJoin(timeSlot, eq(schedule.timeSlotId, timeSlot.id))
-                .innerJoin(classroom, eq(schedule.classroomId, classroom.id))
-                .innerJoin(
-                    courseOffering,
-                    eq(schedule.offeringId, courseOffering.id)
-                )
-                .innerJoin(course, eq(courseOffering.courseId, course.id))
-                .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
-                .where(eq(schedule.id, input.id))
-                .limit(1)
-                .then((r) => r[0]);
-
-            if (!result) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Schedule not found",
-                });
-            }
-
-            return result;
-        }),
-
-    getOfferingSchedule: adminProcedure
-        .input(getScheduleByIdInputSchema)
-        .query(async ({ input }) => {
-            const offering = await db.query.courseOffering.findFirst({
-                where: eq(courseOffering.id, input.id),
-            });
-
-            if (!offering) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Course offering not found",
-                });
-            }
-
-            const schedules = await db
-                .select({
-                    schedule,
-                    timeSlot,
-                    classroom,
-                })
-                .from(schedule)
-                .innerJoin(timeSlot, eq(schedule.timeSlotId, timeSlot.id))
-                .innerJoin(classroom, eq(schedule.classroomId, classroom.id))
-                .where(eq(schedule.offeringId, input.id))
-                .orderBy(timeSlot.dayOfWeek);
-
-            return schedules;
-        }),
-
-    createSchedule: adminProcedure
-        .input(createScheduleInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            const {
-                offeringId,
-                roomCode,
-                timeSlotId,
-                effectiveFrom,
-                effectiveTo,
-            } = input;
-
-            return await db.transaction(async (tx) => {
-                const offering = await tx.query.courseOffering.findFirst({
-                    where: eq(courseOffering.id, offeringId),
-                });
-
-                if (!offering) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Course offering not found",
-                    });
-                }
-
-                const classroomRecord = await tx.query.classroom.findFirst({
-                    where: eq(classroom.room, roomCode),
-                });
-
-                if (!classroomRecord) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: `Classroom '${roomCode}' not found`,
-                    });
-                }
-
-                const timeSlotRecord = await tx.query.timeSlot.findFirst({
-                    where: eq(timeSlot.id, timeSlotId),
-                });
-
-                if (!timeSlotRecord) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Time slot not found",
-                    });
-                }
-
-                const classroomConflict = await tx.query.schedule.findFirst({
-                    where: and(
-                        eq(schedule.classroomId, classroomRecord.id),
-                        eq(schedule.timeSlotId, timeSlotId)
-                    ),
-                });
-
-                if (classroomConflict) {
-                    throw new TRPCError({
-                        code: "CONFLICT",
-                        message:
-                            "Classroom is already booked for this time slot",
-                    });
-                }
-
-                const offeringConflict = await tx.query.schedule.findFirst({
-                    where: and(
-                        eq(schedule.offeringId, offeringId),
-                        eq(schedule.timeSlotId, timeSlotId)
-                    ),
-                });
-
-                if (offeringConflict) {
-                    throw new TRPCError({
-                        code: "CONFLICT",
-                        message:
-                            "Course offering already has a class at this time slot",
-                    });
-                }
-
-                const [created] = await tx
-                    .insert(schedule)
-                    .values({
-                        offeringId,
-                        classroomId: classroomRecord.id,
-                        timeSlotId,
-                        effectiveFrom,
-                        effectiveTo,
-                    })
-                    .returning();
-
-                if (!created) {
-                    throw new TRPCError({
-                        code: "INTERNAL_SERVER_ERROR",
-                        message: "Failed to create schedule",
-                    });
-                }
-
-                await logAuditEvent({
-                    userId: ctx.session.user.id,
-                    action: "CREATE",
-                    entityType: "SCHEDULE",
-                    entityId: created.id,
-                    after: created,
-                });
-
-                return created;
-            });
-        }),
-
-    updateSchedule: adminProcedure
-        .input(updateScheduleInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            const { id, roomCode, ...restData } = input;
-
-            return await db.transaction(async (tx) => {
-                const before = await tx.query.schedule.findFirst({
-                    where: eq(schedule.id, id),
-                });
-
-                if (!before) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Schedule not found",
-                    });
-                }
-
-                let resolvedClassroomId: string | undefined;
-                if (roomCode) {
-                    const classroomRecord = await tx.query.classroom.findFirst({
-                        where: eq(classroom.room, roomCode),
-                    });
-
-                    if (!classroomRecord) {
-                        throw new TRPCError({
-                            code: "NOT_FOUND",
-                            message: `Classroom '${roomCode}' not found`,
-                        });
-                    }
-                    resolvedClassroomId = classroomRecord.id;
-                }
-
-                const newClassroomId =
-                    resolvedClassroomId ?? before.classroomId;
-                const newTimeSlotId = restData.timeSlotId ?? before.timeSlotId;
-                const newOfferingId = restData.offeringId ?? before.offeringId;
-
-                if (
-                    restData.timeSlotId &&
-                    restData.timeSlotId !== before.timeSlotId
-                ) {
-                    const timeSlotRecord = await tx.query.timeSlot.findFirst({
-                        where: eq(timeSlot.id, restData.timeSlotId),
-                    });
-
-                    if (!timeSlotRecord) {
-                        throw new TRPCError({
-                            code: "NOT_FOUND",
-                            message: "Time slot not found",
-                        });
-                    }
-                }
-
-                if (resolvedClassroomId || restData.timeSlotId) {
-                    const classroomConflict = await tx.query.schedule.findFirst(
-                        {
-                            where: and(
-                                eq(schedule.classroomId, newClassroomId),
-                                eq(schedule.timeSlotId, newTimeSlotId),
-                                sql`${schedule.id} != ${id}`
-                            ),
-                        }
-                    );
-
-                    if (classroomConflict) {
-                        throw new TRPCError({
-                            code: "CONFLICT",
-                            message:
-                                "Classroom is already booked for this time slot",
-                        });
-                    }
-                }
-
-                if (restData.offeringId || restData.timeSlotId) {
-                    const offeringConflict = await tx.query.schedule.findFirst({
-                        where: and(
-                            eq(schedule.offeringId, newOfferingId),
-                            eq(schedule.timeSlotId, newTimeSlotId),
-                            sql`${schedule.id} != ${id}`
-                        ),
-                    });
-
-                    if (offeringConflict) {
-                        throw new TRPCError({
-                            code: "CONFLICT",
-                            message:
-                                "Course offering already has a class at this time slot",
-                        });
-                    }
-                }
-
-                const updateData = {
-                    ...restData,
-                    ...(resolvedClassroomId && {
-                        classroomId: resolvedClassroomId,
-                    }),
-                };
-
-                const [after] = await tx
-                    .update(schedule)
-                    .set(updateData)
-                    .where(eq(schedule.id, id))
-                    .returning();
-
-                if (!after) {
-                    throw new TRPCError({
-                        code: "INTERNAL_SERVER_ERROR",
-                        message: "Failed to update schedule",
-                    });
-                }
-
-                await logAuditEvent({
-                    userId: ctx.session.user.id,
-                    action: "UPDATE",
-                    entityType: "SCHEDULE",
-                    entityId: id,
-                    before,
-                    after,
-                });
-
-                return after;
-            });
-        }),
-
-    deleteSchedule: adminProcedure
-        .input(deleteScheduleInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            return await db.transaction(async (tx) => {
-                const before = await tx.query.schedule.findFirst({
-                    where: eq(schedule.id, input.id),
-                });
-
-                if (!before) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Schedule not found",
-                    });
-                }
-
-                await tx.delete(schedule).where(eq(schedule.id, input.id));
-
-                await logAuditEvent({
-                    userId: ctx.session.user.id,
-                    action: "DELETE",
-                    entityType: "SCHEDULE",
-                    entityId: input.id,
-                    before,
-                });
-
-                return { success: true };
-            });
-        }),
-
-    listTimeSlots: adminProcedure
-        .input(listTimeSlotsInputSchema)
-        .query(async ({ input }) => {
-            const { dayOfWeek } = input;
-
-            const conditions = [];
-
-            if (dayOfWeek !== undefined) {
-                conditions.push(eq(timeSlot.dayOfWeek, dayOfWeek));
-            }
-
-            const where = conditions.length ? and(...conditions) : undefined;
-
-            return await db
-                .select()
-                .from(timeSlot)
-                .where(where)
-                .orderBy(timeSlot.dayOfWeek, timeSlot.sessionType);
-        }),
-
-    createTimeSlot: adminProcedure
-        .input(createTimeSlotInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            const {
-                dayOfWeek,
-                sessionType,
-                theoryPeriod,
-                tutorialPeriod,
-                labPeriod,
-            } = input;
-
-            return await db.transaction(async (tx) => {
-                const conditions = [
-                    eq(timeSlot.dayOfWeek, dayOfWeek),
-                    eq(timeSlot.sessionType, sessionType),
-                ];
-
-                if (sessionType === "THEORY" && theoryPeriod) {
-                    conditions.push(eq(timeSlot.theoryPeriod, theoryPeriod));
-                } else if (sessionType === "TUTORIAL" && tutorialPeriod) {
-                    conditions.push(
-                        eq(timeSlot.tutorialPeriod, tutorialPeriod)
-                    );
-                } else if (sessionType === "LAB" && labPeriod) {
-                    conditions.push(eq(timeSlot.labPeriod, labPeriod));
-                }
-
-                const existing = await tx.query.timeSlot.findFirst({
-                    where: and(...conditions),
-                });
-
-                if (existing) {
-                    throw new TRPCError({
-                        code: "CONFLICT",
-                        message: "Time slot already exists",
-                    });
-                }
-
-                const [created] = await tx
-                    .insert(timeSlot)
-                    .values({
-                        dayOfWeek,
-                        sessionType,
-                        theoryPeriod:
-                            sessionType === "THEORY" ? theoryPeriod : null,
-                        tutorialPeriod:
-                            sessionType === "TUTORIAL" ? tutorialPeriod : null,
-                        labPeriod: sessionType === "LAB" ? labPeriod : null,
-                    })
-                    .returning();
-
-                if (!created) {
-                    throw new TRPCError({
-                        code: "INTERNAL_SERVER_ERROR",
-                        message: "Failed to create time slot",
-                    });
-                }
-
-                await logAuditEvent({
-                    userId: ctx.session.user.id,
-                    action: "CREATE",
-                    entityType: "TIME_SLOT",
-                    entityId: created.id,
-                    after: created,
-                });
-
-                return created;
-            });
-        }),
-
-    deleteTimeSlot: adminProcedure
-        .input(deleteTimeSlotInputSchema)
-        .mutation(async ({ input, ctx }) => {
-            return await db.transaction(async (tx) => {
-                const before = await tx.query.timeSlot.findFirst({
-                    where: eq(timeSlot.id, input.id),
-                });
-
-                if (!before) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Time slot not found",
-                    });
-                }
-
-                const inUse = await tx.query.schedule.findFirst({
-                    where: eq(schedule.timeSlotId, input.id),
-                });
-
-                if (inUse) {
-                    throw new TRPCError({
-                        code: "PRECONDITION_FAILED",
-                        message:
-                            "Cannot delete time slot that is in use by schedules",
-                    });
-                }
-
-                await tx.delete(timeSlot).where(eq(timeSlot.id, input.id));
-
-                await logAuditEvent({
-                    userId: ctx.session.user.id,
-                    action: "DELETE",
-                    entityType: "TIME_SLOT",
-                    entityId: input.id,
-                    before,
-                });
-
-                return { success: true };
-            });
-        }),
-
     createBulkSchedules: adminProcedure
-        .input(createManySchedulesInputSchema)
+        .input(createBulkSchedulesInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { schedules: scheduleInputs } = input;
 
             return await db.transaction(async (tx) => {
-                const offeringIds = [
-                    ...new Set(scheduleInputs.map((s) => s.offeringId)),
+                const ongoingSemester = await tx.query.semester.findFirst({
+                    where: eq(semester.status, "ONGOING"),
+                });
+
+                if (!ongoingSemester) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "No ongoing semester found",
+                    });
+                }
+
+                const courseCodes = [
+                    ...new Set(scheduleInputs.map((s) => s.courseCode)),
                 ];
                 const roomCodes = [
                     ...new Set(scheduleInputs.map((s) => s.roomCode)),
                 ];
-                const timeSlotIds = [
-                    ...new Set(scheduleInputs.map((s) => s.timeSlotId)),
-                ];
 
-                const [offerings, classrooms, timeSlots] = await Promise.all([
-                    tx.query.courseOffering.findMany({
-                        where: inArray(courseOffering.id, offeringIds),
+                const [courses, classrooms] = await Promise.all([
+                    tx.query.course.findMany({
+                        where: inArray(course.code, courseCodes),
                     }),
                     tx.query.classroom.findMany({
                         where: inArray(classroom.room, roomCodes),
                     }),
-                    tx.query.timeSlot.findMany({
-                        where: inArray(timeSlot.id, timeSlotIds),
-                    }),
                 ]);
 
-                const offeringMap = new Map(offerings.map((o) => [o.id, o]));
-                const classroomByRoomCode = new Map(
+                const courseMap = new Map(courses.map((c) => [c.code, c]));
+                const classroomMap = new Map(
                     classrooms.map((c) => [c.room, c])
                 );
-                const timeSlotMap = new Map(timeSlots.map((t) => [t.id, t]));
 
+                const courseIds = courses.map((c) => c.id);
+                const offerings = await tx.query.courseOffering.findMany({
+                    where: and(
+                        inArray(courseOffering.courseId, courseIds),
+                        eq(courseOffering.semesterId, ongoingSemester.id)
+                    ),
+                });
+
+                const offeringMap = new Map(
+                    offerings.map((o) => [o.courseId, o])
+                );
+
+                const allTimeSlots = await tx.query.timeSlot.findMany();
+
+                const timeSlotLookup = new Map<
+                    string,
+                    (typeof allTimeSlots)[0]
+                >();
+                allTimeSlots.forEach((slot) => {
+                    let periodValue: string | null = null;
+                    if (slot.sessionType === "THEORY" && slot.theoryPeriod) {
+                        periodValue = slot.theoryPeriod;
+                    } else if (
+                        slot.sessionType === "TUTORIAL" &&
+                        slot.tutorialPeriod
+                    ) {
+                        periodValue = slot.tutorialPeriod;
+                    } else if (slot.sessionType === "LAB" && slot.labPeriod) {
+                        periodValue = slot.labPeriod;
+                    }
+
+                    if (periodValue) {
+                        const key = `${slot.dayOfWeek}-${slot.sessionType}-${periodValue}`;
+                        timeSlotLookup.set(key, slot);
+                    }
+                });
+
+                const offeringIds = offerings.map((o) => o.id);
                 const classroomIds = classrooms.map((c) => c.id);
 
                 const existingSchedules =
-                    classroomIds.length > 0
+                    offeringIds.length > 0 && classroomIds.length > 0
                         ? await tx
                               .select()
                               .from(schedule)
                               .where(
                                   or(
-                                      and(
-                                          inArray(
-                                              schedule.classroomId,
-                                              classroomIds
-                                          ),
-                                          inArray(
-                                              schedule.timeSlotId,
-                                              timeSlotIds
-                                          )
+                                      inArray(
+                                          schedule.classroomId,
+                                          classroomIds
                                       ),
-                                      and(
-                                          inArray(
-                                              schedule.offeringId,
-                                              offeringIds
-                                          ),
-                                          inArray(
-                                              schedule.timeSlotId,
-                                              timeSlotIds
-                                          )
-                                      )
+                                      inArray(schedule.offeringId, offeringIds)
                                   )
                               )
                         : [];
 
-                const existingClassroomSlots = new Set(
-                    existingSchedules.map(
-                        (s) => `${s.classroomId}-${s.timeSlotId}`
-                    )
-                );
-                const existingOfferingSlots = new Set(
-                    existingSchedules.map(
-                        (s) => `${s.offeringId}-${s.timeSlotId}`
-                    )
-                );
+                const existingByClassroomTime = new Map<
+                    string,
+                    typeof existingSchedules
+                >();
+                const existingByOfferingTime = new Map<
+                    string,
+                    typeof existingSchedules
+                >();
 
-                const batchClassroomSlots = new Set<string>();
-                const batchOfferingSlots = new Set<string>();
+                existingSchedules.forEach((s) => {
+                    const classroomKey = `${s.classroomId}-${s.timeSlotId}`;
+                    const offeringKey = `${s.offeringId}-${s.timeSlotId}`;
+
+                    if (!existingByClassroomTime.has(classroomKey)) {
+                        existingByClassroomTime.set(classroomKey, []);
+                    }
+                    existingByClassroomTime.get(classroomKey)!.push(s);
+
+                    if (!existingByOfferingTime.has(offeringKey)) {
+                        existingByOfferingTime.set(offeringKey, []);
+                    }
+                    existingByOfferingTime.get(offeringKey)!.push(s);
+                });
+
+                const batchClassroomSlots = new Map<
+                    string,
+                    Array<{
+                        effectiveFrom?: Date;
+                        effectiveTo?: Date;
+                        index: number;
+                    }>
+                >();
+                const batchOfferingSlots = new Map<
+                    string,
+                    Array<{
+                        effectiveFrom?: Date;
+                        effectiveTo?: Date;
+                        index: number;
+                    }>
+                >();
 
                 const validSchedules: Array<{
                     offeringId: string;
@@ -641,18 +164,37 @@ export const scheduleManagement = createTRPCRouter({
                     reason: string;
                 }> = [];
 
-                for (const scheduleInput of scheduleInputs) {
-                    const { offeringId, roomCode, timeSlotId } = scheduleInput;
+                for (let i = 0; i < scheduleInputs.length; i++) {
+                    const scheduleInput = scheduleInputs[i]!;
+                    const {
+                        courseCode,
+                        roomCode,
+                        dayOfWeek,
+                        sessionType,
+                        period,
+                        effectiveFrom,
+                        effectiveTo,
+                    } = scheduleInput;
 
-                    if (!offeringMap.has(offeringId)) {
+                    const courseRecord = courseMap.get(courseCode);
+                    if (!courseRecord) {
                         failed.push({
                             input: scheduleInput,
-                            reason: `Course offering not found: ${offeringId}`,
+                            reason: `Course '${courseCode}' not found`,
                         });
                         continue;
                     }
 
-                    const classroomRecord = classroomByRoomCode.get(roomCode);
+                    const offering = offeringMap.get(courseRecord.id);
+                    if (!offering) {
+                        failed.push({
+                            input: scheduleInput,
+                            reason: `Course '${courseCode}' is not being offered in the ongoing semester`,
+                        });
+                        continue;
+                    }
+
+                    const classroomRecord = classroomMap.get(roomCode);
                     if (!classroomRecord) {
                         failed.push({
                             input: scheduleInput,
@@ -661,58 +203,124 @@ export const scheduleManagement = createTRPCRouter({
                         continue;
                     }
 
-                    if (!timeSlotMap.has(timeSlotId)) {
+                    const timeSlotKey = `${dayOfWeek}-${sessionType}-${period}`;
+                    const timeSlotRecord = timeSlotLookup.get(timeSlotKey);
+
+                    if (!timeSlotRecord) {
                         failed.push({
                             input: scheduleInput,
-                            reason: `Time slot not found: ${timeSlotId}`,
+                            reason: `Time slot not found for ${dayOfWeek}, ${sessionType}, ${period}`,
                         });
                         continue;
                     }
 
-                    const classroomSlotKey = `${classroomRecord.id}-${timeSlotId}`;
-                    const offeringSlotKey = `${offeringId}-${timeSlotId}`;
+                    const classroomSlotKey = `${classroomRecord.id}-${timeSlotRecord.id}`;
+                    const offeringSlotKey = `${offering.id}-${timeSlotRecord.id}`;
 
-                    if (existingClassroomSlots.has(classroomSlotKey)) {
+                    const existingClassroomConflicts =
+                        existingByClassroomTime.get(classroomSlotKey) || [];
+                    const hasClassroomConflict =
+                        existingClassroomConflicts.some((existing) =>
+                            checkDateRangeOverlap(
+                                effectiveFrom,
+                                effectiveTo,
+                                existing.effectiveFrom ?? undefined,
+                                existing.effectiveTo ?? undefined
+                            )
+                        );
+
+                    if (hasClassroomConflict) {
                         failed.push({
                             input: scheduleInput,
-                            reason: `Classroom '${roomCode}' is already booked for this time slot`,
+                            reason: `Classroom '${roomCode}' is already booked for ${dayOfWeek}, ${sessionType}, ${period}`,
                         });
                         continue;
                     }
 
-                    if (existingOfferingSlots.has(offeringSlotKey)) {
+                    const existingOfferingConflicts =
+                        existingByOfferingTime.get(offeringSlotKey) || [];
+                    const hasOfferingConflict = existingOfferingConflicts.some(
+                        (existing) =>
+                            checkDateRangeOverlap(
+                                effectiveFrom,
+                                effectiveTo,
+                                existing.effectiveFrom ?? undefined,
+                                existing.effectiveTo ?? undefined
+                            )
+                    );
+
+                    if (hasOfferingConflict) {
                         failed.push({
                             input: scheduleInput,
-                            reason: "Course offering already has a class at this time slot",
+                            reason: `Course '${courseCode}' already has a class at ${dayOfWeek}, ${sessionType}, ${period}`,
                         });
                         continue;
                     }
 
-                    if (batchClassroomSlots.has(classroomSlotKey)) {
+                    const batchClassroomEntries =
+                        batchClassroomSlots.get(classroomSlotKey) || [];
+                    const hasBatchClassroomConflict =
+                        batchClassroomEntries.some((entry) =>
+                            checkDateRangeOverlap(
+                                effectiveFrom,
+                                effectiveTo,
+                                entry.effectiveFrom,
+                                entry.effectiveTo
+                            )
+                        );
+
+                    if (hasBatchClassroomConflict) {
                         failed.push({
                             input: scheduleInput,
-                            reason: `Duplicate classroom assignment in batch for '${roomCode}' at this time slot`,
+                            reason: `Duplicate classroom assignment in batch for '${roomCode}' at ${dayOfWeek}, ${sessionType}, ${period}`,
                         });
                         continue;
                     }
 
-                    if (batchOfferingSlots.has(offeringSlotKey)) {
+                    const batchOfferingEntries =
+                        batchOfferingSlots.get(offeringSlotKey) || [];
+                    const hasBatchOfferingConflict = batchOfferingEntries.some(
+                        (entry) =>
+                            checkDateRangeOverlap(
+                                effectiveFrom,
+                                effectiveTo,
+                                entry.effectiveFrom,
+                                entry.effectiveTo
+                            )
+                    );
+
+                    if (hasBatchOfferingConflict) {
                         failed.push({
                             input: scheduleInput,
-                            reason: "Duplicate offering assignment in batch for this time slot",
+                            reason: `Duplicate course assignment in batch for '${courseCode}' at ${dayOfWeek}, ${sessionType}, ${period}`,
                         });
                         continue;
                     }
 
-                    batchClassroomSlots.add(classroomSlotKey);
-                    batchOfferingSlots.add(offeringSlotKey);
+                    if (!batchClassroomSlots.has(classroomSlotKey)) {
+                        batchClassroomSlots.set(classroomSlotKey, []);
+                    }
+                    batchClassroomSlots.get(classroomSlotKey)!.push({
+                        effectiveFrom,
+                        effectiveTo,
+                        index: i,
+                    });
+
+                    if (!batchOfferingSlots.has(offeringSlotKey)) {
+                        batchOfferingSlots.set(offeringSlotKey, []);
+                    }
+                    batchOfferingSlots.get(offeringSlotKey)!.push({
+                        effectiveFrom,
+                        effectiveTo,
+                        index: i,
+                    });
 
                     validSchedules.push({
-                        offeringId,
+                        offeringId: offering.id,
                         classroomId: classroomRecord.id,
-                        timeSlotId,
-                        effectiveFrom: scheduleInput.effectiveFrom,
-                        effectiveTo: scheduleInput.effectiveTo,
+                        timeSlotId: timeSlotRecord.id,
+                        effectiveFrom,
+                        effectiveTo,
                     });
                 }
 

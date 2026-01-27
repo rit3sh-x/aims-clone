@@ -39,3 +39,4 @@ npm-debug.log*
 next-env.d.ts
 *env.d.ts
 /plan
+*.csv

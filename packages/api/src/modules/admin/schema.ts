@@ -303,108 +303,53 @@ export const listLogsInputSchema = z.object({
     dateTo: z.date().optional(),
 });
 
-export const listSchedulesInputSchema = z.object({
-    cursor: z
-        .object({
-            createdAt: z.date(),
-            id: z.string(),
-        })
-        .optional(),
-    pageSize: z
-        .number()
-        .min(LIST_MIN_PAGE_SIZE)
-        .max(LIST_MAX_PAGE_SIZE)
-        .default(LIST_DEFAULT_PAGE_SIZE),
-    offeringId: z.string().optional(),
-    roomCode: z.string().optional(),
-    dayOfWeek: z.enum(dayOfWeekEnum.enumValues).optional(),
-});
-
-export const getScheduleByIdInputSchema = z.object({
-    id: z.string(),
-});
-
-export const createManySchedulesInputSchema = z.object({
-    schedules: z
-        .array(
-            z.object({
-                offeringId: z.string(),
-                roomCode: z.string(),
-                timeSlotId: z.string(),
-                effectiveFrom: z.date().optional(),
-                effectiveTo: z.date().optional(),
-            })
-        )
-        .min(1)
-        .max(100),
-});
-
-export const createScheduleInputSchema = z.object({
-    offeringId: z.string(),
-    roomCode: z.string(),
-    timeSlotId: z.string(),
-    effectiveFrom: z.date().optional(),
-    effectiveTo: z.date().optional(),
-});
-
-export const updateScheduleInputSchema = z.object({
-    id: z.string(),
-    offeringId: z.string().optional(),
-    roomCode: z.string().optional(),
-    timeSlotId: z.string().optional(),
-    effectiveFrom: z.date().nullable().optional(),
-    effectiveTo: z.date().nullable().optional(),
-});
-
-export const deleteScheduleInputSchema = z.object({
-    id: z.string(),
-});
-
-export const listTimeSlotsInputSchema = z.object({
-    dayOfWeek: z.enum(dayOfWeekEnum.enumValues).optional(),
-});
-
-export const createTimeSlotInputSchema = z
-    .object({
-        dayOfWeek: z.enum(dayOfWeekEnum.enumValues),
-        sessionType: z.enum(sessionTypeEnum.enumValues),
-        theoryPeriod: z.enum(theoryPeriodEnum.enumValues).optional(),
-        tutorialPeriod: z.enum(tutorialPeriodEnum.enumValues).optional(),
-        labPeriod: z.enum(labPeriodEnum.enumValues).optional(),
-    })
+const scheduleInputSchema = z
+    .discriminatedUnion("sessionType", [
+        z.object({
+            courseCode: z.string().min(1, "Course code is required"),
+            roomCode: z.string().min(1, "Room code is required"),
+            dayOfWeek: dayOfWeekEnum,
+            sessionType: z.literal("THEORY"),
+            period: theoryPeriodEnum,
+            effectiveFrom: z.date().optional(),
+            effectiveTo: z.date().optional(),
+        }),
+        z.object({
+            courseCode: z.string().min(1, "Course code is required"),
+            roomCode: z.string().min(1, "Room code is required"),
+            dayOfWeek: dayOfWeekEnum,
+            sessionType: z.literal("TUTORIAL"),
+            period: tutorialPeriodEnum,
+            effectiveFrom: z.date().optional(),
+            effectiveTo: z.date().optional(),
+        }),
+        z.object({
+            courseCode: z.string().min(1, "Course code is required"),
+            roomCode: z.string().min(1, "Room code is required"),
+            dayOfWeek: dayOfWeekEnum,
+            sessionType: z.literal("LAB"),
+            period: labPeriodEnum,
+            effectiveFrom: z.date().optional(),
+            effectiveTo: z.date().optional(),
+        }),
+    ])
     .refine(
         (data) => {
-            switch (data.sessionType) {
-                case "THEORY":
-                    return (
-                        data.theoryPeriod !== undefined &&
-                        !data.tutorialPeriod &&
-                        !data.labPeriod
-                    );
-                case "TUTORIAL":
-                    return (
-                        data.tutorialPeriod !== undefined &&
-                        !data.theoryPeriod &&
-                        !data.labPeriod
-                    );
-                case "LAB":
-                    return (
-                        data.labPeriod !== undefined &&
-                        !data.theoryPeriod &&
-                        !data.tutorialPeriod
-                    );
-                default:
-                    return false;
+            if (data.effectiveFrom && data.effectiveTo) {
+                return data.effectiveFrom < data.effectiveTo;
             }
+            return true;
         },
         {
-            message:
-                "Period must match session type: THEORY requires theoryPeriod, TUTORIAL requires tutorialPeriod, LAB requires labPeriod",
+            message: "effectiveFrom must be before effectiveTo",
+            path: ["effectiveFrom"],
         }
     );
 
-export const deleteTimeSlotInputSchema = z.object({
-    id: z.string(),
+export const createBulkSchedulesInputSchema = z.object({
+    schedules: z
+        .array(scheduleInputSchema)
+        .min(1, "At least one schedule is required"),
 });
 
 export const createFeedbackQuestionsInputSchema = z.object({

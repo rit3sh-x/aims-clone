@@ -10,7 +10,7 @@ export const studentManagement = createTRPCRouter({
         .input(listStudentsInputSchema)
         .query(async ({ input, ctx }) => {
             const { id: advisorId } = ctx.advisor;
-            const { pageSize, cursor, programCode, search, year } = input;
+            const { pageSize, cursor, search, year } = input;
 
             const conditions = [];
 
@@ -23,10 +23,6 @@ export const studentManagement = createTRPCRouter({
 
             if (year) {
                 conditions.push(eq(batch.year, year));
-            }
-
-            if (programCode) {
-                conditions.push(eq(program.code, programCode));
             }
 
             conditions.push(eq(user.disabled, false));

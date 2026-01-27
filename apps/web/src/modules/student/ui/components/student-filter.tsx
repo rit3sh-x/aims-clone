@@ -2,17 +2,15 @@
 
 import { SearchFilter } from "@/components/search-filter";
 import { useDebouncedSearch } from "@/hooks/use-debounced-search";
-import { useTenantParams } from "@/modules/tenant/hooks/use-tenant-params";
-import { NameFilter } from "../name-filter";
-import { CodeFilter, CodeFilterSkeleton } from "../code-filter";
-import { Suspense } from "react";
-import { YearFilter } from "../year-filter";
+import { useStudentParams } from "../../hooks/use-student-params";
+import { CodeFilter } from "./code-filter";
+import { YearFilter } from "./year-filter";
 
 export const StudentFilters = () => {
-    const [params, setParams] = useTenantParams();
-    const { name, departmentCode, year } = params;
+    const [params, setParams] = useStudentParams();
+    const { name, year } = params;
 
-    const hasAnyFilters = !!(name || departmentCode || year);
+    const hasAnyFilters = !!(name || year);
 
     const updateSearch = (patch: Partial<typeof params>) => {
         setParams(patch);
@@ -21,7 +19,6 @@ export const StudentFilters = () => {
     const onClear = () => {
         setParams({
             name: undefined,
-            departmentCode: undefined,
             year: undefined,
         });
     };
@@ -45,19 +42,6 @@ export const StudentFilters = () => {
                 )}
             </div>
 
-            <SearchFilter title="Department">
-                <Suspense fallback={<CodeFilterSkeleton />}>
-                    <CodeFilter
-                        value={
-                            departmentCode === "" ? undefined : departmentCode
-                        }
-                        onChange={(value) =>
-                            updateSearch({ departmentCode: value })
-                        }
-                    />
-                </Suspense>
-            </SearchFilter>
-
             <SearchFilter title="Year">
                 <YearFilter
                     value={year ?? undefined}
@@ -65,8 +49,8 @@ export const StudentFilters = () => {
                 />
             </SearchFilter>
 
-            <SearchFilter title="Search" className="border-b-0">
-                <NameFilter
+            <SearchFilter title="Department" className="border-b-0">
+                <CodeFilter
                     value={debouncedName.value}
                     onChange={debouncedName.onChange}
                 />

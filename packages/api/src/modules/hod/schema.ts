@@ -104,7 +104,6 @@ export const listOfferingsInputSchema = z.object({
 
 export const listStudentsInputSchema = z.object({
     search: z.string().optional(),
-    programCode: z.string().optional(),
     year: z.number().min(2000).max(2100).optional(),
     cursor: z
         .object({

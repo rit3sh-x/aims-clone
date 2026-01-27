@@ -12,15 +12,17 @@ const Page = async ({ searchParams }: Props) => {
     await requireAdmin();
     const { name } = await classroomParamsLoader(searchParams);
 
-    prefetch(trpc.admin.classroom.list.infiniteQueryOptions({
-        search: name === "" ? undefined: name,
-    }));
+    prefetch(
+        trpc.admin.classroom.list.infiniteQueryOptions({
+            search: name === "" ? undefined : name,
+        })
+    );
 
     return (
         <HydrateClient>
             <ClassroomView />
         </HydrateClient>
-    )
-}
+    );
+};
 
 export default Page;

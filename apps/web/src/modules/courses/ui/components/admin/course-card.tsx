@@ -43,9 +43,7 @@ export const CourseCard = ({ course, disabled = false }: CourseCardProps) => {
         >
             <div className="flex items-start justify-between gap-2">
                 <div>
-                    <h3 className="font-semibold text-sm">
-                        {course.code}
-                    </h3>
+                    <h3 className="font-semibold text-sm">{course.code}</h3>
                     <p className="text-xs text-muted-foreground line-clamp-2">
                         {course.title}
                     </p>
@@ -59,8 +57,7 @@ export const CourseCard = ({ course, disabled = false }: CourseCardProps) => {
             <div className="text-xs text-muted-foreground flex gap-4">
                 <span>Credits: {course.credits}</span>
                 <span>
-                    L-T-P: {course.lectureHours}-
-                    {course.tutorialHours}-
+                    L-T-P: {course.lectureHours}-{course.tutorialHours}-
                     {course.practicalHours}
                 </span>
             </div>

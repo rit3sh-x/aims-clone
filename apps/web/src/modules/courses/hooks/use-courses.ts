@@ -26,7 +26,7 @@ export const useSuspenseCourse = (id: string) => {
 
     return useSuspenseQuery(
         trpc.admin.course.getOne.queryOptions({
-            id
+            id,
         })
     );
 };
@@ -38,7 +38,8 @@ export const useSuspenseCoursesList = () => {
     const query = useSuspenseInfiniteQuery(
         trpc.admin.course.list.infiniteQueryOptions(
             {
-                departmentCode: departmentCode === "" ? undefined : departmentCode,
+                departmentCode:
+                    departmentCode === "" ? undefined : departmentCode,
                 search: name === "" ? undefined : name,
             },
             {
@@ -95,7 +96,8 @@ export const useAcceptCourse = () => {
             onSuccess: async () => {
                 queryClient.invalidateQueries(
                     trpc.admin.course.list.infiniteQueryOptions({
-                        departmentCode: departmentCode === "" ? undefined : departmentCode,
+                        departmentCode:
+                            departmentCode === "" ? undefined : departmentCode,
                         search: name === "" ? undefined : name,
                     })
                 );
@@ -114,7 +116,8 @@ export const useRejectCourse = () => {
             onSuccess: async () => {
                 queryClient.invalidateQueries(
                     trpc.admin.course.list.infiniteQueryOptions({
-                        departmentCode: departmentCode === "" ? undefined : departmentCode,
+                        departmentCode:
+                            departmentCode === "" ? undefined : departmentCode,
                         search: name === "" ? undefined : name,
                     })
                 );

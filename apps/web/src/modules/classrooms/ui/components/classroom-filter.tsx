@@ -8,12 +8,9 @@ import { TypeFilter } from "./type-filter";
 
 export const ClassroomFilters = () => {
     const [params, setParams] = useClassroomParams();
-    const { name, type} = params;
+    const { name, type } = params;
 
-    const hasAnyFilters = !!(
-        name ||
-        type
-    );
+    const hasAnyFilters = !!(name || type);
 
     const updateSearch = (patch: Partial<typeof params>) => {
         setParams(patch);

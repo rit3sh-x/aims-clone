@@ -18,9 +18,7 @@ export const ClassroomCard = ({ classroom }: { classroom: Classroom }) => {
     return (
         <Card className="p-4 space-y-2">
             <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm">
-                    Room {classroom.room}
-                </h3>
+                <h3 className="font-semibold text-sm">Room {classroom.room}</h3>
 
                 <Badge variant="outline" className="text-[10px] uppercase">
                     {classroom.type}

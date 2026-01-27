@@ -11,13 +11,17 @@ export const ROLES = {
 export const ROLE_VALUES = Object.values(ROLES) as [string, ...string[]];
 
 const statement = {
-    plugins: [],
+    user: ["create", "list", "update", "delete", "ban", "impersonate"],
+    session: ["list", "terminate"],
 } as const;
 
 export const ac = createAccessControl(statement);
 
 export const ROLE_MAP = {
-    [ROLES.ADMIN]: ac.newRole({}),
+    [ROLES.ADMIN]: ac.newRole({
+        user: ["create", "list", "update", "delete", "ban", "impersonate"],
+        session: ["list", "terminate"],
+    }),
     [ROLES.ADVISOR]: ac.newRole({}),
     [ROLES.HOD]: ac.newRole({}),
     [ROLES.INSTRUCTOR]: ac.newRole({}),

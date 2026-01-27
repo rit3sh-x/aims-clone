@@ -23,7 +23,7 @@ export const offeringManagement = createTRPCRouter({
                 semesterTerm,
                 instructorIds,
                 departmentCode,
-                courseId
+                courseId,
             } = input;
 
             const conditions = [];
@@ -97,9 +97,9 @@ export const offeringManagement = createTRPCRouter({
 
             const nextCursor = hasNextPage
                 ? {
-                    createdAt: items[items.length - 1]!.offering.createdAt,
-                    id: items[items.length - 1]!.offering.id,
-                }
+                      createdAt: items[items.length - 1]!.offering.createdAt,
+                      id: items[items.length - 1]!.offering.id,
+                  }
                 : null;
 
             return {

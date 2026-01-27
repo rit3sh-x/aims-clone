@@ -6,9 +6,9 @@ export const useListFeedback = () => {
     const trpc = useTRPC();
     return useSuspenseQuery(
         trpc.admin.feedback.list.queryOptions(undefined, {
-            staleTime: 0, 
-            gcTime: Infinity, 
-            refetchOnMount: true, 
+            staleTime: 0,
+            gcTime: Infinity,
+            refetchOnMount: true,
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
         })

@@ -47,8 +47,12 @@ export const SemesterFilter = () => {
             <SearchFilter title="Department">
                 <Suspense fallback={<CodeFilterSkeleton />}>
                     <CodeFilter
-                        value={departmentCode === "" ? undefined : departmentCode}
-                        onChange={(value) => updateSearch({ departmentCode: value })}
+                        value={
+                            departmentCode === "" ? undefined : departmentCode
+                        }
+                        onChange={(value) =>
+                            updateSearch({ departmentCode: value })
+                        }
                     />
                 </Suspense>
             </SearchFilter>

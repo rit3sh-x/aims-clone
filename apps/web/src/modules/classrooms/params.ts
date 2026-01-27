@@ -5,5 +5,5 @@ export const classroomParams = {
     name: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
     type: parseAsStringLiteral([...CLASSROOMS, ""])
         .withDefault("")
-        .withOptions({ clearOnDefault: true })
+        .withOptions({ clearOnDefault: true }),
 };

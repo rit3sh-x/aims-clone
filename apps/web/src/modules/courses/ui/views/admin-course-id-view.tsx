@@ -1,6 +1,12 @@
 import { Suspense } from "react";
-import { CourseDetailsCard, CourseDetailsCardSkeleton } from "../components/admin/course-details-card";
-import { OfferingsList, OfferingsListSkeleton } from "../components/admin/offerings-list";
+import {
+    CourseDetailsCard,
+    CourseDetailsCardSkeleton,
+} from "../components/admin/course-details-card";
+import {
+    OfferingsList,
+    OfferingsListSkeleton,
+} from "../components/admin/offerings-list";
 
 interface AdminCourseIdViewProps {
     courseId: string;

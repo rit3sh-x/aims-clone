@@ -11,7 +11,11 @@ import {
     DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { humanizeEnum } from "@/lib/formatters";
-import { useAcceptCourse, useRejectCourse, useSuspenseCourse } from "@/modules/courses/hooks/use-courses";
+import {
+    useAcceptCourse,
+    useRejectCourse,
+    useSuspenseCourse,
+} from "@/modules/courses/hooks/use-courses";
 import { RichText } from "@/components/rich-text";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
@@ -36,7 +40,10 @@ export const CourseDetailsCard = ({ courseId }: CourseDetailsCardProps) => {
                     </h2>
 
                     <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="uppercase text-[10px]">
+                        <Badge
+                            variant="outline"
+                            className="uppercase text-[10px]"
+                        >
                             {humanizeEnum(course.status)}
                         </Badge>
 
@@ -48,15 +55,19 @@ export const CourseDetailsCard = ({ courseId }: CourseDetailsCardProps) => {
 
                 {showActions && (
                     <DropdownMenu>
-                        <DropdownMenuTrigger render={(props) => (
-                            <Button variant="ghost" size="icon" {...props}>
-                                <MoreVertical className="size-4" />
-                            </Button>
-                        )} />
+                        <DropdownMenuTrigger
+                            render={(props) => (
+                                <Button variant="ghost" size="icon" {...props}>
+                                    <MoreVertical className="size-4" />
+                                </Button>
+                            )}
+                        />
 
                         <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuItem
-                                onClick={() => acceptCourse.mutate({ courseId: course.id })}
+                                onClick={() =>
+                                    acceptCourse.mutate({ courseId: course.id })
+                                }
                                 disabled={acceptCourse.isPending}
                             >
                                 <Check className="mr-2 size-4" />
@@ -64,7 +75,9 @@ export const CourseDetailsCard = ({ courseId }: CourseDetailsCardProps) => {
                             </DropdownMenuItem>
 
                             <DropdownMenuItem
-                                onClick={() => rejectCourse.mutate({ courseId: course.id })}
+                                onClick={() =>
+                                    rejectCourse.mutate({ courseId: course.id })
+                                }
                                 disabled={rejectCourse.isPending}
                                 className="text-destructive focus:text-destructive"
                             >
@@ -93,13 +106,7 @@ export const CourseDetailsCard = ({ courseId }: CourseDetailsCardProps) => {
     );
 };
 
-const Info = ({
-    label,
-    value,
-}: {
-    label: string;
-    value: string | number;
-}) => (
+const Info = ({ label, value }: { label: string; value: string | number }) => (
     <div>
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="font-medium">{value}</p>

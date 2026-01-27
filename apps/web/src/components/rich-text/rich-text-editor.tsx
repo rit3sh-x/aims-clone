@@ -6,7 +6,7 @@ import {
     BlockNoteView,
     lightDefaultTheme,
     darkDefaultTheme,
-    Theme
+    Theme,
 } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import "@blocknote/core/fonts/inter.css";
@@ -47,7 +47,7 @@ export const RichTextEditor = ({
     content,
     onChange,
     disabled = false,
-    className
+    className,
 }: RichTextEditorProps) => {
     const { resolvedTheme } = useTheme();
 
@@ -56,12 +56,18 @@ export const RichTextEditor = ({
     });
 
     return (
-        <div className={`rounded-md border border-input bg-background ${className}`}>
+        <div
+            className={`rounded-md border border-input bg-background ${className}`}
+        >
             <BlockNoteView
                 editor={editor}
                 editable={!disabled}
                 onChange={() => onChange?.(editor.document)}
-                theme={resolvedTheme === "dark" ? shadcnTheme.dark : shadcnTheme.light}
+                theme={
+                    resolvedTheme === "dark"
+                        ? shadcnTheme.dark
+                        : shadcnTheme.light
+                }
                 slashMenu={!disabled}
                 sideMenu={!disabled}
                 formattingToolbar={!disabled}

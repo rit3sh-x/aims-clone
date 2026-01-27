@@ -9,14 +9,7 @@ export const studentManagement = createTRPCRouter({
     list: adminProcedure
         .input(listStudentsInputSchema)
         .query(async ({ input }) => {
-            const {
-                pageSize,
-                cursor,
-                departmentCode,
-                programCode,
-                search,
-                year,
-            } = input;
+            const { pageSize, cursor, departmentCode, search, year } = input;
 
             const conditions = [];
 
@@ -26,10 +19,6 @@ export const studentManagement = createTRPCRouter({
 
             if (year) {
                 conditions.push(eq(batch.year, year));
-            }
-
-            if (programCode) {
-                conditions.push(eq(program.code, programCode));
             }
 
             if (departmentCode) {
@@ -87,7 +76,7 @@ export const studentManagement = createTRPCRouter({
             };
         }),
 
-    getOne: adminProcedure
+    getById: adminProcedure
         .input(getStudentByIdSchema)
         .query(async ({ input }) => {
             const { id } = input;

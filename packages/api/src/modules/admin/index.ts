@@ -1,8 +1,6 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import { userManagement } from "./procedures/users";
 import { departmentManagement } from "./procedures/department";
-import { programManagement } from "./procedures/program";
-import { batchManagement } from "./procedures/batch";
 import { studentManagement } from "./procedures/student";
 import { instructorManagement } from "./procedures/instructor";
 import { courseManagement } from "./procedures/course";
@@ -19,8 +17,6 @@ import { metricsViewer } from "./procedures/metrics";
 export const adminRouter = createTRPCRouter({
     user: userManagement,
     department: departmentManagement,
-    program: programManagement,
-    batch: batchManagement,
     student: studentManagement,
     instructor: instructorManagement,
     course: courseManagement,

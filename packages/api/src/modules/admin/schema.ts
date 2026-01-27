@@ -21,7 +21,7 @@ import {
 
 export const banUserInputSchema = z.object({
     id: z.string(),
-    reason: z.string(),
+    reason: z.string().optional(),
     expiresIn: z.number().int().positive().optional(),
 });
 
@@ -107,7 +107,6 @@ export const listBatchesInputSchema = z.object({
 export const listStudentsInputSchema = z.object({
     search: z.string().optional(),
     departmentCode: z.string().optional(),
-    programCode: z.string().optional(),
     year: z.number().min(2000).max(2100).optional(),
     cursor: z
         .object({
@@ -198,7 +197,7 @@ export const listHodsInputSchema = z.object({
         .min(LIST_MIN_PAGE_SIZE)
         .max(LIST_MAX_PAGE_SIZE)
         .default(LIST_DEFAULT_PAGE_SIZE),
-    departmentCode: z.string().length(5).toUpperCase().optional(),
+    departmentCode: z.string().min(1).toUpperCase().optional(),
     search: z.string().min(1).optional(),
 });
 

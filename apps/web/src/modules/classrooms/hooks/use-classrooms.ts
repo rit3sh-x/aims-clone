@@ -1,11 +1,9 @@
 import { useTRPC } from "@/trpc/client";
 import { useClassroomParams } from "./use-classroom-params";
-import {
-    useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 
 export const useSuspenseClassrooms = () => {
-    const [{ name,type }] = useClassroomParams();
+    const [{ name, type }] = useClassroomParams();
     const trpc = useTRPC();
 
     const query = useSuspenseInfiniteQuery(

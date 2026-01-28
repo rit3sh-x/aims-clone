@@ -65,9 +65,8 @@ export const createUser = async ({
     });
 };
 
-type BulkUserInput = Omit<CreateUserInput, "password">;
 
-export const createBulkUsers = async (users: BulkUserInput[]) => {
+export const createBulkUsers = async (users: CreateUserInput[]) => {
     if (users.length === 0) return [];
 
     return db.transaction(async (tx) => {
@@ -89,12 +88,14 @@ export const createBulkUsers = async (users: BulkUserInput[]) => {
         }
 
         const accountsData = await Promise.all(
-            createdUsers.map(async (u) => {
-                const hashedPassword = await createAuthHash(randomHex());
+            createdUsers.map(async (createdUser, index) => {
+                const inputUser = users[index]!;
+                const plainPassword = inputUser.password ?? randomHex();
+                const hashedPassword = await createAuthHash(plainPassword);
 
                 return {
-                    userId: u.id,
-                    accountId: u.id,
+                    userId: createdUser.id,
+                    accountId: createdUser.id,
                     providerId: "credential",
                     password: hashedPassword,
                 };

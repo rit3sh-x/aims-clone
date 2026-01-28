@@ -29,6 +29,8 @@ import {
 import { createBulkUsers } from "./utils";
 import * as data from "./dummy-data";
 
+const DEFAULT_PASSWORD = "abcd1234";
+
 async function seedDepartments() {
     console.log("Seeding departments...");
     const depts = await db
@@ -47,6 +49,7 @@ async function seedHODs(depts: (typeof department.$inferSelect)[]) {
             name: h.name,
             email: h.email,
             role: "HOD" as const,
+            password: DEFAULT_PASSWORD,
         }))
     );
 
@@ -96,6 +99,7 @@ async function seedAdvisors(depts: (typeof department.$inferSelect)[]) {
             name: a.name,
             email: a.email,
             role: "ADVISOR" as const,
+            password: DEFAULT_PASSWORD,
         }))
     );
 
@@ -125,6 +129,7 @@ async function seedInstructors(depts: (typeof department.$inferSelect)[]) {
             name: i.name,
             email: i.email,
             role: "INSTRUCTOR" as const,
+            password: DEFAULT_PASSWORD,
         }))
     );
 
@@ -179,6 +184,7 @@ async function seedStudents(
             name: s.name,
             email: s.email,
             role: "STUDENT" as const,
+            password: DEFAULT_PASSWORD,
         }))
     );
 

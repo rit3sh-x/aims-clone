@@ -5,7 +5,6 @@ import {
     LIST_MIN_PAGE_SIZE,
     MAX_POSSIBLE_QUESTIONS,
 } from "../constants";
-import { attendanceTypeEnum } from "@workspace/db";
 
 export const listOfferingsInputSchema = z.object({
     pageSize: z
@@ -27,7 +26,6 @@ export const dropInputSchema = z.object({
 export const listAttendanceInputSchema = z.object({
     page: z.number().min(1).default(1),
     pageSize: z.number().min(1).max(50).default(10),
-    type: z.enum(attendanceTypeEnum.enumValues),
     weekStart: z.date().optional(),
 });
 

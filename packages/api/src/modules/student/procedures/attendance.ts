@@ -9,7 +9,7 @@ import {
     schedule,
     timeSlot,
 } from "@workspace/db";
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { listAttendanceInputSchema } from "../schema";
 import { getWeekRange } from "../utils";
@@ -19,7 +19,7 @@ export const attendanceViewer = createTRPCRouter({
         .input(listAttendanceInputSchema)
         .query(async ({ ctx, input }) => {
             const studentUserId = ctx.session.user.id;
-            const { page, pageSize, type, weekStart } = input;
+            const { page, pageSize, weekStart } = input;
 
             const offset = (page - 1) * pageSize;
 
@@ -70,25 +70,31 @@ export const attendanceViewer = createTRPCRouter({
                         eq(enrollment.studentId, studentRecord.id),
                         eq(courseOffering.semesterId, currentSemester.id),
                         gte(attendance.date, monday),
-                        lte(attendance.date, sunday),
-                        eq(attendance.type, type)
+                        lte(attendance.date, sunday)
                     )
                 )
-                .orderBy(attendance.date, timeSlot.startTime)
+                .orderBy(
+                    attendance.date,
+                    timeSlot.dayOfWeek,
+                    sql`CASE 
+                        WHEN ${timeSlot.theoryPeriod} IS NOT NULL THEN ${timeSlot.theoryPeriod}::text
+                        WHEN ${timeSlot.tutorialPeriod} IS NOT NULL THEN ${timeSlot.tutorialPeriod}::text
+                        WHEN ${timeSlot.labPeriod} IS NOT NULL THEN ${timeSlot.labPeriod}::text
+                    END`
+                )
                 .limit(pageSize + 1)
                 .offset(offset);
 
             const hasNextPage = rows.length > pageSize;
+            const items = hasNextPage ? rows.slice(0, pageSize) : rows;
 
             return {
                 week: {
                     from: monday,
                     to: sunday,
                 },
-                page,
-                pageSize,
-                hasNextPage,
-                data: hasNextPage ? rows.slice(0, pageSize) : rows,
+                items,
+                nextCursor: hasNextPage ? page + 1 : undefined,
             };
         }),
 });

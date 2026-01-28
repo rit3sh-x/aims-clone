@@ -10,7 +10,7 @@ import {
     semester,
     timeSlot,
 } from "@workspace/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export const scheduleViewer = createTRPCRouter({
     current: studentProcedure.query(async ({ ctx }) => {
@@ -64,6 +64,13 @@ export const scheduleViewer = createTRPCRouter({
                     eq(courseOffering.semesterId, currentSemester.id)
                 )
             )
-            .orderBy(timeSlot.dayOfWeek, timeSlot.startTime);
+            .orderBy(
+                timeSlot.dayOfWeek,
+                sql`CASE 
+                    WHEN ${timeSlot.theoryPeriod} IS NOT NULL THEN ${timeSlot.theoryPeriod}::text
+                    WHEN ${timeSlot.tutorialPeriod} IS NOT NULL THEN ${timeSlot.tutorialPeriod}::text
+                    WHEN ${timeSlot.labPeriod} IS NOT NULL THEN ${timeSlot.labPeriod}::text
+                END`
+            );
     }),
 });

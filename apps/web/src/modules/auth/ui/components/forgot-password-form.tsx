@@ -104,7 +104,7 @@ export const ForgotPasswordForm = ({ onSubmit }: ForgotPasswordFormProps) => {
                             disabled={!canSubmit}
                             className="w-full bg-white text-black"
                         >
-                            Send reset link
+                            Send reset OTP
                         </Button>
                     )}
                 </form.Subscribe>

@@ -24,3 +24,5 @@ const Page = async ({ params }: Props) => {
         </HydrateClient>
     );
 };
+
+export default Page;

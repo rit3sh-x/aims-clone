@@ -44,10 +44,6 @@ const assessmentTemplateSchema = z.object({
 
 export const proposeOfferingInputSchema = z.object({
     courseId: z.string(),
-    semesterId: z.string(),
-    batchIds: z.array(z.string()).min(1),
-    prerequisiteCourseIds: z.array(z.string().min(1)).default([]),
-    instructorIds: z.array(z.string().min(1)).default([]),
     assessmentTemplates: z.array(assessmentTemplateSchema),
 });
 
@@ -77,8 +73,12 @@ export const proposeCourseInputSchema = z.object({
     credits: z.number().min(0.5).max(5),
 });
 
+export const getCourseInputSchema = z.object({
+    courseId: z.string().uuid(),
+});
+
 export const listInstructorCoursesInputSchema = z.object({
-    status: z.enum(courseStatusEnum.enumValues).optional(),
+    search: z.string().optional(),
 });
 
 export const uploadAssessmentMarksInputSchema = z.object({

@@ -5,7 +5,6 @@ import { InstructorEnrollmentView } from "@/modules/enrollments/ui/views/instruc
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import type { SearchParams } from "nuqs";
-import { Suspense } from "react";
 
 type Props = {
     searchParams: Promise<SearchParams>;

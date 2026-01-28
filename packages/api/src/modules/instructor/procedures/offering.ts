@@ -10,62 +10,39 @@ import {
     courseOffering,
     courseOfferingInstructor,
     db,
-    instructor,
     logAuditEvent,
-    offeringBatch,
-    prerequisite,
 } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, inArray, lt, or, type SQL } from "drizzle-orm";
+import { and, desc, eq, lt, or, type SQL } from "drizzle-orm";
 
 export const offeringManagement = createTRPCRouter({
     propose: instructorProcedure
         .input(proposeOfferingInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { instructor: currentInstructor } = ctx;
-
-            const {
-                courseId,
-                semesterId,
-                batchIds,
-                instructorIds,
-                prerequisiteCourseIds,
-                assessmentTemplates,
-            } = input;
+            const { courseId, assessmentTemplates } = input;
 
             const courseRecord = await db
                 .select({
+                    id: course.id,
                     status: course.status,
                 })
                 .from(course)
                 .where(eq(course.id, courseId))
                 .then((r) => r[0]);
 
-            if (!courseRecord || courseRecord.status !== "ADMIN_ACCEPTED") {
+            if (!courseRecord) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Course not found",
+                });
+            }
+
+            if (courseRecord.status !== "ADMIN_ACCEPTED") {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: "Only ADMIN_ACCEPTED courses can be offered",
                 });
-            }
-
-            const instructorsToAdd = Array.from(
-                new Set(
-                    instructorIds.filter((id) => id !== currentInstructor.id)
-                )
-            );
-
-            if (instructorsToAdd.length > 0) {
-                const instructorRecords = await db
-                    .select({ id: instructor.id })
-                    .from(instructor)
-                    .where(inArray(instructor.id, instructorsToAdd));
-
-                if (instructorRecords.length !== instructorsToAdd.length) {
-                    throw new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: "Invalid instructor list",
-                    });
-                }
             }
 
             const totalWeightage = assessmentTemplates.reduce(
@@ -76,7 +53,20 @@ export const offeringManagement = createTRPCRouter({
             if (totalWeightage !== 100) {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
-                    message: "Total assessment weightage must be exactly 100",
+                    message: "Total assessment weightage must equal 100%",
+                });
+            }
+
+            const currentSemester = await db.query.semester.findFirst({
+                where: (s, { or, eq }) =>
+                    or(eq(s.status, "ONGOING"), eq(s.status, "UPCOMING")),
+                orderBy: (s, { asc }) => asc(s.startDate),
+            });
+
+            if (!currentSemester) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: "No active or upcoming semester available",
                 });
             }
 
@@ -90,7 +80,7 @@ export const offeringManagement = createTRPCRouter({
                     .where(
                         and(
                             eq(courseOffering.courseId, courseId),
-                            eq(courseOffering.semesterId, semesterId)
+                            eq(courseOffering.semesterId, currentSemester.id)
                         )
                     )
                     .then((r) => r[0]);
@@ -102,7 +92,7 @@ export const offeringManagement = createTRPCRouter({
                     throw new TRPCError({
                         code: "CONFLICT",
                         message:
-                            "Offering already exists for this course and semester",
+                            "Offering already exists for this course in the current semester",
                     });
                 }
 
@@ -110,7 +100,7 @@ export const offeringManagement = createTRPCRouter({
                     .insert(courseOffering)
                     .values({
                         courseId,
-                        semesterId,
+                        semesterId: currentSemester.id,
                         status: "PROPOSED",
                     })
                     .returning();
@@ -122,43 +112,21 @@ export const offeringManagement = createTRPCRouter({
                     });
                 }
 
-                const allInstructorIds = [
-                    currentInstructor.id,
-                    ...instructorsToAdd,
-                ];
+                await tx.insert(courseOfferingInstructor).values({
+                    offeringId: offering.id,
+                    instructorId: currentInstructor.id,
+                    isHead: true,
+                });
 
-                await tx.insert(courseOfferingInstructor).values(
-                    allInstructorIds.map((id) => ({
-                        offeringId: offering.id,
-                        instructorId: id,
-                        isHead: id === currentInstructor.id,
-                    }))
-                );
-
-                await tx.insert(offeringBatch).values(
-                    batchIds.map((batchId) => ({
-                        offeringId: offering.id,
-                        batchId,
-                    }))
-                );
-
-                await tx.insert(assessmentTemplate).values(
-                    assessmentTemplates.map((template) => ({
-                        ...template,
-                        offeringId: offering.id,
-                    }))
-                );
-
-                if (prerequisiteCourseIds.length > 0) {
-                    await tx
-                        .insert(prerequisite)
-                        .values(
-                            prerequisiteCourseIds.map((prereqId) => ({
-                                courseId,
-                                prerequisiteCourseId: prereqId,
-                            }))
-                        )
-                        .onConflictDoNothing();
+                if (assessmentTemplates.length > 0) {
+                    await tx.insert(assessmentTemplate).values(
+                        assessmentTemplates.map((template) => ({
+                            offeringId: offering.id,
+                            type: template.type,
+                            maxMarks: template.maxMarks,
+                            weightage: template.weightage,
+                        }))
+                    );
                 }
 
                 await logAuditEvent({
@@ -168,10 +136,7 @@ export const offeringManagement = createTRPCRouter({
                     entityId: offering.id,
                     after: {
                         offering,
-                        instructorIds: allInstructorIds,
                         headInstructorId: currentInstructor.id,
-                        batchIds,
-                        prerequisiteCourseIds,
                         assessmentTemplates,
                     },
                 });
@@ -211,8 +176,10 @@ export const offeringManagement = createTRPCRouter({
             const rows = await db
                 .select({
                     offering: courseOffering,
+                    course,
                 })
                 .from(courseOffering)
+                .innerJoin(course, eq(courseOffering.courseId, course.id))
                 .innerJoin(
                     courseOfferingInstructor,
                     eq(courseOfferingInstructor.offeringId, courseOffering.id)

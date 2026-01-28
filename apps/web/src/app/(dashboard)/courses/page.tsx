@@ -5,6 +5,7 @@ import {
     AdminCourseViewSkeleton,
 } from "@/modules/courses/ui/views/admin-course-view";
 import { HodCourseView } from "@/modules/courses/ui/views/hod-course-view";
+import { InstructorCourseView } from "@/modules/courses/ui/views/instructor-course-view";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
@@ -57,6 +58,17 @@ const Page = async ({ searchParams }: Props) => {
             );
         }
         case "INSTRUCTOR": {
+            prefetch(
+                trpc.instructor.course.list.queryOptions({
+                    search: name === "" ? undefined : name,
+                })
+            );
+
+            return (
+                <HydrateClient>
+                    <InstructorCourseView />
+                </HydrateClient>
+            );
         }
         default:
             return null;

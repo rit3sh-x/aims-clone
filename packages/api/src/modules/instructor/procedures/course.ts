@@ -1,11 +1,12 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import { instructorProcedure } from "../middleware";
 import { TRPCError } from "@trpc/server";
-import { course, db, logAuditEvent } from "@workspace/db";
-import { and, eq, desc } from "drizzle-orm";
+import { course, db, department, logAuditEvent } from "@workspace/db";
+import { and, eq, desc, or, type SQL } from "drizzle-orm";
 import {
     proposeCourseInputSchema,
     listInstructorCoursesInputSchema,
+    getCourseInputSchema,
 } from "../schema";
 
 export const courseManagement = createTRPCRouter({
@@ -45,20 +46,58 @@ export const courseManagement = createTRPCRouter({
         .input(listInstructorCoursesInputSchema)
         .query(async ({ input, ctx }) => {
             const { instructor } = ctx;
-            const { status } = input;
+            const { search } = input;
 
-            const conditions = [
+            const conditions: SQL[] = [
                 eq(course.departmentId, instructor.departmentId),
             ];
 
-            if (status) {
-                conditions.push(eq(course.status, status));
-            }
+            if (search) {
+                const searchCondition = or(
+                    eq(course.title, search),
+                    eq(course.description, search),
+                    eq(course.code, search)
+                );
 
+                if (searchCondition) {
+                    conditions.push(searchCondition);
+                }
+            }
             return db
                 .select()
                 .from(course)
                 .where(and(...conditions))
                 .orderBy(desc(course.createdAt));
+        }),
+
+    getById: instructorProcedure
+        .input(getCourseInputSchema)
+        .query(async ({ input, ctx }) => {
+            const { instructor } = ctx;
+            const { courseId } = input;
+
+            const result = await db
+                .select({
+                    course,
+                    department,
+                })
+                .from(course)
+                .innerJoin(department, eq(course.departmentId, department.id))
+                .where(
+                    and(
+                        eq(course.id, courseId),
+                        eq(course.departmentId, instructor.departmentId)
+                    )
+                )
+                .then((rows) => rows[0]);
+
+            if (!result) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Course not found",
+                });
+            }
+
+            return result;
         }),
 });

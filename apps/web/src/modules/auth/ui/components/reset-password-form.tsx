@@ -212,7 +212,6 @@ export const ResetPasswordForm = ({ onSubmit }: ResetPasswordFormProps) => {
                     {(canSubmit) => (
                         <Button
                             type="submit"
-                            variant="secondary"
                             disabled={!canSubmit}
                             className="w-full bg-white text-black"
                         >

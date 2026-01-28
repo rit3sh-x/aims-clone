@@ -187,7 +187,6 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
                     {(canSubmit) => (
                         <Button
                             type="submit"
-                            variant="secondary"
                             disabled={!canSubmit}
                             className="w-full bg-white text-black"
                         >

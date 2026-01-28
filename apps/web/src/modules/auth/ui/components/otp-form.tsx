@@ -132,7 +132,6 @@ export const OtpForm = ({ onSubmit, onResend }: OtpFormProps) => {
                     {(canSubmit) => (
                         <Button
                             type="submit"
-                            variant="secondary"
                             disabled={!canSubmit}
                             className="w-full bg-white text-black"
                         >

@@ -5,95 +5,66 @@ import {
     UsersIcon,
     UserIcon,
     LayersIcon,
-    LinkIcon,
     ClipboardListIcon,
     CheckSquareIcon,
     CalendarIcon,
     MessageSquareIcon,
-    BellIcon,
     FileTextIcon,
-    ShieldIcon,
-    LockIcon,
     HistoryIcon,
     BarChartIcon,
-    SettingsIcon,
     CalendarDaysIcon,
     BuildingIcon,
-    ClockIcon,
-    ClipboardCheckIcon,
     StarIcon,
     LayoutGridIcon,
     BookMarkedIcon,
     SchoolIcon,
     CalendarClockIcon,
-    UserCogIcon,
 } from "lucide-react";
 import type { UserRole } from "@workspace/db";
-
-// TODO: Correct the urls and make them according to app
 
 export const academics = [
     {
         title: "Departments",
-        url: "/academics/departments",
+        url: "/departments",
         icon: FolderOpenIcon,
     },
-    { title: "Programs", url: "/academics/programs", icon: GraduationCapIcon },
-    { title: "Courses", url: "/academics/courses", icon: BookOpenIcon },
-    { title: "Batches", url: "/academics/batches", icon: LayersIcon },
-    { title: "Students", url: "/academics/students", icon: UsersIcon },
-    { title: "Instructors", url: "/academics/instructors", icon: UserIcon },
-    { title: "Prerequisites", url: "/academics/prerequisites", icon: LinkIcon },
+    { title: "Courses", url: "/courses", icon: BookOpenIcon },
+    { title: "Students", url: "/list/students", icon: UsersIcon },
+    { title: "Instructors", url: "/list/instructors", icon: UserIcon },
 ];
 
 export const teachingLearning = [
     {
         title: "Course Offerings",
-        url: "/teaching/course-offerings",
+        url: "/offering",
         icon: LayoutGridIcon,
     },
     {
         title: "Enrollments",
-        url: "/teaching/enrollments",
+        url: "/enrollments",
         icon: ClipboardListIcon,
     },
-    { title: "Attendance", url: "/teaching/attendance", icon: CheckSquareIcon },
     {
-        title: "Assessments",
-        url: "/teaching/assessments",
-        icon: ClipboardCheckIcon,
-    },
-    { title: "Grades", url: "/teaching/grades", icon: StarIcon },
-    {
-        title: "Course Feedback",
-        url: "/teaching/feedback",
+        title: "Feedback Questions",
+        url: "/feedback-questions",
         icon: MessageSquareIcon,
     },
 ];
 
 export const scheduling = [
-    { title: "Time Slots", url: "/scheduling/time-slots", icon: ClockIcon },
-    { title: "Classrooms", url: "/scheduling/classrooms", icon: BuildingIcon },
+    { title: "Classrooms", url: "/classrooms", icon: BuildingIcon },
     {
-        title: "Class Schedules",
-        url: "/scheduling/class-schedules",
+        title: "Academic Schedule",
+        url: "/academic-schedule",
         icon: CalendarIcon,
     },
-    { title: "Exams", url: "/scheduling/exams", icon: ClipboardListIcon },
-    {
-        title: "Exam Schedules",
-        url: "/scheduling/exam-schedules",
-        icon: CalendarDaysIcon,
-    },
-];
-
-export const settings = [
-    { title: "Semesters", url: "/settings/semesters", icon: CalendarDaysIcon },
+    { title: "Semesters", url: "/semesters", icon: CalendarDaysIcon },
+    { title: "Events", url: "/events", icon: CalendarDaysIcon },
 ];
 
 export function getSidebarOptions(role: UserRole) {
     const commonDashboard = [
-        { title: "Overview", url: "/dashboard", icon: BarChartIcon },
+        { title: "Overview", url: "/", icon: BarChartIcon },
     ];
 
     switch (role) {
@@ -103,7 +74,7 @@ export function getSidebarOptions(role: UserRole) {
                     ...commonDashboard,
                     {
                         title: "Audit Logs",
-                        url: "/dashboard/audit-logs",
+                        url: "/logs",
                         icon: HistoryIcon,
                     },
                 ],
@@ -122,11 +93,6 @@ export function getSidebarOptions(role: UserRole) {
                         title: "Scheduling",
                         icon: CalendarClockIcon,
                         items: scheduling,
-                    },
-                    {
-                        title: "Settings",
-                        icon: SettingsIcon,
-                        items: settings,
                     },
                 ],
                 footer: [
@@ -148,23 +114,18 @@ export function getSidebarOptions(role: UserRole) {
                         items: [
                             {
                                 title: "My Courses",
-                                url: "/my-academics/courses",
+                                url: "/courses",
                                 icon: BookOpenIcon,
                             },
                             {
-                                title: "Attendance",
-                                url: "/my-academics/attendance",
-                                icon: CheckSquareIcon,
+                                title: "Enrollments",
+                                url: "/enrollments",
+                                icon: ClipboardListIcon,
                             },
                             {
-                                title: "Grades",
-                                url: "/my-academics/grades",
-                                icon: StarIcon,
-                            },
-                            {
-                                title: "Course Feedback",
-                                url: "/my-academics/feedback",
-                                icon: MessageSquareIcon,
+                                title: "Student Record",
+                                url: "/student-record",
+                                icon: FileTextIcon,
                             },
                         ],
                     },
@@ -173,56 +134,14 @@ export function getSidebarOptions(role: UserRole) {
                         icon: CalendarClockIcon,
                         items: [
                             {
-                                title: "Class Schedule",
-                                url: "/schedule/classes",
+                                title: "Academic Schedule",
+                                url: "/academic-schedule",
                                 icon: CalendarIcon,
                             },
                             {
-                                title: "Exam Schedule",
-                                url: "/schedule/exams",
+                                title: "Events",
+                                url: "/events",
                                 icon: CalendarDaysIcon,
-                            },
-                        ],
-                    },
-                    {
-                        title: "Communication",
-                        icon: MessageSquareIcon,
-                        items: [
-                            {
-                                title: "Announcements",
-                                url: "/communication/announcements",
-                                icon: MessageSquareIcon,
-                            },
-                            {
-                                title: "Notifications",
-                                url: "/communication/notifications",
-                                icon: BellIcon,
-                            },
-                            {
-                                title: "Documents",
-                                url: "/communication/documents",
-                                icon: FileTextIcon,
-                            },
-                        ],
-                    },
-                    {
-                        title: "Profile",
-                        icon: UserCogIcon,
-                        items: [
-                            {
-                                title: "Personal Info",
-                                url: "/profile/info",
-                                icon: UserIcon,
-                            },
-                            {
-                                title: "Change Password",
-                                url: "/profile/password",
-                                icon: LockIcon,
-                            },
-                            {
-                                title: "Security Settings",
-                                url: "/profile/security",
-                                icon: ShieldIcon,
                             },
                         ],
                     },
@@ -239,32 +158,17 @@ export function getSidebarOptions(role: UserRole) {
                         items: [
                             {
                                 title: "Course Offerings",
-                                url: "/my-courses/offerings",
+                                url: "/offering",
                                 icon: LayoutGridIcon,
                             },
                             {
                                 title: "Enrollments",
-                                url: "/my-courses/enrollments",
+                                url: "/enrollments",
                                 icon: ClipboardListIcon,
                             },
                             {
-                                title: "Attendance",
-                                url: "/my-courses/attendance",
-                                icon: CheckSquareIcon,
-                            },
-                            {
-                                title: "Assessments",
-                                url: "/my-courses/assessments",
-                                icon: ClipboardCheckIcon,
-                            },
-                            {
-                                title: "Grades",
-                                url: "/my-courses/grades",
-                                icon: StarIcon,
-                            },
-                            {
-                                title: "Course Feedback",
-                                url: "/my-courses/feedback",
+                                title: "Feedback Questions",
+                                url: "/feedback-questions",
                                 icon: MessageSquareIcon,
                             },
                         ],
@@ -274,30 +178,14 @@ export function getSidebarOptions(role: UserRole) {
                         icon: CalendarClockIcon,
                         items: [
                             {
-                                title: "My Class Schedule",
-                                url: "/schedule/classes",
+                                title: "Academic Schedule",
+                                url: "/academic-schedule",
                                 icon: CalendarIcon,
                             },
                             {
-                                title: "My Exam Schedule",
-                                url: "/schedule/exams",
-                                icon: CalendarDaysIcon,
-                            },
-                        ],
-                    },
-                    {
-                        title: "Communication",
-                        icon: MessageSquareIcon,
-                        items: [
-                            {
-                                title: "Announcements",
-                                url: "/communication/announcements",
-                                icon: MessageSquareIcon,
-                            },
-                            {
-                                title: "Notifications",
-                                url: "/communication/notifications",
-                                icon: BellIcon,
+                                title: "Classrooms",
+                                url: "/classrooms",
+                                icon: BuildingIcon,
                             },
                         ],
                     },
@@ -314,28 +202,13 @@ export function getSidebarOptions(role: UserRole) {
                         items: [
                             {
                                 title: "Students",
-                                url: "/my-batch/students",
+                                url: "/list/students",
                                 icon: UsersIcon,
                             },
                             {
                                 title: "Enrollments",
-                                url: "/my-batch/enrollments",
+                                url: "/enrollments",
                                 icon: ClipboardListIcon,
-                            },
-                            {
-                                title: "Attendance",
-                                url: "/my-batch/attendance",
-                                icon: CheckSquareIcon,
-                            },
-                            {
-                                title: "Grades",
-                                url: "/my-batch/grades",
-                                icon: StarIcon,
-                            },
-                            {
-                                title: "Course Feedback",
-                                url: "/my-batch/feedback",
-                                icon: MessageSquareIcon,
                             },
                         ],
                     },
@@ -344,30 +217,14 @@ export function getSidebarOptions(role: UserRole) {
                         icon: CalendarClockIcon,
                         items: [
                             {
-                                title: "Class Schedule",
-                                url: "/schedule/classes",
+                                title: "Academic Schedule",
+                                url: "/academic-schedule",
                                 icon: CalendarIcon,
                             },
                             {
-                                title: "Exam Schedule",
-                                url: "/schedule/exams",
+                                title: "Events",
+                                url: "/events",
                                 icon: CalendarDaysIcon,
-                            },
-                        ],
-                    },
-                    {
-                        title: "Communication",
-                        icon: MessageSquareIcon,
-                        items: [
-                            {
-                                title: "Announcements",
-                                url: "/communication/announcements",
-                                icon: MessageSquareIcon,
-                            },
-                            {
-                                title: "Notifications",
-                                url: "/communication/notifications",
-                                icon: BellIcon,
                             },
                         ],
                     },
@@ -383,18 +240,18 @@ export function getSidebarOptions(role: UserRole) {
                         icon: SchoolIcon,
                         items: [
                             {
-                                title: "Batches",
-                                url: "/academics/batches",
-                                icon: LayersIcon,
+                                title: "Departments",
+                                url: "/departments",
+                                icon: FolderOpenIcon,
                             },
                             {
                                 title: "Students",
-                                url: "/academics/students",
+                                url: "/list/students",
                                 icon: UsersIcon,
                             },
                             {
                                 title: "Instructors",
-                                url: "/academics/instructors",
+                                url: "/list/instructors",
                                 icon: UserIcon,
                             },
                         ],
@@ -405,28 +262,18 @@ export function getSidebarOptions(role: UserRole) {
                         items: [
                             {
                                 title: "Course Offerings",
-                                url: "/teaching/course-offerings",
+                                url: "/offering",
                                 icon: LayoutGridIcon,
                             },
                             {
                                 title: "Enrollments",
-                                url: "/teaching/enrollments",
+                                url: "/enrollments",
                                 icon: ClipboardListIcon,
                             },
                             {
-                                title: "Attendance",
-                                url: "/teaching/attendance",
-                                icon: CheckSquareIcon,
-                            },
-                            {
-                                title: "Assessments",
-                                url: "/teaching/assessments",
-                                icon: ClipboardCheckIcon,
-                            },
-                            {
-                                title: "Grades",
-                                url: "/teaching/grades",
-                                icon: StarIcon,
+                                title: "Courses",
+                                url: "/courses",
+                                icon: BookOpenIcon,
                             },
                         ],
                     },
@@ -435,35 +282,19 @@ export function getSidebarOptions(role: UserRole) {
                         icon: CalendarClockIcon,
                         items: [
                             {
-                                title: "Class Schedules",
-                                url: "/scheduling/class-schedules",
+                                title: "Academic Schedule",
+                                url: "/academic-schedule",
                                 icon: CalendarIcon,
                             },
                             {
-                                title: "Exams",
-                                url: "/scheduling/exams",
-                                icon: ClipboardListIcon,
-                            },
-                            {
-                                title: "Exam Schedules",
-                                url: "/scheduling/exam-schedules",
+                                title: "Semesters",
+                                url: "/semesters",
                                 icon: CalendarDaysIcon,
                             },
-                        ],
-                    },
-                    {
-                        title: "Communication",
-                        icon: MessageSquareIcon,
-                        items: [
                             {
-                                title: "Announcements",
-                                url: "/communication/announcements",
-                                icon: MessageSquareIcon,
-                            },
-                            {
-                                title: "Notifications",
-                                url: "/communication/notifications",
-                                icon: BellIcon,
+                                title: "Classrooms",
+                                url: "/classrooms",
+                                icon: BuildingIcon,
                             },
                         ],
                     },

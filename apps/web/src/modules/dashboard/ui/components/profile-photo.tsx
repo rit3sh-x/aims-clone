@@ -3,13 +3,12 @@
 import React, { useState } from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
 import {
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalTitle,
-} from "@workspace/ui/components/modal";
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@workspace/ui/components/dialog";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import {
@@ -120,7 +119,7 @@ export const ProfilePhoto = ({
     };
 
     return (
-        <Modal
+        <Dialog
             open={open}
             onOpenChange={(val) => {
                 onOpenChange(val);
@@ -131,12 +130,12 @@ export const ProfilePhoto = ({
                 }
             }}
         >
-            <ModalContent className="md:max-w-md">
-                <ModalHeader>
-                    <ModalTitle>Profile Photo</ModalTitle>
-                </ModalHeader>
+            <DialogContent className="md:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Profile Photo</DialogTitle>
+                </DialogHeader>
 
-                <ModalBody className="space-y-4 w-full md:px-0">
+                <div className="space-y-4 w-full px-4 py-6">
                     <Input
                         type="file"
                         accept="image/*"
@@ -160,9 +159,9 @@ export const ProfilePhoto = ({
                             />
                         </div>
                     )}
-                </ModalBody>
+                </div>
 
-                <ModalFooter className="flex flex-col-reverse gap-2 md:flex-row">
+                <DialogFooter className="flex flex-col-reverse gap-2 md:flex-row">
                     <Button
                         variant="outline"
                         disabled={isPending}
@@ -190,9 +189,9 @@ export const ProfilePhoto = ({
                             {isPending ? "Saving..." : "Save"}
                         </Button>
                     )}
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
 

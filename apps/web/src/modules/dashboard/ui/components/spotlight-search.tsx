@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useSpotlightSearch } from "../../hooks/use-spotlight-search";
 import { useSpotlight } from "../../hooks/use-spotlight";
 import { SpotlightOutput } from "../../types";
+import type { Route } from "next";
 
 export const SpotlightSearch = () => {
     const [open, setOpen] = useState(false);
@@ -96,7 +97,7 @@ export const SpotlightSearch = () => {
                                     {group.items.map((item) => (
                                         <Link
                                             key={item.url}
-                                            href={item.url}
+                                            href={item.url as Route}
                                             className="block"
                                             onClick={() => setOpen(false)}
                                         >

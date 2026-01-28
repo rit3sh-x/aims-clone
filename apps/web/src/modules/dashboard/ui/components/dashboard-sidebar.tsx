@@ -29,6 +29,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@workspace/ui/components/collapsible";
+import type { Route } from "next";
 
 interface DashboardSidebarProps {
     role: UserRole;
@@ -179,7 +180,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                                                         <Link
                                                                             {...props}
                                                                             href={
-                                                                                item.url
+                                                                                item.url as Route
                                                                             }
                                                                         >
                                                                             <item.icon className="size-4" />
@@ -224,7 +225,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                         "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
                                 )}
                                 render={(props) => (
-                                    <Link {...props} href={item.url}>
+                                    <Link {...props} href={item.url as Route}>
                                         <item.icon className="size-4" />
                                         <span>{item.title}</span>
                                     </Link>

@@ -101,7 +101,7 @@ export const listOfferingsInputSchema = z.object({
         .max(LIST_MAX_PAGE_SIZE)
         .default(LIST_DEFAULT_PAGE_SIZE),
     courseCode: z.string().optional(),
-    instructorIds: z.array(z.string()).optional(),
+    search: z.string().optional(),
 });
 
 export const listStudentsInputSchema = z.object({

@@ -8,13 +8,12 @@ import {
 import {
     course,
     courseOffering,
-    courseOfferingInstructor,
     db,
     department,
     logAuditEvent,
     semester,
 } from "@workspace/db";
-import { and, desc, eq, sql, or, lt } from "drizzle-orm";
+import { and, desc, eq, or, lt } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const offeringManagement = createTRPCRouter({
@@ -22,7 +21,7 @@ export const offeringManagement = createTRPCRouter({
         .input(listOfferingsInputSchema)
         .query(async ({ input, ctx }) => {
             const { departmentId } = ctx.hod;
-            const { pageSize, cursor, courseCode, instructorIds } = input;
+            const { pageSize, cursor, courseCode, search } = input;
 
             const currentSemester = await db.query.semester.findFirst({
                 where: (s, { eq }) => eq(s.status, "ONGOING"),
@@ -43,16 +42,9 @@ export const offeringManagement = createTRPCRouter({
 
             conditions.push(eq(department.id, departmentId));
 
-            if (instructorIds && instructorIds.length > 0) {
+            if (search) {
                 conditions.push(
-                    sql`
-                        EXISTS (
-                            SELECT 1
-                            FROM ${courseOfferingInstructor} coi
-                            WHERE coi.offering_id = ${courseOffering.id}
-                            AND coi.instructor_id IN ${instructorIds}
-                        )
-                    `
+                    or(eq(course.title, search), eq(course.description, search))
                 );
             }
 

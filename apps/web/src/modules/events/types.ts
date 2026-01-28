@@ -1,3 +1,4 @@
+import { RouterOutputs } from "@workspace/api";
 export type {
     LabPeriod,
     SessionType,
@@ -7,3 +8,6 @@ export type {
     AttendanceStatus,
     DaysOfWeek,
 } from "@workspace/db";
+
+export type SemesterCardType =
+    RouterOutputs["student"]["self"]["performance"][number];

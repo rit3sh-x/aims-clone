@@ -30,7 +30,7 @@ export const selfManagement = createTRPCRouter({
         const rows = await db
             .select({
                 semester,
-                credits: course.credits,
+                course,
                 grade: grade.grade,
             })
             .from(enrollment)
@@ -53,6 +53,10 @@ export const selfManagement = createTRPCRouter({
             string,
             {
                 semester: typeof semester.$inferSelect;
+                courses: Array<{
+                    course: typeof course.$inferSelect;
+                    grade: GradeType;
+                }>;
                 totalCredits: number;
                 totalPoints: number;
             }
@@ -60,21 +64,27 @@ export const selfManagement = createTRPCRouter({
 
         for (const row of rows) {
             const gp = GRADE_POINTS[row.grade];
-            if (gp === null) continue;
-
             const semId = row.semester.id;
 
             if (!bySemester.has(semId)) {
                 bySemester.set(semId, {
                     semester: row.semester,
+                    courses: [],
                     totalCredits: 0,
                     totalPoints: 0,
                 });
             }
 
             const sem = bySemester.get(semId)!;
-            sem.totalCredits += row.credits;
-            sem.totalPoints += row.credits * gp;
+            sem.courses.push({
+                course: row.course,
+                grade: row.grade,
+            });
+
+            if (gp !== null) {
+                sem.totalCredits += row.course.credits;
+                sem.totalPoints += row.course.credits * gp;
+            }
         }
 
         let cumulativeCredits = 0;
@@ -98,6 +108,7 @@ export const selfManagement = createTRPCRouter({
 
             result.push({
                 semester: sem.semester,
+                courses: sem.courses,
                 sgpa,
                 cgpa,
             });

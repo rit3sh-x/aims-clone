@@ -3,20 +3,21 @@ import { studentProcedure } from "../middleware";
 import {
     dropInputSchema,
     enrollInputSchema,
+    getOfferingInputSchema,
     listOfferingsInputSchema,
 } from "../schema";
 import {
     course,
     courseOffering,
     db,
-    document,
+    department,
     enrollment,
     logAuditEvent,
     offeringBatch,
     semester,
     student,
 } from "@workspace/db";
-import { and, asc, eq, gt, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, gt, ilike, inArray, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { MAX_CREDITS_PER_SEMESTER } from "../../constants";
 
@@ -25,7 +26,7 @@ export const offeringManagement = createTRPCRouter({
         .input(listOfferingsInputSchema)
         .query(async ({ input, ctx }) => {
             const studentUserId = ctx.session.user.id;
-            const { pageSize, cursor } = input;
+            const { pageSize, cursor, departmentCode, search } = input;
 
             const currentSemester = await db.query.semester.findFirst({
                 where: (s, { eq }) => eq(s.status, "ONGOING"),
@@ -49,27 +50,45 @@ export const offeringManagement = createTRPCRouter({
                 });
             }
 
+            const filters = [
+                eq(courseOffering.semesterId, currentSemester.id),
+                eq(courseOffering.status, "ENROLLING"),
+                eq(offeringBatch.batchId, studentRecord.batchId),
+            ];
+
+            if (cursor) {
+                filters.push(gt(courseOffering.id, cursor));
+            }
+
+            if (departmentCode) {
+                filters.push(eq(department.code, departmentCode.toUpperCase()));
+            }
+
+            if (search) {
+                filters.push(
+                    or(
+                        ilike(course.code, `%${search}%`),
+                        ilike(course.title, `%${search}%`)
+                    )!
+                );
+            }
+
             const rows = await db
                 .select({
                     offering: courseOffering,
                     course,
                     semester,
+                    department,
                 })
                 .from(courseOffering)
                 .innerJoin(course, eq(courseOffering.courseId, course.id))
                 .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
+                .innerJoin(department, eq(course.departmentId, department.id))
                 .innerJoin(
                     offeringBatch,
                     eq(offeringBatch.offeringId, courseOffering.id)
                 )
-                .where(
-                    and(
-                        eq(courseOffering.semesterId, currentSemester.id),
-                        eq(courseOffering.status, "ENROLLING"),
-                        eq(offeringBatch.batchId, studentRecord.batchId),
-                        cursor ? gt(courseOffering.id, cursor) : undefined
-                    )
-                )
+                .where(and(...filters))
                 .orderBy(asc(courseOffering.id))
                 .limit(pageSize + 1);
 
@@ -77,7 +96,7 @@ export const offeringManagement = createTRPCRouter({
             const items = hasNextPage ? rows.slice(0, pageSize) : rows;
 
             const nextCursor = hasNextPage
-                ? { id: items[items.length - 1]!.offering.id }
+                ? items[items.length - 1]!.offering.id
                 : null;
 
             return {
@@ -210,7 +229,7 @@ export const offeringManagement = createTRPCRouter({
         .input(dropInputSchema)
         .mutation(async ({ input, ctx }) => {
             const studentUserId = ctx.session.user.id;
-            const { enrollmentId } = input;
+            const { offeringId } = input;
 
             const studentRecord = await db.query.student.findFirst({
                 where: eq(student.userId, studentUserId),
@@ -223,24 +242,60 @@ export const offeringManagement = createTRPCRouter({
                 });
             }
 
+            const currentSemester = await db.query.semester.findFirst({
+                where: (s, { eq }) => eq(s.status, "ONGOING"),
+            });
+
+            if (!currentSemester) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: "No currently running semester",
+                });
+            }
+
+            const enrollmentRecord = await db
+                .select()
+                .from(enrollment)
+                .innerJoin(
+                    courseOffering,
+                    eq(enrollment.offeringId, courseOffering.id)
+                )
+                .where(
+                    and(
+                        eq(enrollment.studentId, studentRecord.id),
+                        eq(enrollment.offeringId, offeringId),
+                        eq(courseOffering.semesterId, currentSemester.id),
+                        inArray(enrollment.status, [
+                            "PENDING",
+                            "INSTRUCTOR_APPROVED",
+                            "ADVISOR_APPROVED",
+                            "ENROLLED",
+                        ])
+                    )
+                )
+                .then((rows) => rows[0]);
+
+            if (!enrollmentRecord) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message:
+                        "Enrollment not found for the given offering in the current semester",
+                });
+            }
+
             const [updated] = await db
                 .update(enrollment)
                 .set({
                     status: "DROPPED",
                     updatedAt: new Date(),
                 })
-                .where(
-                    and(
-                        eq(enrollment.id, enrollmentId),
-                        eq(enrollment.studentId, studentRecord.id)
-                    )
-                )
+                .where(eq(enrollment.id, enrollmentRecord.enrollment.id))
                 .returning();
 
             if (!updated) {
                 throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Enrollment not found",
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to drop the enrollment",
                 });
             }
 
@@ -253,5 +308,46 @@ export const offeringManagement = createTRPCRouter({
             });
 
             return updated;
+        }),
+
+    getById: studentProcedure
+        .input(getOfferingInputSchema)
+        .query(async ({ input, ctx }) => {
+            const studentUserId = ctx.session.user.id;
+            const { offeringId } = input;
+
+            const studentRecord = await db.query.student.findFirst({
+                where: eq(student.userId, studentUserId),
+            });
+
+            if (!studentRecord) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "Student record not found",
+                });
+            }
+
+            const offering = await db
+                .select({
+                    offering: courseOffering,
+                    course,
+                    semester,
+                    department,
+                })
+                .from(courseOffering)
+                .innerJoin(course, eq(courseOffering.courseId, course.id))
+                .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
+                .innerJoin(department, eq(course.departmentId, department.id))
+                .where(eq(courseOffering.id, offeringId))
+                .then((rows) => rows[0]);
+
+            if (!offering) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Offering not found",
+                });
+            }
+
+            return offering;
         }),
 });

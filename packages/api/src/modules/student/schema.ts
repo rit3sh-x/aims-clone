@@ -13,15 +13,17 @@ export const listOfferingsInputSchema = z.object({
         .max(LIST_MAX_PAGE_SIZE)
         .default(LIST_DEFAULT_PAGE_SIZE),
     cursor: z.string().optional(),
+    search: z.string().optional(),
+    departmentCode: z.string().optional(),
 });
 
 export const enrollInputSchema = z.object({
     offeringId: z.string(),
 });
 
-export const dropInputSchema = z.object({
-    enrollmentId: z.string(),
-});
+export const dropInputSchema = enrollInputSchema;
+
+export const getOfferingInputSchema = enrollInputSchema;
 
 export const listAttendanceInputSchema = z.object({
     page: z.number().min(1).default(1),

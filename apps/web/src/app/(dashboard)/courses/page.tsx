@@ -17,7 +17,7 @@ type Props = {
 const Page = async ({ searchParams }: Props) => {
     const { user } = await requireAuth();
 
-    if (user.role === "ADVISOR") {
+    if (user.role === "ADVISOR" || user.role === "STUDENT") {
         redirect("/");
     }
 
@@ -57,8 +57,6 @@ const Page = async ({ searchParams }: Props) => {
             );
         }
         case "INSTRUCTOR": {
-        }
-        case "STUDENT": {
         }
         default:
             return null;

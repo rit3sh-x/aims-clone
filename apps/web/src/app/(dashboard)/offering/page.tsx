@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { offeringParamsLoader } from "@/modules/offering/server/params-loader";
 import { HodOfferingView } from "@/modules/offering/ui/views/hod-offering-view";
+import { StudentOfferingView } from "@/modules/offering/ui/views/student-offering-view";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
@@ -12,7 +13,11 @@ type Props = {
 const Page = async ({ searchParams }: Props) => {
     const { user } = await requireAuth();
 
-    if (user.role === "ADVISOR" || user.role === "ADMIN") {
+    if (
+        user.role === "ADVISOR" ||
+        user.role === "ADMIN" ||
+        user.role === "INSTRUCTOR"
+    ) {
         redirect("/");
     }
 
@@ -35,9 +40,19 @@ const Page = async ({ searchParams }: Props) => {
                 </HydrateClient>
             );
         }
-        case "INSTRUCTOR": {
-        }
         case "STUDENT": {
+            prefetch(
+                trpc.student.offering.list.infiniteQueryOptions({
+                    search: name === "" ? undefined : name,
+                    departmentCode: code === "" ? undefined : code,
+                })
+            );
+
+            return (
+                <HydrateClient>
+                    <StudentOfferingView />
+                </HydrateClient>
+            );
         }
         default:
             return null;

@@ -4,13 +4,14 @@ import { SearchFilter } from "@/components/search-filter";
 import { NameFilter } from "./name-filter";
 import { useCourseParams } from "../../../hooks/use-course-params";
 import { useDebouncedSearch } from "@/hooks/use-debounced-search";
+import { CourseStatusFilter } from "./status-filter";
 
-export const SemesterFilter = () => {
+export const CourseFilter = () => {
     const [params, setParams] = useCourseParams();
 
-    const { name } = params;
+    const { name, status } = params;
 
-    const hasAnyFilters = !!name;
+    const hasAnyFilters = !!(name || status);
 
     const updateSearch = (patch: Partial<typeof params>) => {
         setParams(patch);
@@ -18,7 +19,8 @@ export const SemesterFilter = () => {
 
     const onClear = () => {
         setParams({
-            name: undefined,
+            name: "",
+            status: "",
         });
     };
 
@@ -40,6 +42,13 @@ export const SemesterFilter = () => {
                     </button>
                 )}
             </div>
+
+            <SearchFilter title="Status">
+                <CourseStatusFilter
+                    value={status || undefined}
+                    onChange={(value) => updateSearch({ status: value })}
+                />
+            </SearchFilter>
 
             <SearchFilter title="Search" className="border-b-0">
                 <NameFilter

@@ -26,11 +26,8 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
-    const headers = new Headers(request.headers);
-    headers.set("x-path", pathname);
-
     return NextResponse.next({
-        request: { headers },
+        request,
     });
 }
 

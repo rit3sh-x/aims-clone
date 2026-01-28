@@ -1,25 +1,26 @@
+"use client";
+
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import { UserProfile } from "./user-profile";
-import { headers as getHeaders } from "next/headers";
 import { SpotlightSearch } from "./spotlight-search";
+import { usePathname } from "next/navigation";
 
 const getPageTitle = (pathname: string): string => {
-    const segment = pathname.split("/").filter(Boolean)[0];
-    if (!segment) return "Dashboard";
-    return segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length === 0) return "Dashboard";
+    return formatSegment(segments[0]!);
 };
+
+const formatSegment = (segment: string) =>
+    segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 interface DashboardHeaderProps {
     name: string;
     image?: string | null;
 }
 
-export const DashboardHeader = async ({
-    image,
-    name,
-}: DashboardHeaderProps) => {
-    const headers = await getHeaders();
-    const pathname = headers.get("x-path") || "";
+export const DashboardHeader = ({ image, name }: DashboardHeaderProps) => {
+    const pathname = usePathname();
     const pageTitle = getPageTitle(pathname);
 
     return (

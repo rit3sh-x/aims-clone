@@ -72,7 +72,7 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                             },
                             {
                                 title: "Students",
-                                url: "/student",
+                                url: "/students",
                                 icon: UsersIcon,
                             },
                         ],

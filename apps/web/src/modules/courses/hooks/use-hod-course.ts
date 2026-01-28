@@ -18,13 +18,14 @@ export const useSuspenseCourse = (id: string) => {
 };
 
 export const useSuspenseCoursesList = () => {
-    const [{ name }] = useCourseParams();
+    const [{ name, status }] = useCourseParams();
     const trpc = useTRPC();
 
     const query = useSuspenseInfiniteQuery(
         trpc.hod.course.list.infiniteQueryOptions(
             {
                 search: name === "" ? undefined : name,
+                status: status === "" ? undefined : status,
             },
             {
                 getNextPageParam: (lastPage) =>
@@ -47,7 +48,7 @@ export const useSuspenseCoursesList = () => {
 export const useAcceptCourse = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ departmentCode, name }] = useCourseParams();
+    const [{ name }] = useCourseParams();
 
     return useMutation(
         trpc.hod.course.acceptCourse.mutationOptions({
@@ -65,7 +66,7 @@ export const useAcceptCourse = () => {
 export const useRejectCourse = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ departmentCode, name }] = useCourseParams();
+    const [{ name }] = useCourseParams();
 
     return useMutation(
         trpc.hod.course.rejectCourse.mutationOptions({

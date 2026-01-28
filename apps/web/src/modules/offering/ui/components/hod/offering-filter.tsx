@@ -47,14 +47,14 @@ export const OfferingFilter = () => {
                 )}
             </div>
 
-            <SearchFilter title="Search by Name">
+            <SearchFilter title="Name">
                 <NameFilter
                     value={debouncedName.value}
                     onChange={debouncedName.onChange}
                 />
             </SearchFilter>
 
-            <SearchFilter title="Search by Code" className="border-b-0">
+            <SearchFilter title="Code" className="border-b-0">
                 <CodeFilter
                     value={debouncedCode.value}
                     onChange={debouncedCode.onChange}

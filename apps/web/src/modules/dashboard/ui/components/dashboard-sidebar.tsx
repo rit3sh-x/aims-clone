@@ -38,6 +38,19 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
     const sidebarOptions = getSidebarOptions(role);
     const pathname = usePathname();
     const router = useRouter();
+    const [openSections, setOpenSections] = useState<Record<string, boolean>>(
+        {}
+    );
+
+    useEffect(() => {
+        const initialOpen: Record<string, boolean> = {};
+        sidebarOptions.sections.forEach((section) => {
+            if (isSectionActive(section.items)) {
+                initialOpen[section.title] = true;
+            }
+        });
+        setOpenSections((prev) => ({ ...prev, ...initialOpen }));
+    }, [pathname]);
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const topSentinelRef = useRef<HTMLDivElement>(null);
@@ -134,9 +147,15 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                             {sidebarOptions.sections.map((section) => (
                                 <SidebarMenu key={section.title}>
                                     <Collapsible
-                                        defaultOpen={isSectionActive(
-                                            section.items
-                                        )}
+                                        open={
+                                            openSections[section.title] ?? false
+                                        }
+                                        onOpenChange={(open) =>
+                                            setOpenSections((prev) => ({
+                                                ...prev,
+                                                [section.title]: open,
+                                            }))
+                                        }
                                         className="group/collapsible"
                                     >
                                         <SidebarMenuItem>
@@ -155,7 +174,8 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                                         <ChevronRightIcon
                                                             className={cn(
                                                                 "ml-auto transition-transform duration-200",
-                                                                state.open && "rotate-90"
+                                                                state.open &&
+                                                                    "rotate-90"
                                                             )}
                                                         />
                                                     </SidebarMenuButton>
@@ -176,7 +196,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                                                         isActive(
                                                                             item.url
                                                                         ) &&
-                                                                        "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
+                                                                            "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
                                                                     )}
                                                                     render={(
                                                                         props
@@ -187,10 +207,15 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                                                                 item.url
                                                                             }
                                                                         >
-                                                                            <item.icon className={cn(
-                                                                                "size-4",
-                                                                                isActive(item.url) && "text-neutral-200!"
-                                                                            )} />
+                                                                            <item.icon
+                                                                                className={cn(
+                                                                                    "size-4",
+                                                                                    isActive(
+                                                                                        item.url
+                                                                                    ) &&
+                                                                                        "text-neutral-200!"
+                                                                                )}
+                                                                            />
                                                                             <span>
                                                                                 {
                                                                                     item.title
@@ -229,7 +254,7 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                 isActive={isActive(item.url)}
                                 className={cn(
                                     isActive(item.url) &&
-                                    "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
+                                        "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
                                 )}
                                 render={(props) => (
                                     <Link href={item.url} {...props}>

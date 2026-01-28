@@ -109,13 +109,16 @@ export const courseManagement = createTRPCRouter({
     list: hodProcedure
         .input(listCourseInputSchema)
         .query(async ({ input, ctx }) => {
-            const { pageSize, cursor, search } = input;
+            const { pageSize, cursor, search, status } = input;
             const { departmentId } = ctx.hod;
 
             const conditions = [];
 
             conditions.push(eq(course.departmentId, departmentId));
-            conditions.push(eq(course.status, "PROPOSED"));
+
+            if (status) {
+                conditions.push(eq(course.status, status));
+            }
 
             if (search) {
                 conditions.push(

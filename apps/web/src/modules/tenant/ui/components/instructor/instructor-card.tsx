@@ -2,46 +2,47 @@
 
 import { Card } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { Instructor } from "@/modules/tenant/types";
+import type { Route } from "next";
 
 export const InstructorCard = ({
     instructorData,
 }: {
     instructorData: Instructor;
 }) => {
-    const router = useRouter();
-
-    const handleCardClick = () => {
-        router.push(`/instructor/${instructorData.instructor.id}`);
-    };
-
     return (
-        <Card
-            className="p-4 space-y-2 cursor-pointer hover:shadow-lg"
-            onClick={handleCardClick}
+        <Link
+            href={`/instructor/${instructorData.instructor.id}` as Route}
+            passHref
         >
-            <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm">
-                    {instructorData.user.name}
-                </h3>
+            <Card className="p-4 space-y-2 cursor-pointer hover:shadow-lg">
+                <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm">
+                        {instructorData.user.name}
+                    </h3>
 
-                <Badge variant="outline" className="text-[10px] uppercase">
-                    {instructorData.department.name}
-                </Badge>
-            </div>
-
-            <div className="text-xs text-muted-foreground space-y-1">
-                <div>
-                    <span className="font-medium text-foreground">Email:</span>{" "}
-                    {instructorData.user.email}
+                    <Badge variant="outline" className="text-[10px] uppercase">
+                        {instructorData.department.name}
+                    </Badge>
                 </div>
 
-                <div>
-                    <span className="font-medium text-foreground">Phone:</span>{" "}
-                    {instructorData.instructor.phoneNumber ?? "—"}
+                <div className="text-xs text-muted-foreground space-y-1">
+                    <div>
+                        <span className="font-medium text-foreground">
+                            Email:
+                        </span>{" "}
+                        {instructorData.user.email}
+                    </div>
+
+                    <div>
+                        <span className="font-medium text-foreground">
+                            Phone:
+                        </span>{" "}
+                        {instructorData.instructor.phoneNumber ?? "—"}
+                    </div>
                 </div>
-            </div>
-        </Card>
+            </Card>
+        </Link>
     );
 };

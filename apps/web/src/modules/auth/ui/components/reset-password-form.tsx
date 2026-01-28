@@ -213,7 +213,7 @@ export const ResetPasswordForm = ({ onSubmit }: ResetPasswordFormProps) => {
                         <Button
                             type="submit"
                             disabled={!canSubmit}
-                            className="w-full bg-white text-black"
+                            className="w-full bg-white text-black hover:bg-white/90 hover:text-black hover:border border-border"
                         >
                             Reset password
                         </Button>

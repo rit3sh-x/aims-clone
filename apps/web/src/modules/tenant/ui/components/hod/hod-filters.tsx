@@ -19,8 +19,8 @@ export const HodFilters = () => {
 
     const onClear = () => {
         setParams({
-            name: undefined,
-            departmentCode: undefined,
+            name: "",
+            departmentCode: "",
         });
     };
 

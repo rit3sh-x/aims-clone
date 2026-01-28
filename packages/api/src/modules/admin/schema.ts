@@ -177,7 +177,7 @@ export const listAdvisorsInputSchema = z.object({
         .min(LIST_MIN_PAGE_SIZE)
         .max(LIST_MAX_PAGE_SIZE)
         .default(LIST_DEFAULT_PAGE_SIZE),
-    departmentCode: z.string().length(5).toUpperCase().optional(),
+    departmentCode: z.string().min(1).toUpperCase().optional(),
     search: z.string().min(1).optional(),
 });
 

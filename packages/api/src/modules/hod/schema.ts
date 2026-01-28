@@ -4,6 +4,7 @@ import {
     LIST_MAX_PAGE_SIZE,
     LIST_MIN_PAGE_SIZE,
 } from "../constants";
+import { courseStatusEnum } from "@workspace/db";
 
 export const acceptCourseInputSchema = z.object({
     courseId: z.string(),
@@ -15,6 +16,7 @@ export const rejectCourseInputSchema = acceptCourseInputSchema.extend({
 
 export const listCourseInputSchema = z.object({
     search: z.string().optional(),
+    status: z.enum(courseStatusEnum.enumValues).optional(),
     cursor: z
         .object({
             createdAt: z.date(),

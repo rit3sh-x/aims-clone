@@ -20,9 +20,9 @@ export const StudentFilters = () => {
 
     const onClear = () => {
         setParams({
-            name: undefined,
-            departmentCode: undefined,
-            year: undefined,
+            name: "",
+            departmentCode: "",
+            year: null,
         });
     };
 

@@ -22,7 +22,8 @@ const Page = async ({ searchParams }: Props) => {
         redirect("/");
     }
 
-    const { name, departmentCode } = await coursesParamsLoader(searchParams);
+    const { name, departmentCode, status } =
+        await coursesParamsLoader(searchParams);
 
     prefetch(trpc.user.getDepartmentCodes.queryOptions());
 
@@ -48,6 +49,7 @@ const Page = async ({ searchParams }: Props) => {
             prefetch(
                 trpc.hod.course.list.infiniteQueryOptions({
                     search: name === "" ? undefined : name,
+                    status: status === "" ? undefined : status,
                 })
             );
 

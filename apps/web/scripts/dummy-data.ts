@@ -1,3 +1,12 @@
+import { createCourseDescription, withAlias } from "./utils";
+
+const email = process.env.SEED_ADMIN_EMAIL;
+
+if (!email) {
+    console.error("❌ Missing SEED_ADMIN_EMAIL");
+    process.exit(1);
+}
+
 export const departments = [
     {
         name: "Computer Science & Engineering",
@@ -29,7 +38,7 @@ export const departments = [
 export const hods = [
     {
         name: "Dr. Rajesh Kumar",
-        email: "2023csb1153+h1@iitrpr.ac.in",
+        email: withAlias(email, "h1"),
         phoneNumber: "+919876543210",
         website: "https://rajesh-kumar.edu",
         employeeId: "+h1",
@@ -37,7 +46,7 @@ export const hods = [
     },
     {
         name: "Dr. Priya Sharma",
-        email: "2023csb1161+h2@iitrpr.ac.in",
+        email: withAlias(email, "h2"),
         phoneNumber: "+919876543211",
         website: "https://priya-sharma.edu",
         employeeId: "+h2",
@@ -45,7 +54,7 @@ export const hods = [
     },
     {
         name: "Dr. Amit Patel",
-        email: "2023csb1153+h3@iitrpr.ac.in",
+        email: withAlias(email, "h3"),
         phoneNumber: "+919876543212",
         website: "https://amit-patel.edu",
         employeeId: "+h3",
@@ -53,7 +62,7 @@ export const hods = [
     },
     {
         name: "Dr. Sunita Verma",
-        email: "2023csb1161+h4@iitrpr.ac.in",
+        email: withAlias(email, "h4"),
         phoneNumber: "+919876543213",
         website: "https://sunita-verma.edu",
         employeeId: "+h4",
@@ -61,7 +70,7 @@ export const hods = [
     },
     {
         name: "Dr. Vikram Singh",
-        email: "2023csb1153+h5@iitrpr.ac.in",
+        email: withAlias(email, "h5"),
         phoneNumber: "+919876543214",
         website: "https://vikram-singh.edu",
         employeeId: "+h5",
@@ -111,7 +120,7 @@ export const programs = [
 export const advisors = [
     {
         name: "Dr. Anita Desai",
-        email: "2023csb1153+a1@iitrpr.ac.in",
+        email: withAlias(email, "a1"),
         phoneNumber: "+919876543220",
         website: "https://anita-desai.edu",
         employeeId: "+a1",
@@ -119,7 +128,7 @@ export const advisors = [
     },
     {
         name: "Dr. Rahul Mehta",
-        email: "2023csb1161+a2@iitrpr.ac.in",
+        email: withAlias(email, "a2"),
         phoneNumber: "+919876543221",
         website: "https://rahul-mehta.edu",
         employeeId: "+a2",
@@ -127,7 +136,7 @@ export const advisors = [
     },
     {
         name: "Dr. Kavita Reddy",
-        email: "2023csb1153+a3@iitrpr.ac.in",
+        email: withAlias(email, "a3"),
         phoneNumber: "+919876543222",
         website: "https://kavita-reddy.edu",
         employeeId: "+a3",
@@ -135,7 +144,7 @@ export const advisors = [
     },
     {
         name: "Dr. Sanjay Gupta",
-        email: "2023csb1161+a4@iitrpr.ac.in",
+        email: withAlias(email, "a4"),
         phoneNumber: "+919876543223",
         website: "https://sanjay-gupta.edu",
         employeeId: "+a4",
@@ -143,7 +152,7 @@ export const advisors = [
     },
     {
         name: "Dr. Neha Joshi",
-        email: "2023csb1153+a5@iitrpr.ac.in",
+        email: withAlias(email, "a5"),
         phoneNumber: "+919876543224",
         website: "https://neha-joshi.edu",
         employeeId: "+a5",
@@ -151,7 +160,7 @@ export const advisors = [
     },
     {
         name: "Dr. Arun Kumar",
-        email: "2023csb1161+a6@iitrpr.ac.in",
+        email: withAlias(email, "a6"),
         phoneNumber: "+919876543225",
         website: "https://arun-kumar.edu",
         employeeId: "+a6",
@@ -159,7 +168,7 @@ export const advisors = [
     },
     {
         name: "Dr. Pooja Iyer",
-        email: "2023csb1153+a7@iitrpr.ac.in",
+        email: withAlias(email, "a7"),
         phoneNumber: "+919876543226",
         website: "https://pooja-iyer.edu",
         employeeId: "+a7",
@@ -170,7 +179,7 @@ export const advisors = [
 export const instructors = [
     {
         name: "Prof. Deepak Chopra",
-        email: "2023csb1153+i1@iitrpr.ac.in",
+        email: withAlias(email, "i1"),
         phoneNumber: "+919876543230",
         website: "https://deepak-chopra.edu",
         employeeId: "+i1",
@@ -179,7 +188,7 @@ export const instructors = [
     },
     {
         name: "Prof. Meera Nair",
-        email: "2023csb1161+i2@iitrpr.ac.in",
+        email: withAlias(email, "i2"),
         phoneNumber: "+919876543231",
         website: "https://meera-nair.edu",
         employeeId: "+i2",
@@ -188,7 +197,7 @@ export const instructors = [
     },
     {
         name: "Prof. Kiran Rao",
-        email: "2023csb1153+i3@iitrpr.ac.in",
+        email: withAlias(email, "i3"),
         phoneNumber: "+919876543232",
         website: "https://kiran-rao.edu",
         employeeId: "+i3",
@@ -197,7 +206,7 @@ export const instructors = [
     },
     {
         name: "Prof. Suresh Pillai",
-        email: "2023csb1161+i4@iitrpr.ac.in",
+        email: withAlias(email, "i4"),
         phoneNumber: "+919876543233",
         website: "https://suresh-pillai.edu",
         employeeId: "+i4",
@@ -206,7 +215,7 @@ export const instructors = [
     },
     {
         name: "Prof. Lakshmi Menon",
-        email: "2023csb1153+i5@iitrpr.ac.in",
+        email: withAlias(email, "i5"),
         phoneNumber: "+919876543234",
         website: "https://lakshmi-menon.edu",
         employeeId: "+i5",
@@ -215,7 +224,7 @@ export const instructors = [
     },
     {
         name: "Prof. Ravi Shankar",
-        email: "2023csb1161+i6@iitrpr.ac.in",
+        email: withAlias(email, "i6"),
         phoneNumber: "+919876543235",
         website: "https://ravi-shankar.edu",
         employeeId: "+i6",
@@ -224,7 +233,7 @@ export const instructors = [
     },
     {
         name: "Prof. Gita Krishnan",
-        email: "2023csb1153+i7@iitrpr.ac.in",
+        email: withAlias(email, "i7"),
         phoneNumber: "+919876543236",
         website: "https://gita-krishnan.edu",
         employeeId: "+i7",
@@ -233,7 +242,7 @@ export const instructors = [
     },
     {
         name: "Prof. Manoj Tiwari",
-        email: "2023csb1161+i8@iitrpr.ac.in",
+        email: withAlias(email, "i8"),
         phoneNumber: "+919876543237",
         website: "https://manoj-tiwari.edu",
         employeeId: "+i8",
@@ -242,7 +251,7 @@ export const instructors = [
     },
     {
         name: "Prof. Shweta Agarwal",
-        email: "2023csb1153+i9@iitrpr.ac.in",
+        email: withAlias(email, "i9"),
         phoneNumber: "+919876543238",
         website: "https://shweta-agarwal.edu",
         employeeId: "+i9",
@@ -251,7 +260,7 @@ export const instructors = [
     },
     {
         name: "Prof. Vijay Malhotra",
-        email: "2023csb1161+i10@iitrpr.ac.in",
+        email: withAlias(email, "i10"),
         phoneNumber: "+919876543239",
         website: "https://vijay-malhotra.edu",
         employeeId: "+i10",
@@ -263,7 +272,7 @@ export const instructors = [
 export const students = [
     {
         name: "Arjun Patel",
-        email: "2023csb1153+s1@iitrpr.ac.in",
+        email: withAlias(email, "s1"),
         rollNo: "2021CSE001",
         programCode: "BTCS",
         batchYear: 2021,
@@ -271,7 +280,7 @@ export const students = [
     },
     {
         name: "Priya Singh",
-        email: "2023csb1161+s2@iitrpr.ac.in",
+        email: withAlias(email, "s2"),
         rollNo: "2021CSE002",
         programCode: "BTCS",
         batchYear: 2021,
@@ -279,7 +288,7 @@ export const students = [
     },
     {
         name: "Rohan Kumar",
-        email: "2023csb1153+s3@iitrpr.ac.in",
+        email: withAlias(email, "s3"),
         rollNo: "2021CSE003",
         programCode: "BTCS",
         batchYear: 2021,
@@ -287,7 +296,7 @@ export const students = [
     },
     {
         name: "Sneha Sharma",
-        email: "2023csb1161+s4@iitrpr.ac.in",
+        email: withAlias(email, "s4"),
         rollNo: "2021CSE004",
         programCode: "BTCS",
         batchYear: 2021,
@@ -295,7 +304,7 @@ export const students = [
     },
     {
         name: "Amit Verma",
-        email: "2023csb1153+s5@iitrpr.ac.in",
+        email: withAlias(email, "s5"),
         rollNo: "2022CSE001",
         programCode: "BTCS",
         batchYear: 2022,
@@ -303,7 +312,7 @@ export const students = [
     },
     {
         name: "Neha Reddy",
-        email: "2023csb1161+s6@iitrpr.ac.in",
+        email: withAlias(email, "s6"),
         rollNo: "2022CSE002",
         programCode: "BTCS",
         batchYear: 2022,
@@ -311,7 +320,7 @@ export const students = [
     },
     {
         name: "Karan Mehta",
-        email: "2023csb1153+s7@iitrpr.ac.in",
+        email: withAlias(email, "s7"),
         rollNo: "2023CSE001",
         programCode: "BTCS",
         batchYear: 2023,
@@ -319,7 +328,7 @@ export const students = [
     },
     {
         name: "Divya Gupta",
-        email: "2023csb1161+s8@iitrpr.ac.in",
+        email: withAlias(email, "s8"),
         rollNo: "2023CSE002",
         programCode: "BTCS",
         batchYear: 2023,
@@ -327,7 +336,7 @@ export const students = [
     },
     {
         name: "Rahul Joshi",
-        email: "2023csb1153+s9@iitrpr.ac.in",
+        email: withAlias(email, "s9"),
         rollNo: "2021EE001",
         programCode: "BTEE",
         batchYear: 2021,
@@ -335,7 +344,7 @@ export const students = [
     },
     {
         name: "Kavya Iyer",
-        email: "2023csb1161+s10@iitrpr.ac.in",
+        email: withAlias(email, "s10"),
         rollNo: "2021EE002",
         programCode: "BTEE",
         batchYear: 2021,
@@ -343,7 +352,7 @@ export const students = [
     },
     {
         name: "Siddharth Nair",
-        email: "2023csb1153+s11@iitrpr.ac.in",
+        email: withAlias(email, "s11"),
         rollNo: "2022EE001",
         programCode: "BTEE",
         batchYear: 2022,
@@ -351,7 +360,7 @@ export const students = [
     },
     {
         name: "Anjali Rao",
-        email: "2023csb1161+s12@iitrpr.ac.in",
+        email: withAlias(email, "s12"),
         rollNo: "2022EE002",
         programCode: "BTEE",
         batchYear: 2022,
@@ -359,7 +368,7 @@ export const students = [
     },
     {
         name: "Varun Pillai",
-        email: "2023csb1153+s13@iitrpr.ac.in",
+        email: withAlias(email, "s13"),
         rollNo: "2023EE001",
         programCode: "BTEE",
         batchYear: 2023,
@@ -367,7 +376,7 @@ export const students = [
     },
     {
         name: "Riya Menon",
-        email: "2023csb1161+s14@iitrpr.ac.in",
+        email: withAlias(email, "s14"),
         rollNo: "2023EE002",
         programCode: "BTEE",
         batchYear: 2023,
@@ -375,7 +384,7 @@ export const students = [
     },
     {
         name: "Aditya Kumar",
-        email: "2023csb1153+s15@iitrpr.ac.in",
+        email: withAlias(email, "s15"),
         rollNo: "2021ME001",
         programCode: "BTME",
         batchYear: 2021,
@@ -383,7 +392,7 @@ export const students = [
     },
     {
         name: "Simran Singh",
-        email: "2023csb1161+s16@iitrpr.ac.in",
+        email: withAlias(email, "s16"),
         rollNo: "2021ME002",
         programCode: "BTME",
         batchYear: 2021,
@@ -391,7 +400,7 @@ export const students = [
     },
     {
         name: "Akash Sharma",
-        email: "2023csb1153+s17@iitrpr.ac.in",
+        email: withAlias(email, "s17"),
         rollNo: "2022ME001",
         programCode: "BTME",
         batchYear: 2022,
@@ -399,7 +408,7 @@ export const students = [
     },
     {
         name: "Pooja Patel",
-        email: "2023csb1161+s18@iitrpr.ac.in",
+        email: withAlias(email, "s18"),
         rollNo: "2022ME002",
         programCode: "BTME",
         batchYear: 2022,
@@ -407,7 +416,7 @@ export const students = [
     },
     {
         name: "Nikhil Verma",
-        email: "2023csb1153+s19@iitrpr.ac.in",
+        email: withAlias(email, "s19"),
         rollNo: "2023ME001",
         programCode: "BTME",
         batchYear: 2023,
@@ -415,7 +424,7 @@ export const students = [
     },
     {
         name: "Ishita Reddy",
-        email: "2023csb1161+s20@iitrpr.ac.in",
+        email: withAlias(email, "s20"),
         rollNo: "2023ME002",
         programCode: "BTME",
         batchYear: 2023,
@@ -423,7 +432,7 @@ export const students = [
     },
     {
         name: "Manish Gupta",
-        email: "2023csb1153+s21@iitrpr.ac.in",
+        email: withAlias(email, "s21"),
         rollNo: "2022CSE003",
         programCode: "BTCS",
         batchYear: 2022,
@@ -431,7 +440,7 @@ export const students = [
     },
     {
         name: "Shruti Joshi",
-        email: "2023csb1161+s22@iitrpr.ac.in",
+        email: withAlias(email, "s22"),
         rollNo: "2022CSE004",
         programCode: "BTCS",
         batchYear: 2022,
@@ -439,7 +448,7 @@ export const students = [
     },
     {
         name: "Harsh Iyer",
-        email: "2023csb1153+s23@iitrpr.ac.in",
+        email: withAlias(email, "s23"),
         rollNo: "2023CSE003",
         programCode: "BTCS",
         batchYear: 2023,
@@ -447,7 +456,7 @@ export const students = [
     },
     {
         name: "Tanvi Nair",
-        email: "2023csb1161+s24@iitrpr.ac.in",
+        email: withAlias(email, "s24"),
         rollNo: "2023CSE004",
         programCode: "BTCS",
         batchYear: 2023,
@@ -455,7 +464,7 @@ export const students = [
     },
     {
         name: "Vishal Rao",
-        email: "2023csb1153+s25@iitrpr.ac.in",
+        email: withAlias(email, "s25"),
         rollNo: "2021CSE005",
         programCode: "BTCS",
         batchYear: 2021,
@@ -463,7 +472,7 @@ export const students = [
     },
     {
         name: "Megha Pillai",
-        email: "2023csb1161+s26@iitrpr.ac.in",
+        email: withAlias(email, "s26"),
         rollNo: "2021CSE006",
         programCode: "BTCS",
         batchYear: 2021,
@@ -471,7 +480,7 @@ export const students = [
     },
     {
         name: "Shubham Menon",
-        email: "2023csb1153+s27@iitrpr.ac.in",
+        email: withAlias(email, "s27"),
         rollNo: "2022EE003",
         programCode: "BTEE",
         batchYear: 2022,
@@ -479,7 +488,7 @@ export const students = [
     },
     {
         name: "Ananya Kumar",
-        email: "2023csb1161+s28@iitrpr.ac.in",
+        email: withAlias(email, "s28"),
         rollNo: "2022EE004",
         programCode: "BTEE",
         batchYear: 2022,
@@ -487,7 +496,7 @@ export const students = [
     },
     {
         name: "Yash Singh",
-        email: "2023csb1153+s29@iitrpr.ac.in",
+        email: withAlias(email, "s29"),
         rollNo: "2023ME003",
         programCode: "BTME",
         batchYear: 2023,
@@ -495,7 +504,7 @@ export const students = [
     },
     {
         name: "Kriti Sharma",
-        email: "2023csb1161+s30@iitrpr.ac.in",
+        email: withAlias(email, "s30"),
         rollNo: "2023ME004",
         programCode: "BTME",
         batchYear: 2023,
@@ -513,10 +522,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn basic programming"],
-            outcomes: ["Write simple programs"],
-        },
+        description: createCourseDescription(
+            "This course provides a comprehensive introduction to the fundamental concepts of computer programming. Students will learn to design, implement, and test simple programs using a high-level language, focusing on logic building and syntax mastery.",
+            [
+                "Understand the basics of algorithmic thinking and problem-solving.",
+                "Learn the syntax and semantics of a standard programming language.",
+                "Master control structures, loops, and functional programming concepts.",
+            ],
+            [
+                "Write, compile, and debug efficient code for basic computational problems.",
+                "Demonstrate an understanding of structured programming principles.",
+                "Develop simple applications involving file I/O and data manipulation.",
+            ]
+        ),
     },
     {
         code: "CS201",
@@ -527,10 +545,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn data structures"],
-            outcomes: ["Implement DS"],
-        },
+        description: createCourseDescription(
+            "This course explores the organization and management of data to increase the efficiency of algorithms. It covers linear and non-linear data structures, memory management, and complexity analysis.",
+            [
+                "Understand the abstract data types (ADTs) such as stacks, queues, and lists.",
+                "Analyze the time and space complexity of different data structures.",
+                "Learn the implementation of trees, graphs, and hash tables.",
+            ],
+            [
+                "Select the appropriate data structure for a given problem scenario.",
+                "Implement complex data structures from scratch.",
+                "Optimize software performance by managing memory and processing time effectively.",
+            ]
+        ),
     },
     {
         code: "CS301",
@@ -541,10 +568,19 @@ export const courses = [
         selfStudyHours: 6,
         credits: 3,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn algorithms"],
-            outcomes: ["Analyze algorithms"],
-        },
+        description: createCourseDescription(
+            "A deep dive into the design and analysis of algorithms. This course covers divide-and-conquer, dynamic programming, greedy algorithms, and graph algorithms, preparing students for complex computational problem solving.",
+            [
+                "Master asymptotic notation and algorithm efficiency analysis.",
+                "Understand major algorithmic paradigms like Greedy and Dynamic Programming.",
+                "Explore advanced graph traversals and shortest-path algorithms.",
+            ],
+            [
+                "Analyze the correctness and performance of algorithms.",
+                "Design efficient solutions for NP-hard problems using approximation techniques.",
+                "Apply algorithmic strategies to real-world software engineering challenges.",
+            ]
+        ),
     },
     {
         code: "CS401",
@@ -555,10 +591,19 @@ export const courses = [
         selfStudyHours: 5,
         credits: 3.5,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn DBMS"],
-            outcomes: ["Design databases"],
-        },
+        description: createCourseDescription(
+            "This course introduces the concepts of database design and management. It covers the relational model, SQL, normalization, transaction management, and concurrency control in modern DBMS.",
+            [
+                "Understand the architecture of Database Management Systems (DBMS).",
+                "Master SQL for data definition and manipulation.",
+                "Learn the principles of database normalization and schema design.",
+            ],
+            [
+                "Design robust and scalable relational databases.",
+                "Execute complex queries to retrieve and analyze data efficiently.",
+                "Ensure data integrity and handle concurrent transactions effectively.",
+            ]
+        ),
     },
     {
         code: "CS501",
@@ -569,10 +614,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn ML"],
-            outcomes: ["Build ML models"],
-        },
+        description: createCourseDescription(
+            "An introduction to the field of Machine Learning, covering supervised and unsupervised learning techniques. Students will explore regression, classification, clustering, and neural networks.",
+            [
+                "Understand the mathematical foundations of machine learning algorithms.",
+                "Differentiate between supervised, unsupervised, and reinforcement learning.",
+                "Learn to evaluate model performance using metrics like accuracy and precision.",
+            ],
+            [
+                "Build and train machine learning models using modern libraries.",
+                "Apply ML techniques to solve problems in vision, text, and prediction.",
+                "Critically analyze the ethical implications of AI and automated decision making.",
+            ]
+        ),
     },
     {
         code: "EE101",
@@ -583,10 +637,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "EE",
-        description: {
-            objectives: ["Learn EE basics"],
-            outcomes: ["Understand circuits"],
-        },
+        description: createCourseDescription(
+            "Foundational course covering the principles of electrical circuits, electromagnetic fields, and electrical machines. It serves as a prerequisite for advanced studies in electrical and electronics engineering.",
+            [
+                "Understand Kirchhoff's laws and circuit analysis theorems.",
+                "Learn the behavior of R, L, and C components in AC/DC circuits.",
+                "Explore the working principles of transformers and motors.",
+            ],
+            [
+                "Analyze simple DC and AC electrical circuits.",
+                "Measure electrical quantities using standard laboratory equipment.",
+                "Demonstrate knowledge of electrical safety and power generation basics.",
+            ]
+        ),
     },
     {
         code: "EE201",
@@ -597,10 +660,19 @@ export const courses = [
         selfStudyHours: 6,
         credits: 3,
         deptCode: "EE",
-        description: {
-            objectives: ["Analyze circuits"],
-            outcomes: ["Solve circuit problems"],
-        },
+        description: createCourseDescription(
+            "This course deals with advanced techniques for analyzing complex electrical networks. Topics include transient analysis, two-port networks, and Laplace transform applications in circuit theory.",
+            [
+                "Master network theorems for solving complex circuit problems.",
+                "Understand time-domain and frequency-domain analysis.",
+                "Learn to model electrical networks using mathematical tools.",
+            ],
+            [
+                "Solve complex circuit problems involving transient responses.",
+                "Apply Laplace transforms to analyze network stability.",
+                "Design filters and signal conditioning circuits.",
+            ]
+        ),
     },
     {
         code: "EE301",
@@ -611,10 +683,19 @@ export const courses = [
         selfStudyHours: 5,
         credits: 3.5,
         deptCode: "EE",
-        description: {
-            objectives: ["Learn digital systems"],
-            outcomes: ["Design digital circuits"],
-        },
+        description: createCourseDescription(
+            "A comprehensive study of digital logic design. The course covers boolean algebra, combinational and sequential circuits, and an introduction to VHDL/Verilog for hardware description.",
+            [
+                "Understand binary number systems and Boolean algebra.",
+                "Learn to design combinational logic circuits like adders and multiplexers.",
+                "Master sequential logic including flip-flops, counters, and registers.",
+            ],
+            [
+                "Design and simulate digital circuits for practical applications.",
+                "Implement state machines for control logic.",
+                "Troubleshoot and optimize digital systems.",
+            ]
+        ),
     },
     {
         code: "EE401",
@@ -625,10 +706,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "EE",
-        description: {
-            objectives: ["Learn power systems"],
-            outcomes: ["Analyze power grids"],
-        },
+        description: createCourseDescription(
+            "This course focuses on the generation, transmission, and distribution of electric power. It covers load flow analysis, fault analysis, and the stability of power grids.",
+            [
+                "Understand the structure of modern power systems.",
+                "Analyze transmission line parameters and performance.",
+                "Learn methods for load flow studies and fault detection.",
+            ],
+            [
+                "Model and analyze power system networks.",
+                "Evaluate the stability and reliability of power grids.",
+                "Design protection schemes for power system components.",
+            ]
+        ),
     },
     {
         code: "ME101",
@@ -639,10 +729,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "ME",
-        description: {
-            objectives: ["Learn mechanics"],
-            outcomes: ["Apply mechanics"],
-        },
+        description: createCourseDescription(
+            "A core engineering course dealing with forces, equilibrium, and motion. It covers statics and dynamics of particles and rigid bodies, providing the basis for structural analysis and mechanical design.",
+            [
+                "Understand the concepts of force vectors and equilibrium.",
+                "Analyze the kinematics and kinetics of particles.",
+                "Learn the principles of friction, work, and energy.",
+            ],
+            [
+                "Solve problems related to static equilibrium in structures.",
+                "Analyze the motion of mechanical systems under various forces.",
+                "Apply mechanical principles to real-world engineering problems.",
+            ]
+        ),
     },
     {
         code: "ME201",
@@ -653,10 +752,19 @@ export const courses = [
         selfStudyHours: 6,
         credits: 3,
         deptCode: "ME",
-        description: {
-            objectives: ["Learn thermodynamics"],
-            outcomes: ["Solve thermo problems"],
-        },
+        description: createCourseDescription(
+            "This course introduces the fundamental laws of thermodynamics and their application to energy systems. Topics include properties of pure substances, entropy, and thermodynamic cycles.",
+            [
+                "Understand the zeroth, first, and second laws of thermodynamics.",
+                "Analyze thermodynamic cycles like Otto, Diesel, and Rankine.",
+                "Learn the properties of ideal gases and real fluids.",
+            ],
+            [
+                "Calculate energy transfer and efficiency in thermal systems.",
+                "Analyze power and refrigeration cycles.",
+                "Apply thermodynamic principles to design energy-efficient systems.",
+            ]
+        ),
     },
     {
         code: "ME301",
@@ -667,10 +775,19 @@ export const courses = [
         selfStudyHours: 5,
         credits: 3.5,
         deptCode: "ME",
-        description: {
-            objectives: ["Learn fluid mechanics"],
-            outcomes: ["Analyze fluid flow"],
-        },
+        description: createCourseDescription(
+            "Study of fluids at rest and in motion. The course covers fluid properties, fluid statics, Bernoulli's equation, and flow through pipes, essential for hydraulic and aerodynamic engineering.",
+            [
+                "Understand fluid properties and the concept of continuum.",
+                "Master the conservation laws of mass, momentum, and energy in fluids.",
+                "Analyze laminar and turbulent flow in pipes.",
+            ],
+            [
+                "Calculate fluid forces on submerged bodies.",
+                "Design piping systems and hydraulic machinery.",
+                "Apply fluid mechanics principles to aerodynamic problems.",
+            ]
+        ),
     },
     {
         code: "MATH101",
@@ -681,10 +798,19 @@ export const courses = [
         selfStudyHours: 5,
         credits: 4,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn calculus"],
-            outcomes: ["Solve calculus problems"],
-        },
+        description: createCourseDescription(
+            "Fundamental course in single-variable calculus. Topics include limits, continuity, differentiation, and integration, with applications to science and engineering problems.",
+            [
+                "Understand the rigorous definitions of limits and continuity.",
+                "Master the techniques of differentiation and integration.",
+                "Explore applications like optimization and related rates.",
+            ],
+            [
+                "Solve complex mathematical problems using calculus.",
+                "Model physical phenomena using differential equations.",
+                "Apply calculus concepts to engineering analysis.",
+            ]
+        ),
     },
     {
         code: "MATH201",
@@ -695,10 +821,19 @@ export const courses = [
         selfStudyHours: 6,
         credits: 3,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn linear algebra"],
-            outcomes: ["Solve matrix problems"],
-        },
+        description: createCourseDescription(
+            "Study of vector spaces, linear transformations, and matrices. This course provides the mathematical foundation for computer graphics, machine learning, and systems engineering.",
+            [
+                "Understand vector spaces, subspaces, and basis.",
+                "Master matrix operations, determinants, and inverses.",
+                "Learn about eigenvalues, eigenvectors, and diagonalization.",
+            ],
+            [
+                "Solve systems of linear equations efficiently.",
+                "Apply linear algebra concepts to data science and engineering.",
+                "Understand geometric transformations in n-dimensional space.",
+            ]
+        ),
     },
     {
         code: "CS102",
@@ -709,10 +844,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn OOP"],
-            outcomes: ["Write OOP code"],
-        },
+        description: createCourseDescription(
+            "This course introduces the Object-Oriented paradigm. It covers classes, objects, inheritance, polymorphism, and encapsulation, using a modern OOP language like Java or C++.",
+            [
+                "Understand the four pillars of Object-Oriented Programming.",
+                "Learn to design modular and reusable code structures.",
+                "Master exception handling and multithreading concepts.",
+            ],
+            [
+                "Design complex software systems using OOP principles.",
+                "Implement robust and maintainable codebases.",
+                "Refactor procedural code into object-oriented architecture.",
+            ]
+        ),
     },
     {
         code: "CS202",
@@ -723,10 +867,19 @@ export const courses = [
         selfStudyHours: 5,
         credits: 3.5,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn OS concepts"],
-            outcomes: ["Understand OS internals"],
-        },
+        description: createCourseDescription(
+            "An in-depth study of operating system internals. Topics include process management, memory management, file systems, concurrency, and virtualization.",
+            [
+                "Understand the role of the kernel and system calls.",
+                "Analyze scheduling algorithms and deadlock prevention mechanisms.",
+                "Learn virtual memory concepts including paging and segmentation.",
+            ],
+            [
+                "Write system-level code to interact with the OS kernel.",
+                "Troubleshoot system performance and synchronization issues.",
+                "Understand the architecture of modern operating systems like Linux.",
+            ]
+        ),
     },
     {
         code: "CS302",
@@ -737,10 +890,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn networking"],
-            outcomes: ["Understand protocols"],
-        },
+        description: createCourseDescription(
+            "This course covers the design and implementation of computer networks. It focuses on the TCP/IP stack, routing protocols, network security, and distributed systems.",
+            [
+                "Understand the OSI and TCP/IP reference models.",
+                "Master network protocols like IP, TCP, UDP, and HTTP.",
+                "Learn the principles of routing, switching, and congestion control.",
+            ],
+            [
+                "Configure and troubleshoot network infrastructure.",
+                "Analyze network traffic and optimize performance.",
+                "Implement secure communication channels over public networks.",
+            ]
+        ),
     },
     {
         code: "CS402",
@@ -751,10 +913,19 @@ export const courses = [
         selfStudyHours: 6,
         credits: 3,
         deptCode: "CSE",
-        description: {
-            objectives: ["Learn SE"],
-            outcomes: ["Design software systems"],
-        },
+        description: createCourseDescription(
+            "A study of the software development lifecycle (SDLC). The course covers requirements analysis, software architecture, testing methodologies, and project management (Agile/Scrum).",
+            [
+                "Understand various software development models (Waterfall, Agile).",
+                "Learn techniques for requirements gathering and system design.",
+                "Master testing strategies including unit, integration, and system testing.",
+            ],
+            [
+                "Manage software projects using industry-standard tools.",
+                "Produce high-quality software documentation and design specs.",
+                "Collaborate effectively in a software development team.",
+            ]
+        ),
     },
     {
         code: "EE102",
@@ -765,10 +936,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "EE",
-        description: {
-            objectives: ["Learn electronics"],
-            outcomes: ["Design electronic circuits"],
-        },
+        description: createCourseDescription(
+            "Introduction to electronic components and circuits. The course covers diodes, transistors (BJT, FET), amplifiers, and operational amplifiers.",
+            [
+                "Understand the physics of semiconductors and PN junctions.",
+                "Analyze biasing and amplification in transistor circuits.",
+                "Learn the applications of Operational Amplifiers (Op-Amps).",
+            ],
+            [
+                "Design basic electronic circuits for signal processing.",
+                "Troubleshoot electronic hardware and PCBs.",
+                "Simulate circuit behavior using SPICE tools.",
+            ]
+        ),
     },
     {
         code: "EE202",
@@ -779,10 +959,19 @@ export const courses = [
         selfStudyHours: 6,
         credits: 3,
         deptCode: "EE",
-        description: {
-            objectives: ["Learn signals"],
-            outcomes: ["Analyze signals"],
-        },
+        description: createCourseDescription(
+            "This course provides a mathematical framework for analyzing signals and systems. It covers Fourier series, Fourier transforms, and Z-transforms for continuous and discrete-time systems.",
+            [
+                "Understand the classification of signals and systems.",
+                "Master frequency domain analysis using Fourier Transforms.",
+                "Learn sampling theory and signal reconstruction.",
+            ],
+            [
+                "Analyze the response of linear time-invariant (LTI) systems.",
+                "Apply signal processing techniques to audio and image data.",
+                "Design filters to remove noise from signals.",
+            ]
+        ),
     },
     {
         code: "ME102",
@@ -793,10 +982,19 @@ export const courses = [
         selfStudyHours: 5,
         credits: 3.5,
         deptCode: "ME",
-        description: {
-            objectives: ["Learn manufacturing"],
-            outcomes: ["Understand processes"],
-        },
+        description: createCourseDescription(
+            "Overview of modern manufacturing technologies. The course covers casting, forming, machining, welding, and additive manufacturing (3D printing).",
+            [
+                "Understand the principles of material removal and addition.",
+                "Learn about casting and molding techniques for different materials.",
+                "Explore advanced manufacturing techniques like CNC and laser cutting.",
+            ],
+            [
+                "Select the appropriate manufacturing process for a given part design.",
+                "Optimize manufacturing parameters for cost and quality.",
+                "Operate basic machine tools and fabrication equipment.",
+            ]
+        ),
     },
     {
         code: "ME202",
@@ -807,10 +1005,19 @@ export const courses = [
         selfStudyHours: 4,
         credits: 4,
         deptCode: "ME",
-        description: {
-            objectives: ["Learn design"],
-            outcomes: ["Design machines"],
-        },
+        description: createCourseDescription(
+            "This course focuses on the design of mechanical elements. It covers stress analysis, failure theories, and the design of gears, bearings, shafts, and fasteners.",
+            [
+                "Understand theories of failure for static and dynamic loading.",
+                "Learn to design mechanical joints and transmission elements.",
+                "Master the selection of materials for machine components.",
+            ],
+            [
+                "Design safe and efficient mechanical components.",
+                "Perform fatigue and stress analysis on machine parts.",
+                "Create detailed engineering drawings for manufacturing.",
+            ]
+        ),
     },
 ];
 

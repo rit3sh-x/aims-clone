@@ -12,6 +12,101 @@ export function randomHex(length = 32): string {
         .slice(0, length);
 }
 
+export const createCourseDescription = (
+    summary: string,
+    objectives: string[],
+    outcomes: string[]
+) => {
+    return [
+        {
+            type: "heading",
+            props: {
+                level: 2,
+                textColor: "default",
+                backgroundColor: "default",
+                textAlignment: "left",
+            },
+            content: [
+                {
+                    type: "text",
+                    text: "Course Overview",
+                    styles: { bold: true },
+                },
+            ],
+            children: [],
+        },
+        {
+            type: "paragraph",
+            props: {
+                textColor: "default",
+                backgroundColor: "default",
+                textAlignment: "left",
+            },
+            content: [{ type: "text", text: summary, styles: {} }],
+            children: [],
+        },
+        {
+            type: "heading",
+            props: {
+                level: 3,
+                textColor: "default",
+                backgroundColor: "default",
+                textAlignment: "left",
+            },
+            content: [
+                {
+                    type: "text",
+                    text: "Learning Objectives",
+                    styles: { bold: true },
+                },
+            ],
+            children: [],
+        },
+        ...objectives.map((obj) => ({
+            type: "bulletListItem",
+            props: {
+                textColor: "default",
+                backgroundColor: "default",
+                textAlignment: "left",
+            },
+            content: [{ type: "text", text: obj, styles: {} }],
+            children: [],
+        })),
+        {
+            type: "heading",
+            props: {
+                level: 3,
+                textColor: "default",
+                backgroundColor: "default",
+                textAlignment: "left",
+            },
+            content: [
+                {
+                    type: "text",
+                    text: "Course Outcomes",
+                    styles: { bold: true },
+                },
+            ],
+            children: [],
+        },
+        ...outcomes.map((out) => ({
+            type: "bulletListItem",
+            props: {
+                textColor: "default",
+                backgroundColor: "default",
+                textAlignment: "left",
+            },
+            content: [{ type: "text", text: out, styles: {} }],
+            children: [],
+        })),
+    ];
+};
+
+export function withAlias(baseEmail: string, alias: string) {
+    const [local, domain] = baseEmail.split("@");
+    return `${local}+${alias}@${domain}`;
+}
+
 export const createAuthHash = async (password: string) => {
     const hashFn = (await auth.$context).password.hash;
     return hashFn(password);
@@ -64,7 +159,6 @@ export const createUser = async ({
         return createdUser;
     });
 };
-
 
 export const createBulkUsers = async (users: CreateUserInput[]) => {
     if (users.length === 0) return [];

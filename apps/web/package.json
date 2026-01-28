@@ -6,7 +6,9 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "eslint"
+        "lint": "eslint",
+        "seed:admin": "tsx scripts/seed-admin.ts",
+        "seed:data": "tsx scripts/seed-data.ts"
     },
     "dependencies": {
         "@ark-ui/react": "^5.30.0",

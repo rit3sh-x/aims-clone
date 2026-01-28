@@ -13,7 +13,7 @@ export const instructorProcedure = protectedProcedure.use(
             });
         }
 
-        const instructorRecord = await db.query.hod.findFirst({
+        const instructorRecord = await db.query.instructor.findFirst({
             where: (h, { eq }) => eq(h.userId, userId),
             columns: {
                 id: true,
@@ -24,7 +24,7 @@ export const instructorProcedure = protectedProcedure.use(
         if (!instructorRecord) {
             throw new TRPCError({
                 code: "FORBIDDEN",
-                message: "HOD record not found.",
+                message: "Instructor record not found.",
             });
         }
 

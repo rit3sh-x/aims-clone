@@ -21,219 +21,30 @@ import {
     CalendarClockIcon,
 } from "lucide-react";
 import type { UserRole } from "@workspace/db";
+import type { Route } from "next";
+import type { ElementType } from "react";
 
-export const academics = [
-    {
-        title: "Departments",
-        url: "/departments",
-        icon: FolderOpenIcon,
-    },
-    { title: "Courses", url: "/courses", icon: BookOpenIcon },
-    { title: "Students", url: "/list/students", icon: UsersIcon },
-    { title: "Instructors", url: "/list/instructors", icon: UserIcon },
-];
+type SidebarItem = {
+    title: string;
+    url: Route;
+    icon: ElementType;
+};
 
-export const teachingLearning = [
-    {
-        title: "Course Offerings",
-        url: "/offering",
-        icon: LayoutGridIcon,
-    },
-    {
-        title: "Enrollments",
-        url: "/enrollments",
-        icon: ClipboardListIcon,
-    },
-    {
-        title: "Feedback Questions",
-        url: "/feedback-questions",
-        icon: MessageSquareIcon,
-    },
-];
+type SidebarSection = {
+    title: string;
+    icon: ElementType;
+    items: SidebarItem[];
+};
 
-export const scheduling = [
-    { title: "Classrooms", url: "/classrooms", icon: BuildingIcon },
-    {
-        title: "Academic Schedule",
-        url: "/academic-schedule",
-        icon: CalendarIcon,
-    },
-    { title: "Semesters", url: "/semesters", icon: CalendarDaysIcon },
-    { title: "Events", url: "/events", icon: CalendarDaysIcon },
-];
+export type SidebarConfig = {
+    sections: SidebarSection[];
+    footer?: SidebarItem[];
+};
 
-export function getSidebarOptions(role: UserRole) {
-    const commonDashboard = [
-        { title: "Overview", url: "/", icon: BarChartIcon },
-    ];
-
+export function getSidebarOptions(role: UserRole): SidebarConfig {
     switch (role) {
         case "ADMIN":
             return {
-                dashboard: [
-                    ...commonDashboard,
-                    {
-                        title: "Audit Logs",
-                        url: "/logs",
-                        icon: HistoryIcon,
-                    },
-                ],
-                sections: [
-                    {
-                        title: "Academics",
-                        icon: SchoolIcon,
-                        items: academics,
-                    },
-                    {
-                        title: "Teaching & Learning",
-                        icon: BookMarkedIcon,
-                        items: teachingLearning,
-                    },
-                    {
-                        title: "Scheduling",
-                        icon: CalendarClockIcon,
-                        items: scheduling,
-                    },
-                ],
-                footer: [
-                    {
-                        title: "System Logs",
-                        icon: ClipboardListIcon,
-                        url: "/logs",
-                    },
-                ],
-            };
-
-        case "STUDENT":
-            return {
-                dashboard: commonDashboard,
-                sections: [
-                    {
-                        title: "My Academics",
-                        icon: SchoolIcon,
-                        items: [
-                            {
-                                title: "My Courses",
-                                url: "/courses",
-                                icon: BookOpenIcon,
-                            },
-                            {
-                                title: "Enrollments",
-                                url: "/enrollments",
-                                icon: ClipboardListIcon,
-                            },
-                            {
-                                title: "Student Record",
-                                url: "/student-record",
-                                icon: FileTextIcon,
-                            },
-                        ],
-                    },
-                    {
-                        title: "Schedule",
-                        icon: CalendarClockIcon,
-                        items: [
-                            {
-                                title: "Academic Schedule",
-                                url: "/academic-schedule",
-                                icon: CalendarIcon,
-                            },
-                            {
-                                title: "Events",
-                                url: "/events",
-                                icon: CalendarDaysIcon,
-                            },
-                        ],
-                    },
-                ],
-            };
-
-        case "INSTRUCTOR":
-            return {
-                dashboard: commonDashboard,
-                sections: [
-                    {
-                        title: "My Courses",
-                        icon: BookMarkedIcon,
-                        items: [
-                            {
-                                title: "Course Offerings",
-                                url: "/offering",
-                                icon: LayoutGridIcon,
-                            },
-                            {
-                                title: "Enrollments",
-                                url: "/enrollments",
-                                icon: ClipboardListIcon,
-                            },
-                            {
-                                title: "Feedback Questions",
-                                url: "/feedback-questions",
-                                icon: MessageSquareIcon,
-                            },
-                        ],
-                    },
-                    {
-                        title: "Schedule",
-                        icon: CalendarClockIcon,
-                        items: [
-                            {
-                                title: "Academic Schedule",
-                                url: "/academic-schedule",
-                                icon: CalendarIcon,
-                            },
-                            {
-                                title: "Classrooms",
-                                url: "/classrooms",
-                                icon: BuildingIcon,
-                            },
-                        ],
-                    },
-                ],
-            };
-
-        case "ADVISOR":
-            return {
-                dashboard: commonDashboard,
-                sections: [
-                    {
-                        title: "My Batch",
-                        icon: LayersIcon,
-                        items: [
-                            {
-                                title: "Students",
-                                url: "/list/students",
-                                icon: UsersIcon,
-                            },
-                            {
-                                title: "Enrollments",
-                                url: "/enrollments",
-                                icon: ClipboardListIcon,
-                            },
-                        ],
-                    },
-                    {
-                        title: "Schedule",
-                        icon: CalendarClockIcon,
-                        items: [
-                            {
-                                title: "Academic Schedule",
-                                url: "/academic-schedule",
-                                icon: CalendarIcon,
-                            },
-                            {
-                                title: "Events",
-                                url: "/events",
-                                icon: CalendarDaysIcon,
-                            },
-                        ],
-                    },
-                ],
-            };
-
-        case "HOD":
-            return {
-                dashboard: commonDashboard,
                 sections: [
                     {
                         title: "Academics",
@@ -245,14 +56,24 @@ export function getSidebarOptions(role: UserRole) {
                                 icon: FolderOpenIcon,
                             },
                             {
-                                title: "Students",
-                                url: "/list/students",
-                                icon: UsersIcon,
+                                title: "Instructors",
+                                url: "/instructors",
+                                icon: UserIcon,
                             },
                             {
-                                title: "Instructors",
-                                url: "/list/instructors",
-                                icon: UserIcon,
+                                title: "Advisors",
+                                url: "/advisors",
+                                icon: LayersIcon,
+                            },
+                            {
+                                title: "HODs",
+                                url: "/hods",
+                                icon: LayersIcon,
+                            },
+                            {
+                                title: "Students",
+                                url: "/student",
+                                icon: UsersIcon,
                             },
                         ],
                     },
@@ -261,19 +82,14 @@ export function getSidebarOptions(role: UserRole) {
                         icon: BookMarkedIcon,
                         items: [
                             {
-                                title: "Course Offerings",
-                                url: "/offering",
-                                icon: LayoutGridIcon,
-                            },
-                            {
-                                title: "Enrollments",
-                                url: "/enrollments",
-                                icon: ClipboardListIcon,
-                            },
-                            {
                                 title: "Courses",
                                 url: "/courses",
                                 icon: BookOpenIcon,
+                            },
+                            {
+                                title: "Feedback Questions",
+                                url: "/feedback-questions",
+                                icon: MessageSquareIcon,
                             },
                         ],
                     },
@@ -291,10 +107,137 @@ export function getSidebarOptions(role: UserRole) {
                                 url: "/semesters",
                                 icon: CalendarDaysIcon,
                             },
+                        ],
+                    },
+                ],
+                footer: [
+                    {
+                        title: "System Logs",
+                        icon: ClipboardListIcon,
+                        url: "/logs",
+                    },
+                ],
+            };
+
+        case "STUDENT":
+            return {
+                sections: [
+                    {
+                        title: "Academics",
+                        icon: SchoolIcon,
+                        items: [
                             {
-                                title: "Classrooms",
-                                url: "/classrooms",
-                                icon: BuildingIcon,
+                                title: "Courses",
+                                url: "/courses",
+                                icon: BookOpenIcon,
+                            },
+                            {
+                                title: "Course Offerings",
+                                url: "/offerings",
+                                icon: LayoutGridIcon,
+                            },
+                            {
+                                title: "Student Record",
+                                url: "/student-record",
+                                icon: FileTextIcon,
+                            },
+                        ],
+                    },
+                    {
+                        title: "Schedule",
+                        icon: CalendarClockIcon,
+                        items: [
+                            {
+                                title: "Events",
+                                url: "/events",
+                                icon: CalendarDaysIcon,
+                            },
+                        ],
+                    },
+                ],
+            };
+
+        case "INSTRUCTOR":
+            return {
+                sections: [
+                    {
+                        title: "Teaching",
+                        icon: BookMarkedIcon,
+                        items: [
+                            {
+                                title: "Courses",
+                                url: "/courses",
+                                icon: BookOpenIcon,
+                            },
+                            {
+                                title: "Enrollments",
+                                url: "/enrollments",
+                                icon: ClipboardListIcon,
+                            },
+                            {
+                                title: "Attendance",
+                                url: "/attendance",
+                                icon: CheckSquareIcon,
+                            },
+                        ],
+                    },
+                ],
+            };
+
+        case "ADVISOR":
+            return {
+                sections: [
+                    {
+                        title: "My Batch",
+                        icon: LayersIcon,
+                        items: [
+                            {
+                                title: "Students",
+                                url: "/list/students",
+                                icon: UsersIcon,
+                            },
+                            {
+                                title: "Enrollments",
+                                url: "/enrollments",
+                                icon: ClipboardListIcon,
+                            },
+                        ],
+                    },
+                ],
+            };
+
+        case "HOD":
+            return {
+                sections: [
+                    {
+                        title: "Department",
+                        icon: SchoolIcon,
+                        items: [
+                            {
+                                title: "Students",
+                                url: "/list/students",
+                                icon: UsersIcon,
+                            },
+                            {
+                                title: "Instructors",
+                                url: "/list/instructors",
+                                icon: UserIcon,
+                            },
+                        ],
+                    },
+                    {
+                        title: "Academics",
+                        icon: BookMarkedIcon,
+                        items: [
+                            {
+                                title: "Courses",
+                                url: "/courses",
+                                icon: BookOpenIcon,
+                            },
+                            {
+                                title: "Course Offerings",
+                                url: "/offerings",
+                                icon: LayoutGridIcon,
                             },
                         ],
                     },
@@ -303,7 +246,6 @@ export function getSidebarOptions(role: UserRole) {
 
         default:
             return {
-                dashboard: commonDashboard,
                 sections: [],
             };
     }

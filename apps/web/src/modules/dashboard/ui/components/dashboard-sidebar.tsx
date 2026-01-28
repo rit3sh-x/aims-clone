@@ -29,7 +29,6 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@workspace/ui/components/collapsible";
-import type { Route } from "next";
 
 interface DashboardSidebarProps {
     role: UserRole;
@@ -91,9 +90,8 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
-                            render={(props) => (
+                            render={() => (
                                 <Link
-                                    {...props}
                                     href="/"
                                     className="flex items-center justify-center gap-2"
                                 >
@@ -142,9 +140,8 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                     >
                                         <SidebarMenuItem>
                                             <CollapsibleTrigger
-                                                render={(props) => (
+                                                render={() => (
                                                     <SidebarMenuButton
-                                                        {...props}
                                                         tooltip={section.title}
                                                     >
                                                         {section.icon && (
@@ -174,13 +171,10 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                                                         ) &&
                                                                             "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
                                                                     )}
-                                                                    render={(
-                                                                        props
-                                                                    ) => (
+                                                                    render={() => (
                                                                         <Link
-                                                                            {...props}
                                                                             href={
-                                                                                item.url as Route
+                                                                                item.url
                                                                             }
                                                                         >
                                                                             <item.icon className="size-4" />
@@ -224,8 +218,8 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                                     isActive(item.url) &&
                                         "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
                                 )}
-                                render={(props) => (
-                                    <Link {...props} href={item.url as Route}>
+                                render={() => (
+                                    <Link href={item.url}>
                                         <item.icon className="size-4" />
                                         <span>{item.title}</span>
                                     </Link>

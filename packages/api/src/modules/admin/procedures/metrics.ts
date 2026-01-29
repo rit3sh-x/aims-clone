@@ -14,7 +14,6 @@ export const metricsViewer = createTRPCRouter({
                     date: sql<string>`date_trunc('day', ${enrollment.createdAt})::text`,
                     pending: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'PENDING')`,
                     instructorApproved: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'INSTRUCTOR_APPROVED')`,
-                    advisorApproved: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'ADVISOR_APPROVED')`,
                     enrolled: sql<number>`count(*) FILTER (WHERE ${enrollment.status} = 'ENROLLED')`,
                 })
                 .from(enrollment)
@@ -30,7 +29,6 @@ export const metricsViewer = createTRPCRouter({
                 date: r.date.slice(0, 10),
                 pending: r.pending,
                 instructorApproved: r.instructorApproved,
-                advisorApproved: r.advisorApproved,
                 enrolled: r.enrolled,
             }));
         }),

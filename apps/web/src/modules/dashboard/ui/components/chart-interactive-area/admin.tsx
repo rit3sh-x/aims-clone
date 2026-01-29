@@ -44,8 +44,8 @@ const chartConfig = {
         label: "Instructor Approved",
         color: "hsl(var(--primary))",
     },
-    advisorApproved: {
-        label: "Advisor Approved",
+    enrolled: {
+        label: "Enrolled",
         color: "hsl(var(--success))",
     },
     pending: {
@@ -67,9 +67,9 @@ export function AdminChartInteractiveArea() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Enrollment Approvals</CardTitle>
+                <CardTitle>Enrollment Status</CardTitle>
                 <CardDescription>
-                    Instructor, Advisor & Pending approvals
+                    Instructor Approved, Enrolled & Pending enrollments
                 </CardDescription>
 
                 <CardAction>
@@ -192,10 +192,10 @@ export function AdminChartInteractiveArea() {
                         />
 
                         <Area
-                            dataKey="advisorApproved"
+                            dataKey="enrolled"
                             stackId="a"
                             type="natural"
-                            fill="url(#advisorApproved)"
+                            fill="url(#enrolled)"
                             stroke="hsl(var(--success))"
                         />
 

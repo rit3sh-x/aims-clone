@@ -43,11 +43,13 @@ You need to set up the `.env` files for the following directories:
 #### 1. Database Service: `/packages/db/.env`
 
 Copy the example file:
+
 ```bash
 cp packages/db/.env.example packages/db/.env
 ```
 
 Update the `DATABASE_URL` with your PostgreSQL credentials:
+
 ```env
 DATABASE_URL=postgresql://your_user:your_password@localhost:5432/your_database
 ```
@@ -55,11 +57,13 @@ DATABASE_URL=postgresql://your_user:your_password@localhost:5432/your_database
 #### 2. Authentication Service: `/packages/auth/.env`
 
 Copy the example file:
+
 ```bash
 cp packages/auth/.env.example packages/auth/.env
 ```
 
 Update the following fields in the `.env` file:
+
 - `DATABASE_URL`: Your PostgreSQL connection string
 - `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`: Your MinIO/S3 credentials
 - `BETTER_AUTH_SECRET`: Generate a secret (see Step 6)
@@ -68,11 +72,13 @@ Update the following fields in the `.env` file:
 #### 3. Web Application: `/apps/web/.env`
 
 Copy the example file:
+
 ```bash
 cp apps/web/.env.example apps/web/.env
 ```
 
 Update the following fields in the `.env` file:
+
 - `DATABASE_URL`: Your PostgreSQL connection string
 - `BETTER_AUTH_SECRET`: Will be generated in Step 6
 - `NEXT_PUBLIC_APP_URL`: Base URL (e.g., `http://localhost:3000`)
@@ -161,16 +167,19 @@ The application will be available at [http://localhost:3000](http://localhost:30
 ## Additional Commands
 
 ### Run All Workspaces in Dev Mode
+
 ```bash
 turbo dev
 ```
 
 ### Build the Project
+
 ```bash
 turbo build
 ```
 
 ### Clean All Build Artifacts
+
 ```bash
 turbo clean
 ```

@@ -4,6 +4,7 @@ import { scheduleViewer } from "./procedures/schedule";
 import { selfManagement } from "./procedures/self";
 import { attendanceViewer } from "./procedures/attendance";
 import { feedbackManagement } from "./procedures/feedback";
+import { courseManagement } from "./procedures/course";
 
 export const studentRouter = createTRPCRouter({
     offering: offeringManagement,
@@ -11,4 +12,5 @@ export const studentRouter = createTRPCRouter({
     self: selfManagement,
     attendance: attendanceViewer,
     feedback: feedbackManagement,
+    course: courseManagement,
 });

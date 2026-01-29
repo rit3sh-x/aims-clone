@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth-utils";
 import { AdminCourseIdView } from "@/modules/courses/ui/views/admin-course-id-view";
 import { HodCourseIdView } from "@/modules/courses/ui/views/hod-course-id-view";
 import { InstructorCourseIdView } from "@/modules/courses/ui/views/instructor-course-id-view";
+import { StudentCourseIdView } from "@/modules/courses/ui/views/student-course-id-view";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { redirect } from "next/navigation";
 
@@ -14,7 +15,7 @@ type Props = {
 const Page = async ({ params }: Props) => {
     const { user } = await requireAuth();
 
-    if (user.role === "ADVISOR" || user.role === "STUDENT") {
+    if (user.role === "ADVISOR") {
         redirect("/");
     }
     const { courseId } = await params;
@@ -62,6 +63,18 @@ const Page = async ({ params }: Props) => {
             return (
                 <HydrateClient>
                     <InstructorCourseIdView courseId={courseId} />
+                </HydrateClient>
+            );
+        }
+        case "STUDENT": {
+            prefetch(
+                trpc.student.course.getById.queryOptions({
+                    courseId,
+                })
+            );
+            return (
+                <HydrateClient>
+                    <StudentCourseIdView courseId={courseId} />
                 </HydrateClient>
             );
         }

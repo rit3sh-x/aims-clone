@@ -1,24 +1,19 @@
 import {
-    FolderOpenIcon,
+    Building2Icon,
     GraduationCapIcon,
-    BookOpenIcon,
+    UserCogIcon,
+    CrownIcon,
     UsersIcon,
-    UserIcon,
-    LayersIcon,
-    ClipboardListIcon,
-    CheckSquareIcon,
+    BookOpenIcon,
+    MessageCircleQuestionIcon,
     CalendarIcon,
-    MessageSquareIcon,
-    FileTextIcon,
-    HistoryIcon,
-    BarChartIcon,
-    CalendarDaysIcon,
-    BuildingIcon,
-    StarIcon,
-    LayoutGridIcon,
-    BookMarkedIcon,
-    SchoolIcon,
+    CalendarRangeIcon,
+    ScrollTextIcon,
+    Grid3x3Icon,
+    FileUserIcon,
     CalendarClockIcon,
+    UserCheckIcon,
+    ClipboardCheckIcon,
 } from "lucide-react";
 import type { UserRole } from "@workspace/db";
 import type { Route } from "next";
@@ -32,7 +27,6 @@ type SidebarItem = {
 
 type SidebarSection = {
     title: string;
-    icon: ElementType;
     items: SidebarItem[];
 };
 
@@ -48,27 +42,26 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                 sections: [
                     {
                         title: "Academics",
-                        icon: SchoolIcon,
                         items: [
                             {
                                 title: "Departments",
                                 url: "/departments",
-                                icon: FolderOpenIcon,
+                                icon: Building2Icon,
                             },
                             {
                                 title: "Instructors",
                                 url: "/instructors",
-                                icon: UserIcon,
+                                icon: GraduationCapIcon,
                             },
                             {
                                 title: "Advisors",
                                 url: "/advisors",
-                                icon: LayersIcon,
+                                icon: UserCogIcon,
                             },
                             {
                                 title: "HODs",
                                 url: "/hods",
-                                icon: LayersIcon,
+                                icon: CrownIcon,
                             },
                             {
                                 title: "Students",
@@ -79,7 +72,6 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                     },
                     {
                         title: "Teaching & Learning",
-                        icon: BookMarkedIcon,
                         items: [
                             {
                                 title: "Courses",
@@ -89,13 +81,12 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                             {
                                 title: "Feedback Questions",
                                 url: "/feedback-questions",
-                                icon: MessageSquareIcon,
+                                icon: MessageCircleQuestionIcon,
                             },
                         ],
                     },
                     {
                         title: "Scheduling",
-                        icon: CalendarClockIcon,
                         items: [
                             {
                                 title: "Academic Schedule",
@@ -105,7 +96,7 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                             {
                                 title: "Semesters",
                                 url: "/semesters",
-                                icon: CalendarDaysIcon,
+                                icon: CalendarRangeIcon,
                             },
                         ],
                     },
@@ -113,7 +104,7 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                 footer: [
                     {
                         title: "System Logs",
-                        icon: ClipboardListIcon,
+                        icon: ScrollTextIcon,
                         url: "/logs",
                     },
                 ],
@@ -124,7 +115,6 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                 sections: [
                     {
                         title: "Academics",
-                        icon: SchoolIcon,
                         items: [
                             {
                                 title: "Courses",
@@ -134,23 +124,22 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                             {
                                 title: "Course Offerings",
                                 url: "/offerings",
-                                icon: LayoutGridIcon,
+                                icon: Grid3x3Icon,
                             },
                             {
                                 title: "Student Record",
                                 url: "/student-record",
-                                icon: FileTextIcon,
+                                icon: FileUserIcon,
                             },
                         ],
                     },
                     {
                         title: "Schedule",
-                        icon: CalendarClockIcon,
                         items: [
                             {
                                 title: "Events",
                                 url: "/events",
-                                icon: CalendarDaysIcon,
+                                icon: CalendarClockIcon,
                             },
                         ],
                     },
@@ -162,7 +151,6 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                 sections: [
                     {
                         title: "Teaching",
-                        icon: BookMarkedIcon,
                         items: [
                             {
                                 title: "Courses",
@@ -172,12 +160,12 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                             {
                                 title: "Enrollments",
                                 url: "/enrollments",
-                                icon: ClipboardListIcon,
+                                icon: UserCheckIcon,
                             },
                             {
                                 title: "Attendance",
                                 url: "/attendance",
-                                icon: CheckSquareIcon,
+                                icon: ClipboardCheckIcon,
                             },
                         ],
                     },
@@ -189,7 +177,6 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                 sections: [
                     {
                         title: "My Batch",
-                        icon: LayersIcon,
                         items: [
                             {
                                 title: "Students",
@@ -199,7 +186,7 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                             {
                                 title: "Enrollments",
                                 url: "/enrollments",
-                                icon: ClipboardListIcon,
+                                icon: UserCheckIcon,
                             },
                         ],
                     },
@@ -211,7 +198,6 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                 sections: [
                     {
                         title: "Department",
-                        icon: SchoolIcon,
                         items: [
                             {
                                 title: "Students",
@@ -221,13 +207,12 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                             {
                                 title: "Instructors",
                                 url: "/list/instructors",
-                                icon: UserIcon,
+                                icon: GraduationCapIcon,
                             },
                         ],
                     },
                     {
                         title: "Academics",
-                        icon: BookMarkedIcon,
                         items: [
                             {
                                 title: "Courses",
@@ -237,7 +222,7 @@ export function getSidebarOptions(role: UserRole): SidebarConfig {
                             {
                                 title: "Course Offerings",
                                 url: "/offerings",
-                                icon: LayoutGridIcon,
+                                icon: Grid3x3Icon,
                             },
                         ],
                     },

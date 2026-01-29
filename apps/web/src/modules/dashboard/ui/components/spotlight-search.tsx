@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useSpotlightSearch } from "../../hooks/use-spotlight-search";
 import { useSpotlight } from "../../hooks/use-spotlight";
 import { SpotlightOutput } from "../../types";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import type { Route } from "next";
 
 export const SpotlightSearch = () => {
@@ -134,5 +135,14 @@ export const SpotlightSearch = () => {
                 </Command>
             </CommandDialog>
         </>
+    );
+};
+
+export const SpotlightSearchSkeleton = () => {
+    return (
+        <div className="inline-flex h-9 items-center justify-between md:min-w-lg w-fit gap-3 rounded-full border px-6 py-2">
+            <Skeleton className="h-4 w-24 rounded-md" />
+            <Skeleton className="h-4 w-8 rounded-md" />
+        </div>
     );
 };

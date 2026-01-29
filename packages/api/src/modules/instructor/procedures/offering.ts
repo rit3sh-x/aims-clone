@@ -11,6 +11,8 @@ import {
     courseOfferingInstructor,
     db,
     logAuditEvent,
+    offeringBatch,
+    prerequisite,
 } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, lt, or, type SQL } from "drizzle-orm";
@@ -20,7 +22,13 @@ export const offeringManagement = createTRPCRouter({
         .input(proposeOfferingInputSchema)
         .mutation(async ({ input, ctx }) => {
             const { instructor: currentInstructor } = ctx;
-            const { courseId, assessmentTemplates } = input;
+            const {
+                courseId,
+                assessmentTemplates,
+                batchIds,
+                prerequisiteCourseIds,
+                instructorIds,
+            } = input;
 
             const courseRecord = await db
                 .select({
@@ -118,6 +126,34 @@ export const offeringManagement = createTRPCRouter({
                     isHead: true,
                 });
 
+                if (instructorIds.length > 0) {
+                    await tx.insert(courseOfferingInstructor).values(
+                        instructorIds.map((instructorId) => ({
+                            offeringId: offering.id,
+                            instructorId,
+                            isHead: false,
+                        }))
+                    );
+                }
+
+                if (batchIds.length > 0) {
+                    await tx.insert(offeringBatch).values(
+                        batchIds.map((batchId) => ({
+                            offeringId: offering.id,
+                            batchId,
+                        }))
+                    );
+                }
+
+                if (prerequisiteCourseIds.length > 0) {
+                    await tx.insert(prerequisite).values(
+                        prerequisiteCourseIds.map((prereqId) => ({
+                            courseId,
+                            prerequisiteCourseId: prereqId,
+                        }))
+                    );
+                }
+
                 if (assessmentTemplates.length > 0) {
                     await tx.insert(assessmentTemplate).values(
                         assessmentTemplates.map((template) => ({
@@ -137,6 +173,9 @@ export const offeringManagement = createTRPCRouter({
                     after: {
                         offering,
                         headInstructorId: currentInstructor.id,
+                        instructorIds,
+                        batchIds,
+                        prerequisiteCourseIds,
                         assessmentTemplates,
                     },
                 });

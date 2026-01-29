@@ -142,98 +142,42 @@ export const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
                             className="h-0 pointer-events-none mb-4"
                         />
 
-                        <SidebarGroup>
-                            <SidebarGroupLabel>Options</SidebarGroupLabel>
-                            {sidebarOptions.sections.map((section) => (
-                                <SidebarMenu key={section.title}>
-                                    <Collapsible
-                                        open={
-                                            openSections[section.title] ?? false
-                                        }
-                                        onOpenChange={(open) =>
-                                            setOpenSections((prev) => ({
-                                                ...prev,
-                                                [section.title]: open,
-                                            }))
-                                        }
-                                        className="group/collapsible"
-                                    >
-                                        <SidebarMenuItem>
-                                            <CollapsibleTrigger
-                                                render={(props, state) => (
-                                                    <SidebarMenuButton
-                                                        {...props}
-                                                        tooltip={section.title}
-                                                    >
-                                                        {section.icon && (
-                                                            <section.icon className="size-4" />
+                        {sidebarOptions.sections.map((section) => (
+                            <SidebarGroup key={section.title}>
+                                <SidebarGroupLabel>
+                                    {section.title}
+                                </SidebarGroupLabel>
+                                {section.items.map((section) => (
+                                    <SidebarMenuItem key={section.title}>
+                                        <SidebarMenuButton
+                                            isActive={isActive(section.url)}
+                                            className={cn(
+                                                isActive(section.url) &&
+                                                    "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
+                                            )}
+                                            render={(props) => (
+                                                <Link
+                                                    {...props}
+                                                    href={section.url}
+                                                >
+                                                    <section.icon
+                                                        className={cn(
+                                                            "size-4",
+                                                            isActive(
+                                                                section.url
+                                                            ) &&
+                                                                "text-neutral-200!"
                                                         )}
-                                                        <span>
-                                                            {section.title}
-                                                        </span>
-                                                        <ChevronRightIcon
-                                                            className={cn(
-                                                                "ml-auto transition-transform duration-200",
-                                                                state.open &&
-                                                                    "rotate-90"
-                                                            )}
-                                                        />
-                                                    </SidebarMenuButton>
-                                                )}
-                                            />
-                                            <CollapsibleContent>
-                                                <SidebarMenuSub>
-                                                    {section.items.map(
-                                                        (item) => (
-                                                            <SidebarMenuSubItem
-                                                                key={item.title}
-                                                            >
-                                                                <SidebarMenuSubButton
-                                                                    isActive={isActive(
-                                                                        item.url
-                                                                    )}
-                                                                    className={cn(
-                                                                        isActive(
-                                                                            item.url
-                                                                        ) &&
-                                                                            "bg-[#0b63f3]! text-neutral-200! hover:bg-[#0b63f3]/90!"
-                                                                    )}
-                                                                    render={(
-                                                                        props
-                                                                    ) => (
-                                                                        <Link
-                                                                            {...props}
-                                                                            href={
-                                                                                item.url
-                                                                            }
-                                                                        >
-                                                                            <item.icon
-                                                                                className={cn(
-                                                                                    "size-4",
-                                                                                    isActive(
-                                                                                        item.url
-                                                                                    ) &&
-                                                                                        "text-neutral-200!"
-                                                                                )}
-                                                                            />
-                                                                            <span>
-                                                                                {
-                                                                                    item.title
-                                                                                }
-                                                                            </span>
-                                                                        </Link>
-                                                                    )}
-                                                                />
-                                                            </SidebarMenuSubItem>
-                                                        )
-                                                    )}
-                                                </SidebarMenuSub>
-                                            </CollapsibleContent>
-                                        </SidebarMenuItem>
-                                    </Collapsible>
-                                </SidebarMenu>
-                            ))}
-                        </SidebarGroup>
+                                                    />
+                                                    <span>{section.title}</span>
+                                                </Link>
+                                            )}
+                                        />
+                                    </SidebarMenuItem>
+                                ))}
+                            </SidebarGroup>
+                        ))}
+
                         <div
                             ref={bottomSentinelRef}
                             className="h-0 pointer-events-none"

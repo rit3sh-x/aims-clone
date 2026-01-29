@@ -44,6 +44,9 @@ const assessmentTemplateSchema = z.object({
 
 export const proposeOfferingInputSchema = z.object({
     courseId: z.string(),
+    batchIds: z.array(z.string()).min(1),
+    prerequisiteCourseIds: z.array(z.string().min(1)).default([]),
+    instructorIds: z.array(z.string().min(1)).default([]),
     assessmentTemplates: z.array(assessmentTemplateSchema),
 });
 

@@ -1,9 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import { UserProfile } from "./user-profile";
-import { SpotlightSearch } from "./spotlight-search";
+import { SpotlightSearchSkeleton } from "./spotlight-search";
 import { usePathname } from "next/navigation";
+
+const SpotlightSearch = dynamic(
+    () => import("./spotlight-search").then((mod) => mod.SpotlightSearch),
+    {
+        ssr: false,
+        loading: () => <SpotlightSearchSkeleton />,
+    }
+);
 
 const getPageTitle = (pathname: string): string => {
     const segments = pathname.split("/").filter(Boolean);

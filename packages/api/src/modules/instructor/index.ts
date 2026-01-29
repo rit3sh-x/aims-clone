@@ -7,6 +7,8 @@ import { courseManagement } from "./procedures/course";
 import { gradeManagement } from "./procedures/grade";
 import { attendanceManagement } from "./procedures/attendance";
 import { feedbackManagement } from "./procedures/feedback";
+import { batchManagement } from "./procedures/batch";
+import { instructorManagement } from "./procedures/instructor";
 
 export const instructorRouter = createTRPCRouter({
     offering: offeringManagement,
@@ -17,4 +19,6 @@ export const instructorRouter = createTRPCRouter({
     grade: gradeManagement,
     attendance: attendanceManagement,
     feedback: feedbackManagement,
+    batch: batchManagement,
+    instructor: instructorManagement,
 });

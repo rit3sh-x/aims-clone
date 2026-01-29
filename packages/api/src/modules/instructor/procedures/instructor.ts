@@ -1,16 +1,12 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import { instructorProcedure } from "../middleware";
-import { z } from "zod";
 import { db, instructor, user } from "@workspace/db";
 import { ilike, or, sql, ne } from "drizzle-orm";
+import { searchInputSchema } from "../schema";
 
 export const instructorManagement = createTRPCRouter({
     search: instructorProcedure
-        .input(
-            z.object({
-                search: z.string().min(1),
-            })
-        )
+        .input(searchInputSchema)
         .query(async ({ input, ctx }) => {
             const { search } = input;
             const currentInstructorId = ctx.instructor.id;

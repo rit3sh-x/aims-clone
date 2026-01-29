@@ -26,15 +26,22 @@ import {
 } from "@workspace/ui/components/select";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { Field, FieldError, FieldLabel } from "@workspace/ui/components/field";
 import { cn } from "@workspace/ui/lib/utils";
 import { humanizeEnum } from "@/lib/formatters";
 import {
     useSuspenseCourse,
     useProposeOffering,
+    useSearchBatches,
+    useSearchInstructors,
+    useSearchCourses,
 } from "@/modules/courses/hooks/use-instructor-course";
 import { RichText } from "@/components/rich-text";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { MoreVertical, Send, Plus, Trash2 } from "lucide-react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { z } from "zod/v4";
+import MultipleSelector, { Option } from "@/components/multi-select";
 
 const ASSESSMENT_TYPES = [
     "QUIZ",
@@ -167,6 +174,24 @@ const DEFAULT_ASSESSMENTS: AssessmentTemplate[] = [
     { type: "ASSIGNMENT", maxMarks: 100, weightage: 20 },
 ];
 
+const proposeOfferingSchema = z.object({
+    batchIds: z.array(z.string()).min(1, "At least one batch is required"),
+    instructorIds: z.array(z.string()),
+    prerequisiteCourseIds: z.array(z.string()),
+    assessmentTemplates: z
+        .array(
+            z.object({
+                type: z.enum(ASSESSMENT_TYPES),
+                maxMarks: z.number().positive("Max marks must be positive"),
+                weightage: z
+                    .number()
+                    .min(1)
+                    .max(100, "Weightage must be between 1 and 100"),
+            })
+        )
+        .min(1, "At least one assessment is required"),
+});
+
 const ProposeOfferingDialog = ({
     courseId,
     courseCode,
@@ -174,185 +199,453 @@ const ProposeOfferingDialog = ({
     onOpenChange,
 }: ProposeOfferingDialogProps) => {
     const proposeOffering = useProposeOffering();
-    const [assessments, setAssessments] =
-        useState<AssessmentTemplate[]>(DEFAULT_ASSESSMENTS);
 
-    const totalWeightage = assessments.reduce((sum, a) => sum + a.weightage, 0);
-    const isValid = totalWeightage === 100 && assessments.length > 0;
+    const [batchSearch, setBatchSearch] = useState("");
+    const [instructorSearch, setInstructorSearch] = useState("");
+    const [courseSearch, setCourseSearch] = useState("");
 
-    const updateAssessment = (
-        index: number,
-        field: keyof AssessmentTemplate,
-        value: string | number
-    ) => {
-        setAssessments((prev) =>
-            prev.map((item, i) =>
-                i === index ? { ...item, [field]: value } : item
-            )
-        );
-    };
+    // Store selected options with labels
+    const [selectedBatches, setSelectedBatches] = useState<Option[]>([]);
+    const [selectedInstructors, setSelectedInstructors] = useState<Option[]>(
+        []
+    );
+    const [selectedCourses, setSelectedCourses] = useState<Option[]>([]);
 
-    const addAssessment = () => {
-        setAssessments((prev) => [
-            ...prev,
-            { type: "QUIZ", maxMarks: 100, weightage: 0 },
-        ]);
-    };
+    const { data: batchResults } = useSearchBatches(batchSearch);
+    const { data: instructorResults } = useSearchInstructors(instructorSearch);
+    const { data: courseResults } = useSearchCourses(courseSearch);
 
-    const removeAssessment = (index: number) => {
-        if (assessments.length > 1) {
-            setAssessments((prev) => prev.filter((_, i) => i !== index));
-        }
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!isValid) return;
-
-        await proposeOffering.mutateAsync({
-            courseId,
-            assessmentTemplates: assessments,
-        });
-
-        setAssessments(DEFAULT_ASSESSMENTS);
-        onOpenChange(false);
-    };
+    const form = useForm({
+        defaultValues: {
+            batchIds: [] as string[],
+            instructorIds: [] as string[],
+            prerequisiteCourseIds: [] as string[],
+            assessmentTemplates: DEFAULT_ASSESSMENTS,
+        },
+        validators: {
+            onSubmit: proposeOfferingSchema,
+        },
+        onSubmit: ({ value }) => {
+            proposeOffering.mutate(
+                {
+                    courseId,
+                    ...value,
+                },
+                {
+                    onSuccess: () => {
+                        onOpenChange(false);
+                        form.reset();
+                        setSelectedBatches([]);
+                        setSelectedInstructors([]);
+                        setSelectedCourses([]);
+                    },
+                }
+            );
+        },
+    });
 
     const handleClose = (isOpen: boolean) => {
         if (!isOpen) {
-            setAssessments(DEFAULT_ASSESSMENTS);
+            form.reset();
+            setBatchSearch("");
+            setInstructorSearch("");
+            setCourseSearch("");
+            setSelectedBatches([]);
+            setSelectedInstructors([]);
+            setSelectedCourses([]);
         }
         onOpenChange(isOpen);
     };
 
+    const totalWeightage = useStore(form.baseStore, (state) =>
+        state.values.assessmentTemplates.reduce(
+            (sum, a) => sum + a.weightage,
+            0
+        )
+    );
+
+    const handleSearchBatches = async (search: string): Promise<Option[]> => {
+        if (!search || search.length < 1) return [];
+        setBatchSearch(search);
+
+        if (!batchResults) return [];
+
+        return batchResults.map((batch) => ({
+            value: batch.id,
+            label: `${batch.programCode} - ${batch.year} (${humanizeEnum(batch.degreeType)})`,
+        }));
+    };
+
+    const handleSearchInstructors = async (
+        search: string
+    ): Promise<Option[]> => {
+        if (!search || search.length < 1) return [];
+        setInstructorSearch(search);
+
+        if (!instructorResults) return [];
+
+        return instructorResults.map((instructor) => ({
+            value: instructor.id,
+            label: `${instructor.name} (${instructor.employeeId})`,
+        }));
+    };
+
+    const handleSearchCourses = async (search: string): Promise<Option[]> => {
+        if (!search || search.length < 1) return [];
+        setCourseSearch(search);
+
+        if (!courseResults) return [];
+
+        return courseResults.map((course) => ({
+            value: course.id,
+            label: `${course.code} - ${course.title}`,
+        }));
+    };
+
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-7xl w-full mx-auto m-4 lg:m-0 max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Propose Offering for {courseCode}</DialogTitle>
                     <DialogDescription>
-                        Configure the assessment structure for this course
-                        offering. Total weightage must equal 100%.
+                        Configure the course offering details including batches,
+                        instructors, prerequisites, and assessment structure.
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-medium">
-                                Assessment Templates
-                            </h3>
-                            <Badge
-                                variant={isValid ? "default" : "destructive"}
-                            >
-                                Total: {totalWeightage}%
-                            </Badge>
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        form.handleSubmit();
+                    }}
+                    className="space-y-6"
+                >
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="space-y-6">
+                            <form.Field name="batchIds">
+                                {(field) => {
+                                    const isInvalid =
+                                        field.state.meta.isTouched &&
+                                        !field.state.meta.isValid;
+
+                                    return (
+                                        <Field data-invalid={isInvalid}>
+                                            <FieldLabel>
+                                                Target Batches *
+                                            </FieldLabel>
+                                            <MultipleSelector
+                                                value={selectedBatches}
+                                                onChange={(options) => {
+                                                    setSelectedBatches(options);
+                                                    field.handleChange(
+                                                        options.map(
+                                                            (o) => o.value
+                                                        )
+                                                    );
+                                                }}
+                                                onSearch={handleSearchBatches}
+                                                placeholder="Search batches..."
+                                                emptyIndicator="No batches found"
+                                                loadingIndicator={
+                                                    <div className="p-2 text-sm">
+                                                        Searching...
+                                                    </div>
+                                                }
+                                                disabled={
+                                                    proposeOffering.isPending
+                                                }
+                                                triggerSearchOnFocus
+                                            />
+                                            {isInvalid && (
+                                                <FieldError
+                                                    errors={
+                                                        field.state.meta.errors
+                                                    }
+                                                />
+                                            )}
+                                        </Field>
+                                    );
+                                }}
+                            </form.Field>
+
+                            <form.Field name="instructorIds">
+                                {(field) => (
+                                    <Field>
+                                        <FieldLabel>
+                                            Additional Instructors (Optional)
+                                        </FieldLabel>
+                                        <MultipleSelector
+                                            value={selectedInstructors}
+                                            onChange={(options: Option[]) => {
+                                                setSelectedInstructors(options);
+                                                field.handleChange(
+                                                    options.map(
+                                                        (o: Option) => o.value
+                                                    )
+                                                );
+                                            }}
+                                            onSearch={handleSearchInstructors}
+                                            placeholder="Search instructors..."
+                                            emptyIndicator="No instructors found"
+                                            loadingIndicator={
+                                                <div className="p-2 text-sm">
+                                                    Searching...
+                                                </div>
+                                            }
+                                            disabled={proposeOffering.isPending}
+                                            triggerSearchOnFocus
+                                        />
+                                    </Field>
+                                )}
+                            </form.Field>
+
+                            <form.Field name="prerequisiteCourseIds">
+                                {(field) => (
+                                    <Field>
+                                        <FieldLabel>
+                                            Prerequisite Courses (Optional)
+                                        </FieldLabel>
+                                        <MultipleSelector
+                                            value={selectedCourses}
+                                            onChange={(options: Option[]) => {
+                                                setSelectedCourses(options);
+                                                field.handleChange(
+                                                    options.map(
+                                                        (o: Option) => o.value
+                                                    )
+                                                );
+                                            }}
+                                            onSearch={handleSearchCourses}
+                                            placeholder="Search courses..."
+                                            emptyIndicator="No courses found"
+                                            loadingIndicator={
+                                                <div className="p-2 text-sm">
+                                                    Searching...
+                                                </div>
+                                            }
+                                            disabled={proposeOffering.isPending}
+                                            triggerSearchOnFocus
+                                        />
+                                    </Field>
+                                )}
+                            </form.Field>
                         </div>
 
-                        <div className="space-y-3">
-                            {assessments.map((assessment, index) => (
-                                <div
-                                    key={index}
-                                    className="grid grid-cols-12 gap-2 items-end p-3 border rounded-md bg-muted/30"
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-medium">
+                                    Assessment Templates *
+                                </h3>
+                                <Badge
+                                    variant={
+                                        totalWeightage === 100
+                                            ? "default"
+                                            : "destructive"
+                                    }
                                 >
-                                    <div className="col-span-4 space-y-1">
-                                        <Label className="text-xs">Type</Label>
-                                        <Select
-                                            value={assessment.type}
-                                            onValueChange={(value) =>
-                                                updateAssessment(
-                                                    index,
-                                                    "type",
-                                                    value as AssessmentType
-                                                )
-                                            }
-                                        >
-                                            <SelectTrigger className="h-9">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {ASSESSMENT_TYPES.map(
-                                                    (type) => (
-                                                        <SelectItem
-                                                            key={type}
-                                                            value={type}
-                                                        >
-                                                            {humanizeEnum(type)}
-                                                        </SelectItem>
-                                                    )
+                                    Total: {totalWeightage}%
+                                </Badge>
+                            </div>
+
+                            <form.Field name="assessmentTemplates" mode="array">
+                                {(field) => (
+                                    <div className="space-y-3">
+                                        {field.state.value.map((_, index) => (
+                                            <form.Field
+                                                key={index}
+                                                name={`assessmentTemplates[${index}]`}
+                                            >
+                                                {(subField) => (
+                                                    <div className="grid grid-cols-12 gap-2 items-end p-3 border rounded-md bg-muted/30">
+                                                        <div className="col-span-4 space-y-1">
+                                                            <Label className="text-xs">
+                                                                Type
+                                                            </Label>
+                                                            <form.Field
+                                                                name={`assessmentTemplates[${index}].type`}
+                                                            >
+                                                                {(
+                                                                    typeField
+                                                                ) => (
+                                                                    <Select
+                                                                        value={
+                                                                            typeField
+                                                                                .state
+                                                                                .value
+                                                                        }
+                                                                        onValueChange={(
+                                                                            value
+                                                                        ) =>
+                                                                            typeField.handleChange(
+                                                                                value as AssessmentType
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <SelectTrigger className="h-9">
+                                                                            <SelectValue />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            {ASSESSMENT_TYPES.map(
+                                                                                (
+                                                                                    type
+                                                                                ) => (
+                                                                                    <SelectItem
+                                                                                        key={
+                                                                                            type
+                                                                                        }
+                                                                                        value={
+                                                                                            type
+                                                                                        }
+                                                                                    >
+                                                                                        {humanizeEnum(
+                                                                                            type
+                                                                                        )}
+                                                                                    </SelectItem>
+                                                                                )
+                                                                            )}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                )}
+                                                            </form.Field>
+                                                        </div>
+
+                                                        <div className="col-span-3 space-y-1">
+                                                            <Label className="text-xs">
+                                                                Max Marks
+                                                            </Label>
+                                                            <form.Field
+                                                                name={`assessmentTemplates[${index}].maxMarks`}
+                                                            >
+                                                                {(
+                                                                    marksField
+                                                                ) => (
+                                                                    <Input
+                                                                        type="number"
+                                                                        min="1"
+                                                                        className="h-9"
+                                                                        value={
+                                                                            marksField
+                                                                                .state
+                                                                                .value
+                                                                        }
+                                                                        onChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            marksField.handleChange(
+                                                                                parseInt(
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
+                                                                                ) ||
+                                                                                    0
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                )}
+                                                            </form.Field>
+                                                        </div>
+
+                                                        <div className="col-span-3 space-y-1">
+                                                            <Label className="text-xs">
+                                                                Weightage %
+                                                            </Label>
+                                                            <form.Field
+                                                                name={`assessmentTemplates[${index}].weightage`}
+                                                            >
+                                                                {(
+                                                                    weightageField
+                                                                ) => (
+                                                                    <Input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        max="100"
+                                                                        className="h-9"
+                                                                        value={
+                                                                            weightageField
+                                                                                .state
+                                                                                .value
+                                                                        }
+                                                                        onChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            weightageField.handleChange(
+                                                                                parseInt(
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
+                                                                                ) ||
+                                                                                    0
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                )}
+                                                            </form.Field>
+                                                        </div>
+
+                                                        <div className="col-span-2 flex justify-end">
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-9 w-9"
+                                                                onClick={() => {
+                                                                    const current =
+                                                                        field
+                                                                            .state
+                                                                            .value;
+                                                                    if (
+                                                                        current.length >
+                                                                        1
+                                                                    ) {
+                                                                        field.handleChange(
+                                                                            current.filter(
+                                                                                (
+                                                                                    _,
+                                                                                    i
+                                                                                ) =>
+                                                                                    i !==
+                                                                                    index
+                                                                            )
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                disabled={
+                                                                    field.state
+                                                                        .value
+                                                                        .length <=
+                                                                    1
+                                                                }
+                                                            >
+                                                                <Trash2 className="size-4 text-destructive" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
                                                 )}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                            </form.Field>
+                                        ))}
 
-                                    <div className="col-span-3 space-y-1">
-                                        <Label className="text-xs">
-                                            Max Marks
-                                        </Label>
-                                        <Input
-                                            type="number"
-                                            min="1"
-                                            className="h-9"
-                                            value={assessment.maxMarks}
-                                            onChange={(e) =>
-                                                updateAssessment(
-                                                    index,
-                                                    "maxMarks",
-                                                    parseInt(e.target.value) ||
-                                                        0
-                                                )
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="col-span-3 space-y-1">
-                                        <Label className="text-xs">
-                                            Weightage %
-                                        </Label>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            className="h-9"
-                                            value={assessment.weightage}
-                                            onChange={(e) =>
-                                                updateAssessment(
-                                                    index,
-                                                    "weightage",
-                                                    parseInt(e.target.value) ||
-                                                        0
-                                                )
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="col-span-2 flex justify-end">
                                         <Button
                                             type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-9 w-9"
-                                            onClick={() =>
-                                                removeAssessment(index)
-                                            }
-                                            disabled={assessments.length <= 1}
+                                            variant="outline"
+                                            size="sm"
+                                            className="w-full"
+                                            onClick={() => {
+                                                field.handleChange([
+                                                    ...field.state.value,
+                                                    {
+                                                        type: "QUIZ",
+                                                        maxMarks: 100,
+                                                        weightage: 0,
+                                                    } as AssessmentTemplate,
+                                                ]);
+                                            }}
                                         >
-                                            <Trash2 className="size-4 text-destructive" />
+                                            <Plus className="mr-2 size-4" />
+                                            Add Assessment
                                         </Button>
                                     </div>
-                                </div>
-                            ))}
-
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="w-full"
-                                onClick={addAssessment}
-                            >
-                                <Plus className="mr-2 size-4" />
-                                Add Assessment
-                            </Button>
+                                )}
+                            </form.Field>
                         </div>
                     </div>
 
@@ -361,18 +654,28 @@ const ProposeOfferingDialog = ({
                             type="button"
                             variant="outline"
                             onClick={() => handleClose(false)}
+                            className="flex-1"
                         >
                             Cancel
                         </Button>
 
-                        <Button
-                            type="submit"
-                            disabled={!isValid || proposeOffering.isPending}
-                        >
-                            {proposeOffering.isPending
-                                ? "Proposing..."
-                                : "Propose Offering"}
-                        </Button>
+                        <form.Subscribe selector={(s) => s.canSubmit}>
+                            {(canSubmit) => (
+                                <Button
+                                    type="submit"
+                                    disabled={
+                                        !canSubmit ||
+                                        proposeOffering.isPending ||
+                                        totalWeightage !== 100
+                                    }
+                                    className="flex-1"
+                                >
+                                    {proposeOffering.isPending
+                                        ? "Proposing..."
+                                        : "Propose Offering"}
+                                </Button>
+                            )}
+                        </form.Subscribe>
                     </div>
                 </form>
             </DialogContent>

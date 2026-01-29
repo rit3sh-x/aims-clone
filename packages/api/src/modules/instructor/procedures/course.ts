@@ -2,11 +2,12 @@ import { createTRPCRouter } from "@workspace/api/init";
 import { instructorProcedure } from "../middleware";
 import { TRPCError } from "@trpc/server";
 import { course, db, department, logAuditEvent } from "@workspace/db";
-import { and, eq, desc, or, type SQL } from "drizzle-orm";
+import { and, eq, desc, or, type SQL, ilike } from "drizzle-orm";
 import {
     proposeCourseInputSchema,
     listInstructorCoursesInputSchema,
     getCourseInputSchema,
+    searchInputSchema,
 } from "../schema";
 
 export const courseManagement = createTRPCRouter({
@@ -99,5 +100,37 @@ export const courseManagement = createTRPCRouter({
             }
 
             return result;
+        }),
+
+    search: instructorProcedure
+        .input(searchInputSchema)
+        .query(async ({ input, ctx }) => {
+            const { search } = input;
+            const { instructor } = ctx;
+
+            const searchPattern = `%${search}%`;
+
+            const courses = await db
+                .select({
+                    id: course.id,
+                    code: course.code,
+                    title: course.title,
+                    credits: course.credits,
+                    status: course.status,
+                })
+                .from(course)
+                .where(
+                    and(
+                        eq(course.departmentId, instructor.departmentId),
+                        eq(course.status, "ADMIN_ACCEPTED"),
+                        or(
+                            ilike(course.code, searchPattern),
+                            ilike(course.title, searchPattern)
+                        )
+                    )
+                )
+                .limit(5);
+
+            return courses;
         }),
 });

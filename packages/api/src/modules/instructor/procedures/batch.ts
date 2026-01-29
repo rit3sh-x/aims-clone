@@ -1,16 +1,12 @@
 import { createTRPCRouter } from "@workspace/api/init";
 import { instructorProcedure } from "../middleware";
-import { z } from "zod";
 import { batch, db, program } from "@workspace/db";
 import { ilike, or, sql } from "drizzle-orm";
+import { searchInputSchema } from "../schema";
 
 export const batchManagement = createTRPCRouter({
     search: instructorProcedure
-        .input(
-            z.object({
-                search: z.string().min(1),
-            })
-        )
+        .input(searchInputSchema)
         .query(async ({ input }) => {
             const { search } = input;
 

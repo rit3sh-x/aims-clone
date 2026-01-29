@@ -2,7 +2,6 @@ import {
     assessmentTypeEnum,
     attendanceStatusEnum,
     attendanceTypeEnum,
-    courseStatusEnum,
     gradeTypeEnum,
     offeringStatusEnum,
 } from "@workspace/db";
@@ -45,8 +44,8 @@ const assessmentTemplateSchema = z.object({
 export const proposeOfferingInputSchema = z.object({
     courseId: z.string(),
     batchIds: z.array(z.string()).min(1),
-    prerequisiteCourseIds: z.array(z.string().min(1)).default([]),
-    instructorIds: z.array(z.string().min(1)).default([]),
+    prerequisiteCourseIds: z.array(z.string().min(1)).default([]).optional(),
+    instructorIds: z.array(z.string().min(1)).default([]).optional(),
     assessmentTemplates: z.array(assessmentTemplateSchema),
 });
 
@@ -158,4 +157,8 @@ export const getDescriptiveAnswersInputSchema = z.object({
         .max(LIST_MAX_PAGE_SIZE)
         .default(LIST_DEFAULT_PAGE_SIZE),
     cursor: z.string().optional(),
+});
+
+export const searchInputSchema = z.object({
+    search: z.string().min(1),
 });

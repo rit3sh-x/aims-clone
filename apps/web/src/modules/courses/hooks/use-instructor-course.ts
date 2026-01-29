@@ -4,6 +4,7 @@ import {
     useSuspenseInfiniteQuery,
     useMutation,
     useQueryClient,
+    useQuery,
 } from "@tanstack/react-query";
 import { useCourseParams } from "./use-course-params";
 import { toast } from "sonner";
@@ -70,5 +71,50 @@ export const useProposeOffering = () => {
                 toast.error(error.message || "Failed to propose offering");
             },
         })
+    );
+};
+
+export const useSearchBatches = (search: string) => {
+    const trpc = useTRPC();
+
+    return useQuery(
+        trpc.instructor.batch.search.queryOptions(
+            {
+                search,
+            },
+            {
+                enabled: search.length > 0,
+            }
+        )
+    );
+};
+
+export const useSearchInstructors = (search: string) => {
+    const trpc = useTRPC();
+
+    return useQuery(
+        trpc.instructor.instructor.search.queryOptions(
+            {
+                search,
+            },
+            {
+                enabled: search.length > 0,
+            }
+        )
+    );
+};
+
+export const useSearchCourses = (search: string) => {
+    const trpc = useTRPC();
+
+    return useQuery(
+        trpc.instructor.course.search.queryOptions(
+            {
+                search,
+            },
+            {
+                enabled: search.length > 0,
+            }
+        )
     );
 };

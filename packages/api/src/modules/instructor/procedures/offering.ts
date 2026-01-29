@@ -126,7 +126,7 @@ export const offeringManagement = createTRPCRouter({
                     isHead: true,
                 });
 
-                if (instructorIds.length > 0) {
+                if (instructorIds && instructorIds.length > 0) {
                     await tx.insert(courseOfferingInstructor).values(
                         instructorIds.map((instructorId) => ({
                             offeringId: offering.id,
@@ -145,7 +145,7 @@ export const offeringManagement = createTRPCRouter({
                     );
                 }
 
-                if (prerequisiteCourseIds.length > 0) {
+                if (prerequisiteCourseIds && prerequisiteCourseIds.length > 0) {
                     await tx.insert(prerequisite).values(
                         prerequisiteCourseIds.map((prereqId) => ({
                             courseId,

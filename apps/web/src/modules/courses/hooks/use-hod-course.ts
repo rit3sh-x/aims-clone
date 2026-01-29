@@ -6,6 +6,7 @@ import {
     useMutation,
     useSuspenseQuery,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const useSuspenseCourse = (id: string) => {
     const trpc = useTRPC();
@@ -48,16 +49,19 @@ export const useSuspenseCoursesList = () => {
 export const useAcceptCourse = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ name }] = useCourseParams();
 
     return useMutation(
         trpc.hod.course.acceptCourse.mutationOptions({
-            onSuccess: async () => {
+            onSuccess: async ({ id }) => {
+                toast.success("Course is accepted");
                 queryClient.invalidateQueries(
-                    trpc.hod.course.list.infiniteQueryOptions({
-                        search: name === "" ? undefined : name,
+                    trpc.hod.course.getOne.queryOptions({
+                        id,
                     })
                 );
+            },
+            onError: () => {
+                toast.error("Failed to accept the course");
             },
         })
     );
@@ -66,16 +70,19 @@ export const useAcceptCourse = () => {
 export const useRejectCourse = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ name }] = useCourseParams();
 
     return useMutation(
         trpc.hod.course.rejectCourse.mutationOptions({
-            onSuccess: async () => {
+            onSuccess: async ({ id }) => {
+                toast.success("Course is rejected");
                 queryClient.invalidateQueries(
-                    trpc.hod.course.list.infiniteQueryOptions({
-                        search: name === "" ? undefined : name,
+                    trpc.hod.course.getOne.queryOptions({
+                        id,
                     })
                 );
+            },
+            onError: () => {
+                toast.error("Failed to reject the course");
             },
         })
     );

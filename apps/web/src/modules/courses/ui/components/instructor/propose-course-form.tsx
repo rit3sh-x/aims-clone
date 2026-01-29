@@ -33,12 +33,12 @@ export const proposeCourseSchema = z.object({
     practicalHours: z.number().int().min(0).max(10),
     selfStudyHours: z.number().int().min(0).max(20),
     credits: z.number().min(0.5).max(5),
-    description: z.unknown(),
+    description: z.any(),
 });
 
 export type ProposeCourseFormValues = z.infer<typeof proposeCourseSchema>;
 
-export const ProposeCourseForm = () => {
+export function ProposeCourseForm() {
     const [open, setOpen] = useState(false);
     const proposeCourse = useProposeCourse();
 
@@ -51,33 +51,40 @@ export const ProposeCourseForm = () => {
             practicalHours: 0,
             selfStudyHours: 0,
             credits: 3,
-            description: undefined as unknown,
+            description: {},
         },
         validators: {
             onSubmit: proposeCourseSchema,
         },
-        onSubmit: async ({ value }) => {
-            await proposeCourse.mutateAsync({
-                ...value,
-                code: value.code.toUpperCase(),
-            });
-            setOpen(false);
-            form.reset();
+        onSubmit: ({ value }) => {
+            console.log("start");
+            proposeCourse.mutate(
+                {
+                    ...value,
+                    code: value.code.toUpperCase(),
+                },
+                {
+                    onSuccess: () => {
+                        setOpen(false);
+                        form.reset();
+                    },
+                }
+            );
         },
     });
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger
-                render={() => (
-                    <Button>
+                render={(props) => (
+                    <Button {...props}>
                         <Plus className="mr-2 size-4" />
                         Propose Course
                     </Button>
                 )}
             />
 
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-7xl w-full mx-auto m-4 lg:m-0 max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Propose New Course</DialogTitle>
                     <DialogDescription>
@@ -93,252 +100,298 @@ export const ProposeCourseForm = () => {
                     }}
                     className="space-y-6"
                 >
-                    <div className="grid grid-cols-2 gap-4">
-                        <form.Field name="code">
-                            {(field) => {
-                                const isInvalid =
-                                    field.state.meta.isTouched &&
-                                    !field.state.meta.isValid;
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <form.Field name="code">
+                                    {(field) => {
+                                        const isInvalid =
+                                            field.state.meta.isTouched &&
+                                            !field.state.meta.isValid;
 
-                                return (
-                                    <Field data-invalid={isInvalid}>
-                                        <FieldLabel>Course Code</FieldLabel>
-                                        <Input
-                                            value={field.state.value}
-                                            onBlur={field.handleBlur}
-                                            onChange={(e) =>
-                                                field.handleChange(
-                                                    e.target.value.toUpperCase()
-                                                )
-                                            }
-                                            placeholder="CS101"
-                                        />
-                                        {isInvalid && (
-                                            <FieldError
-                                                errors={field.state.meta.errors}
-                                            />
-                                        )}
-                                    </Field>
-                                );
-                            }}
-                        </form.Field>
+                                        return (
+                                            <Field data-invalid={isInvalid}>
+                                                <FieldLabel>
+                                                    Course Code
+                                                </FieldLabel>
+                                                <Input
+                                                    value={field.state.value}
+                                                    onBlur={field.handleBlur}
+                                                    onChange={(e) =>
+                                                        field.handleChange(
+                                                            e.target.value.toUpperCase()
+                                                        )
+                                                    }
+                                                    placeholder="CS101"
+                                                />
+                                                {isInvalid && (
+                                                    <FieldError
+                                                        errors={
+                                                            field.state.meta
+                                                                .errors
+                                                        }
+                                                    />
+                                                )}
+                                            </Field>
+                                        );
+                                    }}
+                                </form.Field>
 
-                        <form.Field name="credits">
-                            {(field) => {
-                                const isInvalid =
-                                    field.state.meta.isTouched &&
-                                    !field.state.meta.isValid;
+                                <form.Field name="credits">
+                                    {(field) => {
+                                        const isInvalid =
+                                            field.state.meta.isTouched &&
+                                            !field.state.meta.isValid;
 
-                                return (
-                                    <Field data-invalid={isInvalid}>
-                                        <FieldLabel>Credits</FieldLabel>
-                                        <Input
-                                            type="number"
-                                            step="0.5"
-                                            min="0.5"
-                                            max="5"
-                                            value={field.state.value}
-                                            onBlur={field.handleBlur}
-                                            onChange={(e) =>
-                                                field.handleChange(
-                                                    parseFloat(
+                                        return (
+                                            <Field data-invalid={isInvalid}>
+                                                <FieldLabel>Credits</FieldLabel>
+                                                <Input
+                                                    type="number"
+                                                    step="0.5"
+                                                    min="0.5"
+                                                    max="5"
+                                                    value={field.state.value}
+                                                    onBlur={field.handleBlur}
+                                                    onChange={(e) =>
+                                                        field.handleChange(
+                                                            parseFloat(
+                                                                e.target.value
+                                                            ) || 0
+                                                        )
+                                                    }
+                                                />
+                                                {isInvalid && (
+                                                    <FieldError
+                                                        errors={
+                                                            field.state.meta
+                                                                .errors
+                                                        }
+                                                    />
+                                                )}
+                                            </Field>
+                                        );
+                                    }}
+                                </form.Field>
+                            </div>
+
+                            <form.Field name="title">
+                                {(field) => {
+                                    const isInvalid =
+                                        field.state.meta.isTouched &&
+                                        !field.state.meta.isValid;
+
+                                    return (
+                                        <Field data-invalid={isInvalid}>
+                                            <FieldLabel>
+                                                Course Title
+                                            </FieldLabel>
+                                            <Input
+                                                value={field.state.value}
+                                                onBlur={field.handleBlur}
+                                                onChange={(e) =>
+                                                    field.handleChange(
                                                         e.target.value
-                                                    ) || 0
-                                                )
-                                            }
-                                        />
-                                        {isInvalid && (
-                                            <FieldError
-                                                errors={field.state.meta.errors}
+                                                    )
+                                                }
+                                                placeholder="Introduction to Computer Science"
                                             />
-                                        )}
+                                            {isInvalid && (
+                                                <FieldError
+                                                    errors={
+                                                        field.state.meta.errors
+                                                    }
+                                                />
+                                            )}
+                                        </Field>
+                                    );
+                                }}
+                            </form.Field>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <form.Field name="lectureHours">
+                                    {(field) => {
+                                        const isInvalid =
+                                            field.state.meta.isTouched &&
+                                            !field.state.meta.isValid;
+
+                                        return (
+                                            <Field data-invalid={isInvalid}>
+                                                <FieldLabel>
+                                                    Lecture Hours
+                                                </FieldLabel>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    max="10"
+                                                    value={field.state.value}
+                                                    onBlur={field.handleBlur}
+                                                    onChange={(e) =>
+                                                        field.handleChange(
+                                                            parseInt(
+                                                                e.target.value
+                                                            ) || 0
+                                                        )
+                                                    }
+                                                />
+                                                {isInvalid && (
+                                                    <FieldError
+                                                        errors={
+                                                            field.state.meta
+                                                                .errors
+                                                        }
+                                                    />
+                                                )}
+                                            </Field>
+                                        );
+                                    }}
+                                </form.Field>
+
+                                <form.Field name="tutorialHours">
+                                    {(field) => {
+                                        const isInvalid =
+                                            field.state.meta.isTouched &&
+                                            !field.state.meta.isValid;
+
+                                        return (
+                                            <Field data-invalid={isInvalid}>
+                                                <FieldLabel>
+                                                    Tutorial Hours
+                                                </FieldLabel>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    max="10"
+                                                    value={field.state.value}
+                                                    onBlur={field.handleBlur}
+                                                    onChange={(e) =>
+                                                        field.handleChange(
+                                                            parseInt(
+                                                                e.target.value
+                                                            ) || 0
+                                                        )
+                                                    }
+                                                />
+                                                {isInvalid && (
+                                                    <FieldError
+                                                        errors={
+                                                            field.state.meta
+                                                                .errors
+                                                        }
+                                                    />
+                                                )}
+                                            </Field>
+                                        );
+                                    }}
+                                </form.Field>
+
+                                <form.Field name="practicalHours">
+                                    {(field) => {
+                                        const isInvalid =
+                                            field.state.meta.isTouched &&
+                                            !field.state.meta.isValid;
+
+                                        return (
+                                            <Field data-invalid={isInvalid}>
+                                                <FieldLabel>
+                                                    Practical Hours
+                                                </FieldLabel>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    max="10"
+                                                    value={field.state.value}
+                                                    onBlur={field.handleBlur}
+                                                    onChange={(e) =>
+                                                        field.handleChange(
+                                                            parseInt(
+                                                                e.target.value
+                                                            ) || 0
+                                                        )
+                                                    }
+                                                />
+                                                {isInvalid && (
+                                                    <FieldError
+                                                        errors={
+                                                            field.state.meta
+                                                                .errors
+                                                        }
+                                                    />
+                                                )}
+                                            </Field>
+                                        );
+                                    }}
+                                </form.Field>
+
+                                <form.Field name="selfStudyHours">
+                                    {(field) => {
+                                        const isInvalid =
+                                            field.state.meta.isTouched &&
+                                            !field.state.meta.isValid;
+
+                                        return (
+                                            <Field data-invalid={isInvalid}>
+                                                <FieldLabel>
+                                                    Self Study Hours
+                                                </FieldLabel>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    max="20"
+                                                    value={field.state.value}
+                                                    onBlur={field.handleBlur}
+                                                    onChange={(e) =>
+                                                        field.handleChange(
+                                                            parseInt(
+                                                                e.target.value
+                                                            ) || 0
+                                                        )
+                                                    }
+                                                />
+                                                {isInvalid && (
+                                                    <FieldError
+                                                        errors={
+                                                            field.state.meta
+                                                                .errors
+                                                        }
+                                                    />
+                                                )}
+                                            </Field>
+                                        );
+                                    }}
+                                </form.Field>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <form.Field name="description">
+                                {(field) => (
+                                    <Field className="lg:h-full h-100">
+                                        <FieldLabel>Description</FieldLabel>
+                                        <div className="border rounded-md overflow-hidden h-full">
+                                            <RichText
+                                                content={field.state.value}
+                                                onChange={(content) =>
+                                                    field.handleChange(content)
+                                                }
+                                                disabled={
+                                                    proposeCourse.isPending
+                                                }
+                                                className="h-full w-full"
+                                            />
+                                        </div>
                                     </Field>
-                                );
-                            }}
-                        </form.Field>
+                                )}
+                            </form.Field>
+                        </div>
                     </div>
 
-                    <form.Field name="title">
-                        {(field) => {
-                            const isInvalid =
-                                field.state.meta.isTouched &&
-                                !field.state.meta.isValid;
-
-                            return (
-                                <Field data-invalid={isInvalid}>
-                                    <FieldLabel>Course Title</FieldLabel>
-                                    <Input
-                                        value={field.state.value}
-                                        onBlur={field.handleBlur}
-                                        onChange={(e) =>
-                                            field.handleChange(e.target.value)
-                                        }
-                                        placeholder="Introduction to Computer Science"
-                                    />
-                                    {isInvalid && (
-                                        <FieldError
-                                            errors={field.state.meta.errors}
-                                        />
-                                    )}
-                                </Field>
-                            );
-                        }}
-                    </form.Field>
-
-                    <div className="grid grid-cols-4 gap-4">
-                        <form.Field name="lectureHours">
-                            {(field) => {
-                                const isInvalid =
-                                    field.state.meta.isTouched &&
-                                    !field.state.meta.isValid;
-
-                                return (
-                                    <Field data-invalid={isInvalid}>
-                                        <FieldLabel>Lecture Hours</FieldLabel>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="10"
-                                            value={field.state.value}
-                                            onBlur={field.handleBlur}
-                                            onChange={(e) =>
-                                                field.handleChange(
-                                                    parseInt(e.target.value) ||
-                                                        0
-                                                )
-                                            }
-                                        />
-                                        {isInvalid && (
-                                            <FieldError
-                                                errors={field.state.meta.errors}
-                                            />
-                                        )}
-                                    </Field>
-                                );
-                            }}
-                        </form.Field>
-
-                        <form.Field name="tutorialHours">
-                            {(field) => {
-                                const isInvalid =
-                                    field.state.meta.isTouched &&
-                                    !field.state.meta.isValid;
-
-                                return (
-                                    <Field data-invalid={isInvalid}>
-                                        <FieldLabel>Tutorial Hours</FieldLabel>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="10"
-                                            value={field.state.value}
-                                            onBlur={field.handleBlur}
-                                            onChange={(e) =>
-                                                field.handleChange(
-                                                    parseInt(e.target.value) ||
-                                                        0
-                                                )
-                                            }
-                                        />
-                                        {isInvalid && (
-                                            <FieldError
-                                                errors={field.state.meta.errors}
-                                            />
-                                        )}
-                                    </Field>
-                                );
-                            }}
-                        </form.Field>
-
-                        <form.Field name="practicalHours">
-                            {(field) => {
-                                const isInvalid =
-                                    field.state.meta.isTouched &&
-                                    !field.state.meta.isValid;
-
-                                return (
-                                    <Field data-invalid={isInvalid}>
-                                        <FieldLabel>Practical Hours</FieldLabel>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="10"
-                                            value={field.state.value}
-                                            onBlur={field.handleBlur}
-                                            onChange={(e) =>
-                                                field.handleChange(
-                                                    parseInt(e.target.value) ||
-                                                        0
-                                                )
-                                            }
-                                        />
-                                        {isInvalid && (
-                                            <FieldError
-                                                errors={field.state.meta.errors}
-                                            />
-                                        )}
-                                    </Field>
-                                );
-                            }}
-                        </form.Field>
-
-                        <form.Field name="selfStudyHours">
-                            {(field) => {
-                                const isInvalid =
-                                    field.state.meta.isTouched &&
-                                    !field.state.meta.isValid;
-
-                                return (
-                                    <Field data-invalid={isInvalid}>
-                                        <FieldLabel>
-                                            Self Study Hours
-                                        </FieldLabel>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="20"
-                                            value={field.state.value}
-                                            onBlur={field.handleBlur}
-                                            onChange={(e) =>
-                                                field.handleChange(
-                                                    parseInt(e.target.value) ||
-                                                        0
-                                                )
-                                            }
-                                        />
-                                        {isInvalid && (
-                                            <FieldError
-                                                errors={field.state.meta.errors}
-                                            />
-                                        )}
-                                    </Field>
-                                );
-                            }}
-                        </form.Field>
-                    </div>
-
-                    <form.Field name="description">
-                        {(field) => (
-                            <Field>
-                                <FieldLabel>Description</FieldLabel>
-                                <div className="border rounded-md">
-                                    <RichText
-                                        content={field.state.value}
-                                        onChange={(content) =>
-                                            field.handleChange(content)
-                                        }
-                                        disabled={false}
-                                    />
-                                </div>
-                            </Field>
-                        )}
-                    </form.Field>
-
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-2 mt-8">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={() => setOpen(false)}
+                            className="flex-1"
                         >
                             Cancel
                         </Button>
@@ -350,6 +403,7 @@ export const ProposeCourseForm = () => {
                                     disabled={
                                         !canSubmit || proposeCourse.isPending
                                     }
+                                    className="flex-1"
                                 >
                                     {proposeCourse.isPending
                                         ? "Proposing..."
@@ -362,4 +416,4 @@ export const ProposeCourseForm = () => {
             </DialogContent>
         </Dialog>
     );
-};
+}

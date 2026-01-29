@@ -6,6 +6,7 @@ import {
     useMutation,
     useSuspenseQuery,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const useSuspenseDepartmentCodes = () => {
     const trpc = useTRPC();
@@ -89,18 +90,19 @@ export const useSuspenseCourseOfferings = (courseId: string) => {
 export const useAcceptCourse = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ departmentCode, name }] = useCourseParams();
 
     return useMutation(
         trpc.admin.course.acceptCourse.mutationOptions({
-            onSuccess: async () => {
+            onSuccess: async ({ id }) => {
+                toast.success("Course is accepted");
                 queryClient.invalidateQueries(
-                    trpc.admin.course.list.infiniteQueryOptions({
-                        departmentCode:
-                            departmentCode === "" ? undefined : departmentCode,
-                        search: name === "" ? undefined : name,
+                    trpc.admin.course.getOne.queryOptions({
+                        id,
                     })
                 );
+            },
+            onError: () => {
+                toast.error("Failed to accept the course");
             },
         })
     );
@@ -109,18 +111,19 @@ export const useAcceptCourse = () => {
 export const useRejectCourse = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ departmentCode, name }] = useCourseParams();
 
     return useMutation(
         trpc.admin.course.rejectCourse.mutationOptions({
-            onSuccess: async () => {
+            onSuccess: async ({ id }) => {
+                toast.success("Course is rejected");
                 queryClient.invalidateQueries(
-                    trpc.admin.course.list.infiniteQueryOptions({
-                        departmentCode:
-                            departmentCode === "" ? undefined : departmentCode,
-                        search: name === "" ? undefined : name,
+                    trpc.admin.course.getOne.queryOptions({
+                        id,
                     })
                 );
+            },
+            onError: () => {
+                toast.error("Failed to reject the course");
             },
         })
     );

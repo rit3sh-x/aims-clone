@@ -75,11 +75,18 @@ export const courseManagement = createTRPCRouter({
                 });
             }
 
-            const updated = await db
+            const [updated] = await db
                 .update(course)
                 .set({ status: "REJECTED" })
                 .where(eq(course.id, courseId))
                 .returning();
+
+            if (!updated) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to approve the course.",
+                });
+            }
 
             await logAuditEvent({
                 userId: user.id,
@@ -93,7 +100,7 @@ export const courseManagement = createTRPCRouter({
                 },
             });
 
-            return updated[0];
+            return updated;
         }),
 
     list: adminProcedure

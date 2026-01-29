@@ -8,7 +8,7 @@ import type { Route } from "next";
 
 export const StudentCard = ({ studentData }: { studentData: Student }) => {
     return (
-        <Link href={`/student/${studentData.student.id}` as Route} passHref>
+        <Link href={`/students/${studentData.student.id}` as Route} passHref>
             <Card className="p-4 space-y-2 cursor-pointer hover:shadow-lg">
                 <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-sm">

@@ -7,8 +7,13 @@ import {
 } from "../../hooks/use-enrollments";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/infinite-scroll-trigger";
 import { EnrollmentCard } from "./enrollment-card";
+import type { UserRole } from "@workspace/db";
 
-export const AdvisorEnrollmentList = () => {
+interface AdvisorEnrollmentListProps {
+    role: UserRole;
+}
+
+export const AdvisorEnrollmentList = ({ role }: AdvisorEnrollmentListProps) => {
     const { enrollments, fetchNextPage, hasNextPage, isFetchingNextPage } =
         useInfiniteAdvisorEnrollments();
     const approveEnrollment = useAdvisorApproveEnrollment();
@@ -28,14 +33,17 @@ export const AdvisorEnrollmentList = () => {
 
     return (
         <div className="space-y-4">
-            {enrollments.map((enrollment) => (
-                <EnrollmentCard
-                    key={enrollment.enrollment.id}
-                    enrollment={enrollment}
-                    onAccept={handleAccept}
-                    onReject={handleReject}
-                />
-            ))}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {enrollments.map((enrollment) => (
+                    <EnrollmentCard
+                        key={enrollment.enrollment.id}
+                        enrollment={enrollment}
+                        onAccept={handleAccept}
+                        onReject={handleReject}
+                        role={role}
+                    />
+                ))}
+            </div>
 
             <InfiniteScrollTrigger
                 canLoadMore={hasNextPage}
@@ -49,8 +57,8 @@ export const AdvisorEnrollmentList = () => {
 
 export const AdvisorEnrollmentListSkeleton = () => {
     return (
-        <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, index) => (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {Array.from({ length: 6 }).map((_, index) => (
                 <div
                     key={index}
                     className="p-4 border rounded-md shadow-sm bg-gray-100 animate-pulse"

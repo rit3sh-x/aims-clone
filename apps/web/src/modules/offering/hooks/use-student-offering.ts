@@ -6,6 +6,7 @@ import {
     useMutation,
     useSuspenseQuery,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const useSuspenseDepartmentCodes = () => {
     const trpc = useTRPC();
@@ -62,17 +63,19 @@ export const useSuspenseOfferingList = () => {
 export const useEnrollOffering = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ name, code }] = useOfferingParams();
 
     return useMutation(
         trpc.student.offering.enroll.mutationOptions({
-            onSuccess: async () => {
+            onSuccess: async ({ offeringId }) => {
+                toast.success("Successfully enrolled in offering");
                 queryClient.invalidateQueries(
-                    trpc.student.offering.list.infiniteQueryOptions({
-                        search: name === "" ? undefined : name,
-                        departmentCode: code === "" ? undefined : code,
+                    trpc.student.offering.getById.queryOptions({
+                        offeringId,
                     })
                 );
+            },
+            onError: (error) => {
+                toast.error(error.message || "Failed to enroll");
             },
         })
     );
@@ -81,17 +84,19 @@ export const useEnrollOffering = () => {
 export const useDropOffering = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ name, code }] = useOfferingParams();
 
     return useMutation(
         trpc.student.offering.drop.mutationOptions({
-            onSuccess: async () => {
+            onSuccess: async ({ offeringId }) => {
+                toast.success("Successfully dropped offering");
                 queryClient.invalidateQueries(
-                    trpc.student.offering.list.infiniteQueryOptions({
-                        search: name === "" ? undefined : name,
-                        departmentCode: code === "" ? undefined : code,
+                    trpc.student.offering.getById.queryOptions({
+                        offeringId,
                     })
                 );
+            },
+            onError: (error) => {
+                toast.error(error.message || "Failed to drop offering");
             },
         })
     );

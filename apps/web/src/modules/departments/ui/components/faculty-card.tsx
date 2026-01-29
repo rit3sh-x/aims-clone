@@ -21,7 +21,7 @@ export const FacultyCard = ({ faculty }: { faculty: FacultyItem }) => {
     const router = useRouter();
 
     const goToInstructor = () => {
-        router.push(`/instructor/${faculty.instructor.id}`);
+        router.push(`/instructors/${faculty.instructor.id}`);
     };
 
     return (

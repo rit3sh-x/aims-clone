@@ -2,6 +2,7 @@ import {
     assessmentTypeEnum,
     attendanceStatusEnum,
     attendanceTypeEnum,
+    enrollmentStatusEnum,
     gradeTypeEnum,
     offeringStatusEnum,
 } from "@workspace/db";
@@ -24,6 +25,7 @@ export const listEnrollmentsInputSchema = z.object({
             id: z.string(),
         })
         .optional(),
+    status: z.enum(enrollmentStatusEnum.enumValues).optional(),
     courseCode: z.string().optional(),
 });
 

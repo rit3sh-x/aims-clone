@@ -12,8 +12,10 @@ export const StudentOfferingIdView = ({
     offeringId,
 }: StudentOfferingIdViewProps) => {
     return (
-        <Suspense fallback={<OfferingDetailsCardSkeleton />}>
-            <OfferingDetailsCard offeringId={offeringId} />
-        </Suspense>
+        <div className="max-w-7xl mx-auto w-full p-6">
+            <Suspense fallback={<OfferingDetailsCardSkeleton />}>
+                <OfferingDetailsCard offeringId={offeringId} />
+            </Suspense>
+        </div>
     );
 };

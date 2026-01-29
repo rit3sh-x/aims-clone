@@ -17,18 +17,20 @@ const Page = async ({ searchParams }: Props) => {
         redirect("/");
     }
 
-    const { code } = await enrollmentParamsLoader(searchParams);
+    const { code, status } = await enrollmentParamsLoader(searchParams);
 
     if (user.role === "ADVISOR") {
         prefetch(
             trpc.advisor.enrollment.list.infiniteQueryOptions({
                 courseCode: code === "" ? undefined : code,
+                status: status === "" ? undefined : status,
             })
         );
     } else {
         prefetch(
             trpc.instructor.enrollment.list.infiniteQueryOptions({
                 courseCode: code === "" ? undefined : code,
+                status: status === "" ? undefined : status,
             })
         );
     }
@@ -36,13 +38,13 @@ const Page = async ({ searchParams }: Props) => {
     if (user.role === "ADVISOR") {
         return (
             <HydrateClient>
-                <AdvisorEnrollmentView />
+                <AdvisorEnrollmentView role={user.role} />
             </HydrateClient>
         );
     } else {
         return (
             <HydrateClient>
-                <InstructorEnrollmentView />
+                <InstructorEnrollmentView role={user.role} />
             </HydrateClient>
         );
     }

@@ -49,3 +49,5 @@ export const submitFeedbackInputSchema = z.object({
 export const getStudentFeedbackQuestionsInputSchema = z.object({
     enrollmentId: z.string(),
 });
+
+export const getOfferingByIdInputSchema = z.object({ offeringId: z.string() });

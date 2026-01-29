@@ -30,8 +30,7 @@ const DAY_ORDER: DaysOfWeek[] = [
     "FRIDAY",
 ];
 
-// Time slots from 7 AM to 9 PM
-const HOURS = Array.from({ length: 15 }, (_, i) => i + 7); // 7, 8, 9, ... 21
+const HOURS = Array.from({ length: 15 }, (_, i) => i + 7);
 
 interface TimeSlot {
     id: string;
@@ -101,7 +100,6 @@ function getSessionTypeColor(sessionType: SessionType): string {
     return colors[sessionType];
 }
 
-// Helper to get hour from period time
 function getHourFromPeriod(
     period: TheoryPeriod | TutorialPeriod | LabPeriod | null
 ): number | null {
@@ -159,7 +157,6 @@ export function WeeklySchedule() {
         [attendanceData]
     );
 
-    // Group schedules by day and hour
     const schedulesByDayAndHour = useMemo(() => {
         const grouped: Record<DaysOfWeek, Record<number, ScheduleSlot[]>> = {
             MONDAY: {},
@@ -294,8 +291,8 @@ export function WeeklySchedule() {
                 </div>
             </div>
 
-            <Card className="overflow-hidden p-0 flex flex-col gap-0 h-[600px] sm:h-[700px]">
-                <div className="grid grid-cols-6 border-b flex-shrink-0">
+            <Card className="overflow-hidden p-0 flex flex-col gap-0 h-150 sm:h-175">
+                <div className="grid grid-cols-6 border-b shrink-0">
                     <div className="border-r p-2 text-center text-xs font-medium sm:text-sm">
                         Time
                     </div>

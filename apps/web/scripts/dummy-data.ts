@@ -7,9 +7,6 @@ if (!email) {
     process.exit(1);
 }
 
-// ============================================================================
-// DEPARTMENTS - Based on typical Indian engineering institute structure
-// ============================================================================
 export const departments = [
     {
         name: "Computer Science & Engineering",
@@ -53,9 +50,6 @@ export const departments = [
     },
 ];
 
-// ============================================================================
-// HEADS OF DEPARTMENTS
-// ============================================================================
 export const hods = [
     {
         name: "Dr. Sandeep Kumar Shukla",
@@ -123,11 +117,7 @@ export const hods = [
     },
 ];
 
-// ============================================================================
-// ACADEMIC PROGRAMS
-// ============================================================================
 export const programs = [
-    // CSE Programs
     {
         name: "Bachelor of Technology in Computer Science & Engineering",
         code: "BTCS",
@@ -146,7 +136,6 @@ export const programs = [
         degreeType: "PHD" as const,
         deptCode: "CSE",
     },
-    // EE Programs
     {
         name: "Bachelor of Technology in Electrical Engineering",
         code: "BTEE",
@@ -159,7 +148,6 @@ export const programs = [
         degreeType: "MASTER" as const,
         deptCode: "EE",
     },
-    // ME Programs
     {
         name: "Bachelor of Technology in Mechanical Engineering",
         code: "BTME",
@@ -172,21 +160,18 @@ export const programs = [
         degreeType: "MASTER" as const,
         deptCode: "ME",
     },
-    // CE Programs
     {
         name: "Bachelor of Technology in Civil Engineering",
         code: "BTCE",
         degreeType: "BACHELOR" as const,
         deptCode: "CE",
     },
-    // ECE Programs
     {
         name: "Bachelor of Technology in Electronics & Communication",
         code: "BTEC",
         degreeType: "BACHELOR" as const,
         deptCode: "ECE",
     },
-    // CHE Programs
     {
         name: "Bachelor of Technology in Chemical Engineering",
         code: "BTCH",
@@ -195,11 +180,7 @@ export const programs = [
     },
 ];
 
-// ============================================================================
-// ACADEMIC ADVISORS
-// ============================================================================
 export const advisors = [
-    // CSE Advisors
     {
         name: "Dr. Arnab Bhattacharya",
         email: withAlias(email, "adv-cse1"),
@@ -224,7 +205,6 @@ export const advisors = [
         employeeId: "ADV003",
         deptCode: "CSE",
     },
-    // EE Advisors
     {
         name: "Dr. Ketan Rajawat",
         email: withAlias(email, "adv-ee1"),
@@ -241,7 +221,6 @@ export const advisors = [
         employeeId: "ADV005",
         deptCode: "EE",
     },
-    // ME Advisors
     {
         name: "Dr. Bishakh Bhattacharya",
         email: withAlias(email, "adv-me1"),
@@ -258,7 +237,6 @@ export const advisors = [
         employeeId: "ADV007",
         deptCode: "ME",
     },
-    // CE Advisors
     {
         name: "Dr. Vinod Tare",
         email: withAlias(email, "adv-ce1"),
@@ -267,7 +245,6 @@ export const advisors = [
         employeeId: "ADV008",
         deptCode: "CE",
     },
-    // ECE Advisors
     {
         name: "Dr. Utpal Das",
         email: withAlias(email, "adv-ece1"),
@@ -276,7 +253,6 @@ export const advisors = [
         employeeId: "ADV009",
         deptCode: "ECE",
     },
-    // CHE Advisors
     {
         name: "Dr. Naveen Tiwari",
         email: withAlias(email, "adv-che1"),
@@ -287,11 +263,7 @@ export const advisors = [
     },
 ];
 
-// ============================================================================
-// INSTRUCTORS
-// ============================================================================
 export const instructors = [
-    // CSE Instructors
     {
         name: "Prof. Manindra Agrawal",
         email: withAlias(email, "inst-cse1"),
@@ -337,7 +309,6 @@ export const instructors = [
         deptCode: "CSE",
         designation: "Assistant Professor",
     },
-    // EE Instructors
     {
         name: "Prof. K. S. Venkatesh",
         email: withAlias(email, "inst-ee1"),
@@ -365,7 +336,6 @@ export const instructors = [
         deptCode: "EE",
         designation: "Assistant Professor",
     },
-    // ME Instructors
     {
         name: "Prof. Nachiketa Tiwari",
         email: withAlias(email, "inst-me1"),
@@ -384,7 +354,6 @@ export const instructors = [
         deptCode: "ME",
         designation: "Associate Professor",
     },
-    // CE Instructors
     {
         name: "Prof. Sudhir Misra",
         email: withAlias(email, "inst-ce1"),
@@ -394,7 +363,6 @@ export const instructors = [
         deptCode: "CE",
         designation: "Professor",
     },
-    // ECE Instructors
     {
         name: "Dr. Abhishek Srivastava",
         email: withAlias(email, "inst-ece1"),
@@ -404,7 +372,6 @@ export const instructors = [
         deptCode: "ECE",
         designation: "Associate Professor",
     },
-    // MTH Instructors (teach service courses to all departments)
     {
         name: "Prof. Debasis Kundu",
         email: withAlias(email, "inst-mth1"),
@@ -423,7 +390,6 @@ export const instructors = [
         deptCode: "MTH",
         designation: "Associate Professor",
     },
-    // PHY Instructors (teach service courses)
     {
         name: "Prof. Tapan Mishra",
         email: withAlias(email, "inst-phy1"),
@@ -435,11 +401,7 @@ export const instructors = [
     },
 ];
 
-// ============================================================================
-// STUDENTS - Realistic Indian names with proper roll number format
-// ============================================================================
 export const students = [
-    // 2021 Batch - CSE (4th year)
     {
         name: "Aarav Sharma",
         email: withAlias(email, "s21cs01"),
@@ -488,7 +450,6 @@ export const students = [
         batchYear: 2021,
         advisorEmployeeId: "ADV003",
     },
-    // 2022 Batch - CSE (3rd year)
     {
         name: "Arjun Verma",
         email: withAlias(email, "s22cs01"),
@@ -537,7 +498,6 @@ export const students = [
         batchYear: 2022,
         advisorEmployeeId: "ADV003",
     },
-    // 2023 Batch - CSE (2nd year)
     {
         name: "Kabir Malhotra",
         email: withAlias(email, "s23cs01"),
@@ -570,7 +530,6 @@ export const students = [
         batchYear: 2023,
         advisorEmployeeId: "ADV002",
     },
-    // 2024 Batch - CSE (1st year)
     {
         name: "Ayaan Chauhan",
         email: withAlias(email, "s24cs01"),
@@ -603,7 +562,6 @@ export const students = [
         batchYear: 2024,
         advisorEmployeeId: "ADV003",
     },
-    // 2021 Batch - EE (4th year)
     {
         name: "Arnav Saxena",
         email: withAlias(email, "s21ee01"),
@@ -636,7 +594,6 @@ export const students = [
         batchYear: 2021,
         advisorEmployeeId: "ADV005",
     },
-    // 2022 Batch - EE (3rd year)
     {
         name: "Parth Srivastava",
         email: withAlias(email, "s22ee01"),
@@ -653,7 +610,6 @@ export const students = [
         batchYear: 2022,
         advisorEmployeeId: "ADV005",
     },
-    // 2023 Batch - EE (2nd year)
     {
         name: "Yash Tiwari",
         email: withAlias(email, "s23ee01"),
@@ -670,7 +626,6 @@ export const students = [
         batchYear: 2023,
         advisorEmployeeId: "ADV005",
     },
-    // 2024 Batch - EE (1st year)
     {
         name: "Lakshay Kumar",
         email: withAlias(email, "s24ee01"),
@@ -687,7 +642,6 @@ export const students = [
         batchYear: 2024,
         advisorEmployeeId: "ADV005",
     },
-    // 2021 Batch - ME (4th year)
     {
         name: "Kartik Bhatt",
         email: withAlias(email, "s21me01"),
@@ -704,7 +658,6 @@ export const students = [
         batchYear: 2021,
         advisorEmployeeId: "ADV007",
     },
-    // 2022 Batch - ME (3rd year)
     {
         name: "Shaurya Mehta",
         email: withAlias(email, "s22me01"),
@@ -721,7 +674,6 @@ export const students = [
         batchYear: 2022,
         advisorEmployeeId: "ADV007",
     },
-    // 2023 Batch - ME (2nd year)
     {
         name: "Om Prakash Singh",
         email: withAlias(email, "s23me01"),
@@ -738,7 +690,6 @@ export const students = [
         batchYear: 2023,
         advisorEmployeeId: "ADV007",
     },
-    // 2024 Batch - ME (1st year)
     {
         name: "Rudra Jain",
         email: withAlias(email, "s24me01"),
@@ -755,7 +706,6 @@ export const students = [
         batchYear: 2024,
         advisorEmployeeId: "ADV007",
     },
-    // 2022 Batch - CE
     {
         name: "Harsh Vardhan",
         email: withAlias(email, "s22ce01"),
@@ -772,7 +722,6 @@ export const students = [
         batchYear: 2022,
         advisorEmployeeId: "ADV008",
     },
-    // 2023 Batch - ECE
     {
         name: "Atharv Khatri",
         email: withAlias(email, "s23ec01"),
@@ -789,7 +738,6 @@ export const students = [
         batchYear: 2023,
         advisorEmployeeId: "ADV009",
     },
-    // 2023 Batch - CHE
     {
         name: "Advait Venkatesh",
         email: withAlias(email, "s23ch01"),
@@ -808,11 +756,7 @@ export const students = [
     },
 ];
 
-// ============================================================================
-// COURSES - Realistic engineering curriculum
-// ============================================================================
 export const courses = [
-    // First Year Common Courses
     {
         code: "ESC101",
         title: "Fundamentals of Computing",
@@ -929,7 +873,6 @@ export const courses = [
         ),
     },
 
-    // CSE Core Courses
     {
         code: "CS201",
         title: "Data Structures",
@@ -1115,7 +1058,6 @@ export const courses = [
         ),
     },
 
-    // EE Core Courses
     {
         code: "EE210",
         title: "Introduction to Electrical Engineering",
@@ -1232,7 +1174,6 @@ export const courses = [
         ),
     },
 
-    // ME Core Courses
     {
         code: "ME201",
         title: "Thermodynamics",
@@ -1349,7 +1290,6 @@ export const courses = [
         ),
     },
 
-    // CE Courses
     {
         code: "CE201",
         title: "Structural Analysis",
@@ -1397,7 +1337,6 @@ export const courses = [
         ),
     },
 
-    // Elective Courses
     {
         code: "CS671",
         title: "Deep Learning",
@@ -1446,11 +1385,7 @@ export const courses = [
     },
 ];
 
-// ============================================================================
-// PREREQUISITES - Course dependencies
-// ============================================================================
 export const prerequisites = [
-    // CSE Prerequisites
     { courseCode: "CS201", prerequisiteCode: "ESC101" },
     { courseCode: "CS220", prerequisiteCode: "CS201" },
     { courseCode: "CS330", prerequisiteCode: "CS201" },
@@ -1462,26 +1397,19 @@ export const prerequisites = [
     { courseCode: "CS771", prerequisiteCode: "MTH102" },
     { courseCode: "CS671", prerequisiteCode: "CS771" },
     { courseCode: "CS682", prerequisiteCode: "MTH102" },
-    // EE Prerequisites
     { courseCode: "EE250", prerequisiteCode: "MTH102" },
     { courseCode: "EE320", prerequisiteCode: "EE210" },
     { courseCode: "EE370", prerequisiteCode: "EE250" },
     { courseCode: "EE380", prerequisiteCode: "EE210" },
-    // ME Prerequisites
     { courseCode: "ME231", prerequisiteCode: "MTH101" },
     { courseCode: "ME251", prerequisiteCode: "PHY101" },
     { courseCode: "ME311", prerequisiteCode: "ME201" },
     { courseCode: "ME321", prerequisiteCode: "ME251" },
-    // CE Prerequisites
     { courseCode: "CE201", prerequisiteCode: "ME251" },
     { courseCode: "CE231", prerequisiteCode: "PHY101" },
 ];
 
-// ============================================================================
-// SEMESTERS - Academic calendar (with historical completed semesters)
-// ============================================================================
 export const semesters = [
-    // Historical semesters for student records (COMPLETED)
     {
         year: 2021,
         semester: "ODD" as const,
@@ -1565,42 +1493,29 @@ export const semesters = [
     },
 ];
 
-// ============================================================================
-// CLASSROOMS - Lecture halls, labs, tutorial rooms
-// ============================================================================
 export const classrooms = [
-    // Lecture Halls (L-prefix)
     { room: "L1", capacity: 250, type: "LECTURE" as const },
     { room: "L2", capacity: 250, type: "LECTURE" as const },
     { room: "L3", capacity: 150, type: "LECTURE" as const },
     { room: "L4", capacity: 150, type: "LECTURE" as const },
     { room: "L7", capacity: 120, type: "LECTURE" as const },
     { room: "L8", capacity: 120, type: "LECTURE" as const },
-    // Tutorial Rooms (T-prefix)
     { room: "T101", capacity: 40, type: "TUTORIAL" as const },
     { room: "T102", capacity: 40, type: "TUTORIAL" as const },
     { room: "T103", capacity: 35, type: "TUTORIAL" as const },
     { room: "T104", capacity: 35, type: "TUTORIAL" as const },
-    // Computer Labs
     { room: "CC-LAB1", capacity: 60, type: "LAB" as const },
     { room: "CC-LAB2", capacity: 60, type: "LAB" as const },
     { room: "CSE-LAB", capacity: 40, type: "LAB" as const },
-    // EE Labs
     { room: "EE-LAB1", capacity: 30, type: "LAB" as const },
     { room: "EE-LAB2", capacity: 30, type: "LAB" as const },
-    // ME Labs
     { room: "ME-WSHOP", capacity: 25, type: "LAB" as const },
     { room: "ME-THERM", capacity: 25, type: "LAB" as const },
-    // Seminar Halls
     { room: "SH1", capacity: 100, type: "SEMINAR" as const },
     { room: "SH2", capacity: 80, type: "SEMINAR" as const },
 ];
 
-// ============================================================================
-// TIME SLOTS - Weekly schedule slots
-// ============================================================================
 export const timeSlots = [
-    // Monday Theory
     {
         dayOfWeek: "MONDAY" as const,
         sessionType: "THEORY" as const,
@@ -1621,7 +1536,6 @@ export const timeSlots = [
         sessionType: "LAB" as const,
         labPeriod: "LAB-3H-1" as const,
     },
-    // Tuesday
     {
         dayOfWeek: "TUESDAY" as const,
         sessionType: "THEORY" as const,
@@ -1642,7 +1556,6 @@ export const timeSlots = [
         sessionType: "TUTORIAL" as const,
         tutorialPeriod: "T-PC-2" as const,
     },
-    // Wednesday
     {
         dayOfWeek: "WEDNESDAY" as const,
         sessionType: "THEORY" as const,
@@ -1663,7 +1576,6 @@ export const timeSlots = [
         sessionType: "LAB" as const,
         labPeriod: "LAB-2H-1" as const,
     },
-    // Thursday
     {
         dayOfWeek: "THURSDAY" as const,
         sessionType: "THEORY" as const,
@@ -1684,7 +1596,6 @@ export const timeSlots = [
         sessionType: "LAB" as const,
         labPeriod: "LAB-3H-2" as const,
     },
-    // Friday
     {
         dayOfWeek: "FRIDAY" as const,
         sessionType: "THEORY" as const,
@@ -1707,9 +1618,6 @@ export const timeSlots = [
     },
 ];
 
-// ============================================================================
-// FEEDBACK QUESTIONS - Course evaluation survey
-// ============================================================================
 export const feedbackQuestions = [
     {
         questionText:
@@ -1791,10 +1699,6 @@ export const feedbackQuestions = [
     },
 ];
 
-// ============================================================================
-// HISTORICAL COURSE OFFERINGS - For student records (COMPLETED semesters)
-// Maps: semesterKey -> array of offerings
-// ============================================================================
 export const historicalCourseOfferings: Record<
     string,
     Array<{
@@ -1805,7 +1709,6 @@ export const historicalCourseOfferings: Record<
         programCodes: string[];
     }>
 > = {
-    // 2021 ODD - First semester for 2021 batch
     "2021-ODD": [
         {
             courseCode: "ESC101",
@@ -1829,7 +1732,6 @@ export const historicalCourseOfferings: Record<
             programCodes: ["BTCS", "BTEE", "BTME"],
         },
     ],
-    // 2022 EVEN - Second semester for 2021 batch
     "2022-EVEN": [
         {
             courseCode: "MTH102",
@@ -1846,9 +1748,7 @@ export const historicalCourseOfferings: Record<
             programCodes: ["BTCS", "BTEE", "BTME"],
         },
     ],
-    // 2022 ODD - Third semester for 2021 batch, First for 2022 batch
     "2022-ODD": [
-        // 2021 batch courses
         {
             courseCode: "CS201",
             instructorEmployeeIds: ["INS002"],
@@ -1870,7 +1770,6 @@ export const historicalCourseOfferings: Record<
             batchYears: [2021],
             programCodes: ["BTME"],
         },
-        // 2022 batch first year courses
         {
             courseCode: "ESC101",
             instructorEmployeeIds: ["INS001", "INS005"],
@@ -1893,9 +1792,7 @@ export const historicalCourseOfferings: Record<
             programCodes: ["BTCS", "BTEE", "BTME", "BTCE"],
         },
     ],
-    // 2023 EVEN
     "2023-EVEN": [
-        // 2021 batch 4th semester
         {
             courseCode: "CS220",
             instructorEmployeeIds: ["INS001"],
@@ -1917,7 +1814,6 @@ export const historicalCourseOfferings: Record<
             batchYears: [2021],
             programCodes: ["BTME"],
         },
-        // 2022 batch 2nd semester
         {
             courseCode: "MTH102",
             instructorEmployeeIds: ["INS013"],
@@ -1933,9 +1829,7 @@ export const historicalCourseOfferings: Record<
             programCodes: ["BTCS", "BTEE", "BTME", "BTCE"],
         },
     ],
-    // 2023 ODD
     "2023-ODD": [
-        // 2021 batch 5th semester
         {
             courseCode: "CS330",
             instructorEmployeeIds: ["INS003"],
@@ -1964,7 +1858,6 @@ export const historicalCourseOfferings: Record<
             batchYears: [2021],
             programCodes: ["BTME"],
         },
-        // 2022 batch 3rd semester
         {
             courseCode: "CS201",
             instructorEmployeeIds: ["INS002", "INS005"],
@@ -1993,7 +1886,6 @@ export const historicalCourseOfferings: Record<
             batchYears: [2022],
             programCodes: ["BTCE"],
         },
-        // 2023 batch first year courses
         {
             courseCode: "ESC101",
             instructorEmployeeIds: ["INS001", "INS004"],
@@ -2016,9 +1908,7 @@ export const historicalCourseOfferings: Record<
             programCodes: ["BTCS", "BTEE", "BTME", "BTEC", "BTCH"],
         },
     ],
-    // 2024 EVEN
     "2024-EVEN": [
-        // 2021 batch 6th semester
         {
             courseCode: "CS355",
             instructorEmployeeIds: ["INS005"],
@@ -2047,7 +1937,6 @@ export const historicalCourseOfferings: Record<
             batchYears: [2021],
             programCodes: ["BTME"],
         },
-        // 2022 batch 4th semester
         {
             courseCode: "CS220",
             instructorEmployeeIds: ["INS001"],
@@ -2076,7 +1965,6 @@ export const historicalCourseOfferings: Record<
             batchYears: [2022],
             programCodes: ["BTCE"],
         },
-        // 2023 batch 2nd semester
         {
             courseCode: "MTH102",
             instructorEmployeeIds: ["INS013"],
@@ -2092,9 +1980,7 @@ export const historicalCourseOfferings: Record<
             programCodes: ["BTCS", "BTEE", "BTME", "BTEC", "BTCH"],
         },
     ],
-    // 2024 ODD
     "2024-ODD": [
-        // 2021 batch 7th semester (electives)
         {
             courseCode: "CS771",
             instructorEmployeeIds: ["INS003", "INS004"],
@@ -2116,7 +2002,6 @@ export const historicalCourseOfferings: Record<
             batchYears: [2021],
             programCodes: ["BTEE"],
         },
-        // 2022 batch 5th semester
         {
             courseCode: "CS330",
             instructorEmployeeIds: ["INS003"],
@@ -2152,7 +2037,6 @@ export const historicalCourseOfferings: Record<
             batchYears: [2022],
             programCodes: ["BTCE"],
         },
-        // 2023 batch 3rd semester
         {
             courseCode: "CS201",
             instructorEmployeeIds: ["INS002", "INS005"],
@@ -2174,7 +2058,6 @@ export const historicalCourseOfferings: Record<
             batchYears: [2023],
             programCodes: ["BTME", "BTCH"],
         },
-        // 2024 batch first year courses
         {
             courseCode: "ESC101",
             instructorEmployeeIds: ["INS001", "INS004"],
@@ -2199,11 +2082,7 @@ export const historicalCourseOfferings: Record<
     ],
 };
 
-// ============================================================================
-// CURRENT SEMESTER COURSE OFFERINGS - 2025 EVEN (ONGOING)
-// ============================================================================
 export const courseOfferings2025Even = [
-    // 2021 batch 8th semester (final year electives/projects)
     {
         courseCode: "CS671",
         instructorEmployeeIds: ["INS003", "INS004"],
@@ -2218,7 +2097,6 @@ export const courseOfferings2025Even = [
         batchYears: [2021],
         programCodes: ["BTCS"],
     },
-    // 2022 batch 6th semester
     {
         courseCode: "CS355",
         instructorEmployeeIds: ["INS005"],
@@ -2247,7 +2125,6 @@ export const courseOfferings2025Even = [
         batchYears: [2022],
         programCodes: ["BTME"],
     },
-    // 2023 batch 4th semester
     {
         courseCode: "CS220",
         instructorEmployeeIds: ["INS001"],
@@ -2269,7 +2146,6 @@ export const courseOfferings2025Even = [
         batchYears: [2023],
         programCodes: ["BTME", "BTCH"],
     },
-    // 2024 batch 2nd semester
     {
         courseCode: "MTH102",
         instructorEmployeeIds: ["INS013"],
@@ -2286,12 +2162,8 @@ export const courseOfferings2025Even = [
     },
 ];
 
-// Keep old export for backward compatibility
 export const courseOfferings2025Spring = courseOfferings2025Even;
 
-// ============================================================================
-// GRADE DISTRIBUTION HELPER - For realistic grade generation
-// ============================================================================
 export const gradeDistribution = {
     excellent: ["A", "A", "A", "A-"] as const,
     good: ["A-", "B", "B", "B-"] as const,
@@ -2299,32 +2171,30 @@ export const gradeDistribution = {
     poor: ["C-", "D", "D", "F"] as const,
 };
 
-// Student performance profiles (affects grade generation in seed script)
 export const studentPerformanceProfiles: Record<
     string,
     "excellent" | "good" | "average" | "poor"
 > = {
-    "210101": "excellent", // Aarav Sharma - top performer
-    "210102": "good", // Diya Patel
-    "210103": "excellent", // Vivaan Gupta
-    "210104": "good", // Ananya Singh
-    "210105": "average", // Aditya Reddy
-    "210106": "good", // Ishita Joshi
-    "220101": "excellent", // Arjun Verma
-    "220102": "good", // Kavya Nair
-    "220103": "average", // Rohan Iyer
-    "220104": "good", // Meera Krishnan
-    "220105": "good", // Siddharth Menon
-    "220106": "excellent", // Priya Agarwal
-    "230101": "good", // Kabir Malhotra
-    "230102": "excellent", // Aisha Khan
-    "230103": "average", // Vihaan Chopra
-    "230104": "good", // Riya Banerjee
-    "240101": "good", // Ayaan Chauhan
-    "240102": "excellent", // Saanvi Kapoor
-    "240103": "average", // Reyansh Deshmukh
-    "240104": "good", // Kiara Rao
-    // EE students
+    "210101": "excellent",
+    "210102": "good",
+    "210103": "excellent",
+    "210104": "good",
+    "210105": "average",
+    "210106": "good",
+    "220101": "excellent",
+    "220102": "good",
+    "220103": "average",
+    "220104": "good",
+    "220105": "good",
+    "220106": "excellent",
+    "230101": "good",
+    "230102": "excellent",
+    "230103": "average",
+    "230104": "good",
+    "240101": "good",
+    "240102": "excellent",
+    "240103": "average",
+    "240104": "good",
     "210201": "good",
     "210202": "excellent",
     "210203": "average",
@@ -2335,7 +2205,6 @@ export const studentPerformanceProfiles: Record<
     "230202": "average",
     "240201": "good",
     "240202": "excellent",
-    // ME students
     "210301": "excellent",
     "210302": "good",
     "220301": "good",
@@ -2344,13 +2213,10 @@ export const studentPerformanceProfiles: Record<
     "230302": "excellent",
     "240301": "average",
     "240302": "good",
-    // CE students
     "220401": "good",
     "220402": "excellent",
-    // ECE students
     "230501": "good",
     "230502": "excellent",
-    // CHE students
     "230601": "average",
     "230602": "good",
 };

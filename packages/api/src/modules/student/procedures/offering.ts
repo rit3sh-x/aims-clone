@@ -3,7 +3,7 @@ import { studentProcedure } from "../middleware";
 import {
     dropInputSchema,
     enrollInputSchema,
-    getOfferingInputSchema,
+    getOfferingByIdInputSchema,
     listOfferingsInputSchema,
 } from "../schema";
 import {
@@ -16,6 +16,12 @@ import {
     offeringBatch,
     semester,
     student,
+    assessmentTemplate,
+    courseOfferingInstructor,
+    instructor,
+    user,
+    batch,
+    program,
 } from "@workspace/db";
 import { and, asc, eq, gt, ilike, inArray, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -95,12 +101,36 @@ export const offeringManagement = createTRPCRouter({
             const hasNextPage = rows.length > pageSize;
             const items = hasNextPage ? rows.slice(0, pageSize) : rows;
 
+            const offeringIds = items.map((item) => item.offering.id);
+            const enrollments = await db
+                .select({
+                    offeringId: enrollment.offeringId,
+                    status: enrollment.status,
+                })
+                .from(enrollment)
+                .where(
+                    and(
+                        eq(enrollment.studentId, studentRecord.id),
+                        inArray(enrollment.offeringId, offeringIds)
+                    )
+                );
+
+            const enrollmentMap = new Map(
+                enrollments.map((e) => [e.offeringId, e.status])
+            );
+
+            const itemsWithEnrollment = items.map((item) => ({
+                ...item,
+                isEnrolled: enrollmentMap.has(item.offering.id),
+                enrollmentStatus: enrollmentMap.get(item.offering.id) || null,
+            }));
+
             const nextCursor = hasNextPage
                 ? items[items.length - 1]!.offering.id
                 : null;
 
             return {
-                items,
+                items: itemsWithEnrollment,
                 nextCursor,
                 hasNextPage,
             };
@@ -180,7 +210,6 @@ export const offeringManagement = createTRPCRouter({
                             inArray(enrollment.status, [
                                 "PENDING",
                                 "INSTRUCTOR_APPROVED",
-                                "ADVISOR_APPROVED",
                                 "ENROLLED",
                             ])
                         )
@@ -268,7 +297,6 @@ export const offeringManagement = createTRPCRouter({
                         inArray(enrollment.status, [
                             "PENDING",
                             "INSTRUCTOR_APPROVED",
-                            "ADVISOR_APPROVED",
                             "ENROLLED",
                         ])
                     )
@@ -311,10 +339,10 @@ export const offeringManagement = createTRPCRouter({
         }),
 
     getById: studentProcedure
-        .input(getOfferingInputSchema)
+        .input(getOfferingByIdInputSchema)
         .query(async ({ input, ctx }) => {
-            const studentUserId = ctx.session.user.id;
             const { offeringId } = input;
+            const studentUserId = ctx.session.user.id;
 
             const studentRecord = await db.query.student.findFirst({
                 where: eq(student.userId, studentUserId),
@@ -327,27 +355,95 @@ export const offeringManagement = createTRPCRouter({
                 });
             }
 
-            const offering = await db
+            const offeringData = await db
                 .select({
                     offering: courseOffering,
                     course,
-                    semester,
                     department,
+                    semester,
                 })
                 .from(courseOffering)
                 .innerJoin(course, eq(courseOffering.courseId, course.id))
-                .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
                 .innerJoin(department, eq(course.departmentId, department.id))
-                .where(eq(courseOffering.id, offeringId))
+                .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
+                .innerJoin(
+                    offeringBatch,
+                    eq(offeringBatch.offeringId, courseOffering.id)
+                )
+                .where(
+                    and(
+                        eq(courseOffering.id, offeringId),
+                        eq(offeringBatch.batchId, studentRecord.batchId)
+                    )
+                )
                 .then((rows) => rows[0]);
 
-            if (!offering) {
+            if (!offeringData) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "Offering not found",
                 });
             }
 
-            return offering;
+            const enrollmentRecord = await db
+                .select({
+                    status: enrollment.status,
+                })
+                .from(enrollment)
+                .where(
+                    and(
+                        eq(enrollment.offeringId, offeringId),
+                        eq(enrollment.studentId, studentRecord.id)
+                    )
+                )
+                .then((rows) => rows[0]);
+
+            const instructors = await db
+                .select({
+                    id: instructor.id,
+                    name: user.name,
+                    email: user.email,
+                    employeeId: instructor.employeeId,
+                    isHead: courseOfferingInstructor.isHead,
+                })
+                .from(courseOfferingInstructor)
+                .innerJoin(
+                    instructor,
+                    eq(courseOfferingInstructor.instructorId, instructor.id)
+                )
+                .innerJoin(user, eq(instructor.userId, user.id))
+                .where(eq(courseOfferingInstructor.offeringId, offeringId));
+
+            const batches = await db
+                .select({
+                    id: batch.id,
+                    year: batch.year,
+                    programName: program.name,
+                    programCode: program.code,
+                    degreeType: program.degreeType,
+                })
+                .from(offeringBatch)
+                .innerJoin(batch, eq(offeringBatch.batchId, batch.id))
+                .innerJoin(program, eq(batch.programId, program.id))
+                .where(eq(offeringBatch.offeringId, offeringId));
+
+            const assessments = await db
+                .select({
+                    id: assessmentTemplate.id,
+                    type: assessmentTemplate.type,
+                    maxMarks: assessmentTemplate.maxMarks,
+                    weightage: assessmentTemplate.weightage,
+                })
+                .from(assessmentTemplate)
+                .where(eq(assessmentTemplate.offeringId, offeringId));
+
+            return {
+                ...offeringData,
+                instructors,
+                batches,
+                assessments,
+                isEnrolled: !!enrollmentRecord,
+                enrollmentStatus: enrollmentRecord?.status || null,
+            };
         }),
 });

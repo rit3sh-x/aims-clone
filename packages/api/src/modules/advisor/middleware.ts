@@ -13,7 +13,7 @@ export const advisorProcedure = protectedProcedure.use(
             });
         }
 
-        const advisorRecord = await db.query.hod.findFirst({
+        const advisorRecord = await db.query.advisor.findFirst({
             where: (h, { eq }) => eq(h.userId, userId),
             columns: {
                 id: true,
@@ -24,7 +24,7 @@ export const advisorProcedure = protectedProcedure.use(
         if (!advisorRecord) {
             throw new TRPCError({
                 code: "FORBIDDEN",
-                message: "HOD record not found.",
+                message: "Advisor record not found.",
             });
         }
 

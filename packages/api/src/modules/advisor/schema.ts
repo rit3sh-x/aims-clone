@@ -4,6 +4,7 @@ import {
     LIST_MAX_PAGE_SIZE,
     LIST_MIN_PAGE_SIZE,
 } from "../constants";
+import { enrollmentStatusEnum } from "@workspace/db";
 
 export const listStudentsInputSchema = z.object({
     search: z.string().optional(),
@@ -45,5 +46,6 @@ export const listEnrollmentsInputSchema = z.object({
             id: z.string(),
         })
         .optional(),
+    status: z.enum(enrollmentStatusEnum.enumValues).optional(),
     courseCode: z.string().optional(),
 });

@@ -27,15 +27,20 @@ export const OfferingDetailsCard = ({
     offeringId,
 }: OfferingDetailsCardProps) => {
     const { data } = useSuspenseOffering(offeringId);
-    const { offering, course, department } = data;
+    const { offering, course, department, isEnrolled, enrollmentStatus } = data;
 
     const enrollOffering = useEnrollOffering();
     const dropOffering = useDropOffering();
 
     const showActions = offering.status === "ENROLLING";
+    const canEnroll = !isEnrolled && showActions;
+    const canDrop =
+        isEnrolled &&
+        enrollmentStatus !== "COMPLETED" &&
+        enrollmentStatus !== "DROPPED";
 
     return (
-        <Card className="p-6 space-y-6 w-full h-full overflow-y-auto">
+        <Card className="p-6 space-y-6 overflow-y-auto">
             <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                     <h2 className="text-lg font-semibold">
@@ -53,10 +58,16 @@ export const OfferingDetailsCard = ({
                         <Badge variant="secondary" className="text-[10px]">
                             {department.code}
                         </Badge>
+
+                        {isEnrolled && enrollmentStatus && (
+                            <Badge variant="default" className="text-[10px]">
+                                {humanizeEnum(enrollmentStatus)}
+                            </Badge>
+                        )}
                     </div>
                 </div>
 
-                {showActions && (
+                {(canEnroll || canDrop) && (
                     <DropdownMenu>
                         <DropdownMenuTrigger
                             render={(props) => (
@@ -67,30 +78,34 @@ export const OfferingDetailsCard = ({
                         />
 
                         <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem
-                                onClick={() =>
-                                    enrollOffering.mutate({
-                                        offeringId: offering.id,
-                                    })
-                                }
-                                disabled={enrollOffering.isPending}
-                            >
-                                <Plus className="mr-2 size-4" />
-                                Enroll
-                            </DropdownMenuItem>
+                            {canEnroll && (
+                                <DropdownMenuItem
+                                    onClick={() =>
+                                        enrollOffering.mutate({
+                                            offeringId: offering.id,
+                                        })
+                                    }
+                                    disabled={enrollOffering.isPending}
+                                >
+                                    <Plus className="mr-2 size-4" />
+                                    Enroll
+                                </DropdownMenuItem>
+                            )}
 
-                            <DropdownMenuItem
-                                onClick={() =>
-                                    dropOffering.mutate({
-                                        offeringId: offering.id,
-                                    })
-                                }
-                                disabled={dropOffering.isPending}
-                                className="text-destructive focus:text-destructive"
-                            >
-                                <X className="mr-2 size-4" />
-                                Drop
-                            </DropdownMenuItem>
+                            {canDrop && (
+                                <DropdownMenuItem
+                                    onClick={() =>
+                                        dropOffering.mutate({
+                                            offeringId: offering.id,
+                                        })
+                                    }
+                                    disabled={dropOffering.isPending}
+                                    className="text-destructive focus:text-destructive"
+                                >
+                                    <X className="mr-2 size-4" />
+                                    Drop
+                                </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )}
@@ -111,6 +126,68 @@ export const OfferingDetailsCard = ({
                     ).toLocaleDateString()}
                 />
             </div>
+
+            {data.instructors && data.instructors.length > 0 && (
+                <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Instructors</h3>
+                    <div className="flex flex-wrap gap-2">
+                        {data.instructors.map((instructor) => (
+                            <Badge
+                                key={instructor.id}
+                                variant={
+                                    instructor.isHead ? "default" : "secondary"
+                                }
+                                className="text-xs"
+                            >
+                                {instructor.name}{" "}
+                                {instructor.isHead && "(Head)"}
+                            </Badge>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {data.batches && data.batches.length > 0 && (
+                <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Target Batches</h3>
+                    <div className="flex flex-wrap gap-2">
+                        {data.batches.map((batch) => (
+                            <Badge
+                                key={batch.id}
+                                variant="outline"
+                                className="text-xs"
+                            >
+                                {batch.programCode} - {batch.year} (
+                                {humanizeEnum(batch.degreeType)})
+                            </Badge>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {data.assessments && data.assessments.length > 0 && (
+                <div className="space-y-2">
+                    <h3 className="text-sm font-medium">
+                        Assessment Structure
+                    </h3>
+                    <div className="space-y-2">
+                        {data.assessments.map((assessment) => (
+                            <div
+                                key={assessment.id}
+                                className="flex justify-between items-center text-sm p-2 border rounded"
+                            >
+                                <span className="font-medium">
+                                    {humanizeEnum(assessment.type)}
+                                </span>
+                                <span className="text-muted-foreground">
+                                    {assessment.maxMarks} marks (
+                                    {assessment.weightage}%)
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="space-y-2">
                 <h3 className="text-sm font-medium">Course Description</h3>
@@ -145,7 +222,7 @@ export const OfferingDetailsCardSkeleton = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Array.from({ length: 6 }).map((_, i) => (
+                {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} className="space-y-1">
                         <Skeleton className="h-3 w-24" />
                         <Skeleton className="h-4 w-16" />

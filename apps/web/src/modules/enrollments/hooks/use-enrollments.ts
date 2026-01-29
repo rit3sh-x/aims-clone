@@ -8,13 +8,14 @@ import {
 import { toast } from "sonner";
 
 export const useInfiniteInstructorEnrollments = () => {
-    const [{ code }] = useEnrollmentParams();
+    const [{ code, status }] = useEnrollmentParams();
     const trpc = useTRPC();
 
     const query = useSuspenseInfiniteQuery(
         trpc.instructor.enrollment.list.infiniteQueryOptions(
             {
                 courseCode: code === "" ? undefined : code,
+                status: status === "" ? undefined : status,
             },
             {
                 getNextPageParam: (lastPage) =>
@@ -36,13 +37,14 @@ export const useInfiniteInstructorEnrollments = () => {
 };
 
 export const useInfiniteAdvisorEnrollments = () => {
-    const [{ code }] = useEnrollmentParams();
+    const [{ code, status }] = useEnrollmentParams();
     const trpc = useTRPC();
 
     const query = useSuspenseInfiniteQuery(
         trpc.advisor.enrollment.list.infiniteQueryOptions(
             {
                 courseCode: code === "" ? undefined : code,
+                status: status === "" ? undefined : status,
             },
             {
                 getNextPageParam: (lastPage) =>
@@ -66,7 +68,7 @@ export const useInfiniteAdvisorEnrollments = () => {
 export const useInstructorApproveEnrollment = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ code }] = useEnrollmentParams();
+    const [{ code, status }] = useEnrollmentParams();
 
     return useMutation(
         trpc.instructor.enrollment.approve.mutationOptions({
@@ -75,6 +77,7 @@ export const useInstructorApproveEnrollment = () => {
                 queryClient.invalidateQueries(
                     trpc.instructor.enrollment.list.infiniteQueryOptions({
                         courseCode: code === "" ? undefined : code,
+                        status: status === "" ? undefined : status,
                     })
                 );
             },
@@ -92,7 +95,7 @@ export const useInstructorApproveEnrollment = () => {
 export const useInstructorRejectEnrollment = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ code }] = useEnrollmentParams();
+    const [{ code, status }] = useEnrollmentParams();
 
     return useMutation(
         trpc.instructor.enrollment.reject.mutationOptions({
@@ -101,6 +104,7 @@ export const useInstructorRejectEnrollment = () => {
                 queryClient.invalidateQueries(
                     trpc.instructor.enrollment.list.infiniteQueryOptions({
                         courseCode: code === "" ? undefined : code,
+                        status: status === "" ? undefined : status,
                     })
                 );
             },
@@ -118,7 +122,7 @@ export const useInstructorRejectEnrollment = () => {
 export const useAdvisorApproveEnrollment = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ code }] = useEnrollmentParams();
+    const [{ code, status }] = useEnrollmentParams();
 
     return useMutation(
         trpc.advisor.enrollment.approve.mutationOptions({
@@ -127,6 +131,7 @@ export const useAdvisorApproveEnrollment = () => {
                 queryClient.invalidateQueries(
                     trpc.advisor.enrollment.list.infiniteQueryOptions({
                         courseCode: code === "" ? undefined : code,
+                        status: status === "" ? undefined : status,
                     })
                 );
             },
@@ -144,7 +149,7 @@ export const useAdvisorApproveEnrollment = () => {
 export const useAdvisorRejectEnrollment = () => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [{ code }] = useEnrollmentParams();
+    const [{ code, status }] = useEnrollmentParams();
 
     return useMutation(
         trpc.advisor.enrollment.reject.mutationOptions({
@@ -153,6 +158,7 @@ export const useAdvisorRejectEnrollment = () => {
                 queryClient.invalidateQueries(
                     trpc.advisor.enrollment.list.infiniteQueryOptions({
                         courseCode: code === "" ? undefined : code,
+                        status: status === "" ? undefined : status,
                     })
                 );
             },

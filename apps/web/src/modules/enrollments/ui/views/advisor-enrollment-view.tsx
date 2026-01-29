@@ -4,8 +4,13 @@ import {
     AdvisorEnrollmentList,
     AdvisorEnrollmentListSkeleton,
 } from "../components/advisor-enrollment-list";
+import type { UserRole } from "@workspace/db";
 
-export const AdvisorEnrollmentView = () => {
+interface AdvisorEnrollmentViewProps {
+    role: UserRole;
+}
+
+export const AdvisorEnrollmentView = ({ role }: AdvisorEnrollmentViewProps) => {
     return (
         <div className="w-full px-4 lg:px-12 py-8 flex flex-col gap-4 h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="grid grid-cols-1 lg:grid-cols-6 xl:grid-cols-8 gap-y-6 gap-x-12 h-full">
@@ -17,7 +22,7 @@ export const AdvisorEnrollmentView = () => {
 
                 <div className="lg:col-span-4 xl:col-span-6">
                     <Suspense fallback={<AdvisorEnrollmentListSkeleton />}>
-                        <AdvisorEnrollmentList />
+                        <AdvisorEnrollmentList role={role} />
                     </Suspense>
                 </div>
             </div>

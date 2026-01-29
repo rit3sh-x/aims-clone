@@ -13,7 +13,7 @@ export const InstructorCard = ({
 }) => {
     return (
         <Link
-            href={`/instructor/${instructorData.instructor.id}` as Route}
+            href={`/instructors/${instructorData.instructor.id}` as Route}
             passHref
         >
             <Card className="p-4 space-y-2 cursor-pointer hover:shadow-lg">

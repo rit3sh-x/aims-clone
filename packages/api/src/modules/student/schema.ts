@@ -50,6 +50,7 @@ export const getStudentFeedbackQuestionsInputSchema = z.object({
     enrollmentId: z.string(),
 });
 
+export const getOfferingByIdInputSchema = z.object({ offeringId: z.string() });
 export const listStudentCoursesInputSchema = z.object({
     search: z.string().optional(),
     departmentCode: z.string().optional(),

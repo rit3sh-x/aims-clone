@@ -9,6 +9,9 @@ import {
     courseOfferingInstructor,
     course,
     courseOffering,
+    user,
+    batch,
+    program,
 } from "@workspace/db";
 import { TRPCError } from "@trpc/server";
 import {
@@ -22,7 +25,7 @@ export const enrollmentManagement = createTRPCRouter({
         .input(listEnrollmentsInputSchema)
         .query(async ({ input, ctx }) => {
             const { id: instructorId } = ctx.instructor;
-            const { pageSize, cursor, courseCode } = input;
+            const { pageSize, cursor, courseCode, status } = input;
 
             const conditions: SQL[] = [
                 eq(courseOfferingInstructor.instructorId, instructorId),
@@ -47,10 +50,19 @@ export const enrollmentManagement = createTRPCRouter({
                 }
             }
 
+            if (status) {
+                conditions.push(eq(enrollment.status, status));
+            }
+
             const rows = await db
                 .select({
                     enrollment,
                     student,
+                    user,
+                    course,
+                    offering: courseOffering,
+                    batch,
+                    program,
                 })
                 .from(enrollment)
                 .innerJoin(
@@ -63,6 +75,9 @@ export const enrollmentManagement = createTRPCRouter({
                 )
                 .innerJoin(course, eq(courseOffering.courseId, course.id))
                 .innerJoin(student, eq(enrollment.studentId, student.id))
+                .innerJoin(user, eq(student.userId, user.id))
+                .innerJoin(batch, eq(student.batchId, batch.id))
+                .innerJoin(program, eq(batch.programId, program.id))
                 .where(and(...conditions))
                 .orderBy(desc(enrollment.createdAt), desc(enrollment.id))
                 .limit(pageSize + 1);
@@ -174,7 +189,7 @@ export const enrollmentManagement = createTRPCRouter({
                     and(
                         eq(enrollment.id, enrollmentId),
                         eq(courseOfferingInstructor.instructorId, instructorId),
-                        eq(courseOfferingInstructor.isHead, true) // 🔑
+                        eq(courseOfferingInstructor.isHead, true)
                     )
                 )
                 .limit(1)

@@ -89,7 +89,6 @@ export const enrollmentStatusEnum = pgEnum("enrollment_status", [
     "PENDING",
     "INSTRUCTOR_APPROVED",
     "INSTRUCTOR_REJECTED",
-    "ADVISOR_APPROVED",
     "ADVISOR_REJECTED",
     "ENROLLED",
     "DROPPED",

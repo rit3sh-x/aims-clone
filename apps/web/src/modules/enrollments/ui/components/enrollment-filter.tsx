@@ -4,12 +4,13 @@ import { SearchFilter } from "@/components/search-filter";
 import { useDebouncedSearch } from "@/hooks/use-debounced-search";
 import { useEnrollmentParams } from "../../hooks/use-enrollment-params";
 import { CodeFilter } from "./code-filter";
+import { EnrollmentFilter } from "./status-filter";
 
 export const StudentFilters = () => {
     const [params, setParams] = useEnrollmentParams();
-    const { code } = params;
+    const { code, status } = params;
 
-    const hasAnyFilters = Boolean(code);
+    const hasAnyFilters = !!(code || status);
 
     const updateSearch = (patch: Partial<typeof params>) => {
         setParams(patch);
@@ -17,7 +18,8 @@ export const StudentFilters = () => {
 
     const onClear = () => {
         setParams({
-            code: undefined,
+            code: "",
+            status: "",
         });
     };
 
@@ -39,6 +41,13 @@ export const StudentFilters = () => {
                     </button>
                 )}
             </div>
+
+            <SearchFilter title="Status">
+                <EnrollmentFilter
+                    value={status === "" ? undefined : status}
+                    onChange={(value) => updateSearch({ status: value })}
+                />
+            </SearchFilter>
 
             <SearchFilter title="Department" className="border-b-0">
                 <CodeFilter

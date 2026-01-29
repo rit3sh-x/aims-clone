@@ -4,8 +4,15 @@ import {
     InstructorEnrollmentList,
     InstructorEnrollmentListSkeleton,
 } from "../components/instructor-enrollment-list";
+import type { UserRole } from "@workspace/db";
 
-export const InstructorEnrollmentView = () => {
+interface InstructorEnrollmentViewProps {
+    role: UserRole;
+}
+
+export const InstructorEnrollmentView = ({
+    role,
+}: InstructorEnrollmentViewProps) => {
     return (
         <div className="w-full px-4 lg:px-12 py-8 flex flex-col gap-4 h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="grid grid-cols-1 lg:grid-cols-6 xl:grid-cols-8 gap-y-6 gap-x-12 h-full">
@@ -17,7 +24,7 @@ export const InstructorEnrollmentView = () => {
 
                 <div className="lg:col-span-4 xl:col-span-6">
                     <Suspense fallback={<InstructorEnrollmentListSkeleton />}>
-                        <InstructorEnrollmentList />
+                        <InstructorEnrollmentList role={role} />
                     </Suspense>
                 </div>
             </div>

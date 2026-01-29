@@ -63,22 +63,18 @@ export const SemesterCard = ({ data }: SemesterCardProps) => {
 
             <CardContent>
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-blue-50 rounded-lg p-4">
+                    <div className="bg-muted rounded-lg p-4">
                         <p className="text-sm text-muted-foreground mb-1">
                             SGPA
                         </p>
-                        <p className="text-3xl font-bold text-blue-600">
-                            {sgpa.toFixed(2)}
-                        </p>
+                        <p className="text-3xl font-bold">{sgpa.toFixed(2)}</p>
                     </div>
 
-                    <div className="bg-purple-50 rounded-lg p-4">
+                    <div className="bg-muted rounded-lg p-4">
                         <p className="text-sm text-muted-foreground mb-1">
                             CGPA
                         </p>
-                        <p className="text-3xl font-bold text-purple-600">
-                            {cgpa.toFixed(2)}
-                        </p>
+                        <p className="text-3xl font-bold">{cgpa.toFixed(2)}</p>
                     </div>
                 </div>
 

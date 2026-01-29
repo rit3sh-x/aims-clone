@@ -1,19 +1,28 @@
 "use client";
 
 import { Suspense } from "react";
-import { SemesterList } from "../components/semester-list";
-import { SemesterListSkeleton } from "@/modules/semester/ui/components/semester-list";
+import {
+    SemesterList,
+    SemesterListSkeleton,
+} from "../components/semester-list";
+import { ScrollArea } from "@workspace/ui/components/scroll-area";
 
 export const StudentRecordView = () => {
     return (
-        <div className="p-6 space-y-6">
-            <h1 className="text-2xl font-bold">Student Record</h1>
-            <p className="text-muted-foreground">
-                View your academic performance and semester details below.
-            </p>
-            <Suspense fallback={<SemesterListSkeleton />}>
-                <SemesterList />
-            </Suspense>
+        <div className="flex flex-col h-[calc(100vh-4rem)] max-w-7xl mx-auto">
+            <div className="p-6 pb-0 space-y-1">
+                <h1 className="text-2xl font-bold tracking-tight">
+                    Student Record
+                </h1>
+                <p className="text-muted-foreground">
+                    View your academic performance and semester details below.
+                </p>
+            </div>
+            <ScrollArea className="flex-1 px-6 py-4">
+                <Suspense fallback={<SemesterListSkeleton />}>
+                    <SemesterList />
+                </Suspense>
+            </ScrollArea>
         </div>
     );
 };

@@ -4,6 +4,7 @@ import { useOptimistic, useTransition, useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { Sortable, SortableItem } from "@/components/sortable";
 import { Button } from "@workspace/ui/components/button";
+import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { QuestionCard, QuestionCardSkeleton } from "./question-card";
 import { QuestionType } from "../../constants";
 import {
@@ -183,30 +184,32 @@ export const QuestionsList = () => {
     const displayQuestions = isPending ? optimisticQuestions : localQuestions;
 
     return (
-        <div className="relative min-h-screen">
-            <div className="w-full max-w-7xl mx-auto p-6 pb-32 space-y-4">
-                <Sortable
-                    value={displayQuestions}
-                    onValueChange={handleValueChange}
-                    getItemValue={getItemValue}
-                    strategy="vertical"
-                    className="space-y-2"
-                >
-                    {displayQuestions.map((question) => (
-                        <SortableItem key={question.id} value={question.id}>
-                            <QuestionCard
-                                question={question}
-                                onUpdate={handleUpdateQuestion}
-                                onDelete={handleDeleteQuestion}
-                            />
-                        </SortableItem>
-                    ))}
-                </Sortable>
-            </div>
+        <div className="flex flex-col h-[calc(100vh-4rem)]">
+            <ScrollArea className="flex-1">
+                <div className="w-full max-w-7xl mx-auto p-6 pb-20 space-y-4">
+                    <Sortable
+                        value={displayQuestions}
+                        onValueChange={handleValueChange}
+                        getItemValue={getItemValue}
+                        strategy="vertical"
+                        className="space-y-2"
+                    >
+                        {displayQuestions.map((question) => (
+                            <SortableItem key={question.id} value={question.id}>
+                                <QuestionCard
+                                    question={question}
+                                    onUpdate={handleUpdateQuestion}
+                                    onDelete={handleDeleteQuestion}
+                                />
+                            </SortableItem>
+                        ))}
+                    </Sortable>
+                </div>
+            </ScrollArea>
 
             <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-50">
                 <div className="max-w-7xl mx-auto flex items-center justify-center">
-                    <div className="pointer-events-auto py-4 px-6 gap-4 flex items-center justify-center">
+                    <div className="pointer-events-auto py-4 px-6 gap-4 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-t-lg border border-b-0">
                         <Button
                             variant="outline"
                             onClick={handleAddQuestion}
@@ -242,10 +245,14 @@ export const QuestionsList = () => {
 
 export const QuestionsListSkeleton = () => {
     return (
-        <div className="w-full max-w-7xl mx-auto p-6 pb-32 space-y-2">
-            {[...Array(5)].map((_, i) => (
-                <QuestionCardSkeleton key={i} />
-            ))}
+        <div className="flex flex-col h-[calc(100vh-4rem)]">
+            <ScrollArea className="flex-1">
+                <div className="w-full max-w-7xl mx-auto p-6 pb-32 space-y-2">
+                    {[...Array(5)].map((_, i) => (
+                        <QuestionCardSkeleton key={i} />
+                    ))}
+                </div>
+            </ScrollArea>
         </div>
     );
 };

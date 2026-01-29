@@ -7,90 +7,146 @@ if (!email) {
     process.exit(1);
 }
 
+// ============================================================================
+// DEPARTMENTS - Based on typical Indian engineering institute structure
+// ============================================================================
 export const departments = [
     {
         name: "Computer Science & Engineering",
         code: "CSE",
-        website: "https://cse.university.edu",
+        website: "https://cse.iitk.ac.in",
     },
     {
         name: "Electrical Engineering",
         code: "EE",
-        website: "https://ee.university.edu",
+        website: "https://ee.iitk.ac.in",
     },
     {
         name: "Mechanical Engineering",
         code: "ME",
-        website: "https://me.university.edu",
+        website: "https://me.iitk.ac.in",
     },
     {
         name: "Civil Engineering",
         code: "CE",
-        website: "https://ce.university.edu",
+        website: "https://ce.iitk.ac.in",
     },
     {
-        name: "Electronics & Communication",
+        name: "Electronics & Communication Engineering",
         code: "ECE",
-        website: "https://ece.university.edu",
+        website: "https://ece.iitk.ac.in",
+    },
+    {
+        name: "Chemical Engineering",
+        code: "CHE",
+        website: "https://che.iitk.ac.in",
+    },
+    {
+        name: "Mathematics & Statistics",
+        code: "MTH",
+        website: "https://mth.iitk.ac.in",
+    },
+    {
+        name: "Physics",
+        code: "PHY",
+        website: "https://phy.iitk.ac.in",
     },
 ];
 
+// ============================================================================
+// HEADS OF DEPARTMENTS
+// ============================================================================
 export const hods = [
     {
-        name: "Dr. Rajesh Kumar",
-        email: withAlias(email, "h1"),
-        phoneNumber: "+919876543210",
-        website: "https://rajesh-kumar.edu",
-        employeeId: "+h1",
+        name: "Dr. Sandeep Kumar Shukla",
+        email: withAlias(email, "hod-cse"),
+        phoneNumber: "+919876543101",
+        website: "https://cse.iitk.ac.in/users/sandeeps",
+        employeeId: "HOD001",
         deptCode: "CSE",
     },
     {
-        name: "Dr. Priya Sharma",
-        email: withAlias(email, "h2"),
-        phoneNumber: "+919876543211",
-        website: "https://priya-sharma.edu",
-        employeeId: "+h2",
+        name: "Dr. Shalabh Bhatnagar",
+        email: withAlias(email, "hod-ee"),
+        phoneNumber: "+919876543102",
+        website: "https://ee.iitk.ac.in/users/shalabh",
+        employeeId: "HOD002",
         deptCode: "EE",
     },
     {
-        name: "Dr. Amit Patel",
-        email: withAlias(email, "h3"),
-        phoneNumber: "+919876543212",
-        website: "https://amit-patel.edu",
-        employeeId: "+h3",
+        name: "Dr. Avinash Kumar Agarwal",
+        email: withAlias(email, "hod-me"),
+        phoneNumber: "+919876543103",
+        website: "https://me.iitk.ac.in/users/akag",
+        employeeId: "HOD003",
         deptCode: "ME",
     },
     {
-        name: "Dr. Sunita Verma",
-        email: withAlias(email, "h4"),
-        phoneNumber: "+919876543213",
-        website: "https://sunita-verma.edu",
-        employeeId: "+h4",
+        name: "Dr. Rajesh Srivastava",
+        email: withAlias(email, "hod-ce"),
+        phoneNumber: "+919876543104",
+        website: "https://ce.iitk.ac.in/users/rajeshs",
+        employeeId: "HOD004",
         deptCode: "CE",
     },
     {
-        name: "Dr. Vikram Singh",
-        email: withAlias(email, "h5"),
-        phoneNumber: "+919876543214",
-        website: "https://vikram-singh.edu",
-        employeeId: "+h5",
+        name: "Dr. Nandini Gupta",
+        email: withAlias(email, "hod-ece"),
+        phoneNumber: "+919876543105",
+        website: "https://ece.iitk.ac.in/users/nandinig",
+        employeeId: "HOD005",
         deptCode: "ECE",
+    },
+    {
+        name: "Dr. Jayant Kumar Singh",
+        email: withAlias(email, "hod-che"),
+        phoneNumber: "+919876543106",
+        website: "https://che.iitk.ac.in/users/jksingh",
+        employeeId: "HOD006",
+        deptCode: "CHE",
+    },
+    {
+        name: "Dr. Debashish Goswami",
+        email: withAlias(email, "hod-mth"),
+        phoneNumber: "+919876543107",
+        website: "https://mth.iitk.ac.in/users/dgoswami",
+        employeeId: "HOD007",
+        deptCode: "MTH",
+    },
+    {
+        name: "Dr. Amit Dutta",
+        email: withAlias(email, "hod-phy"),
+        phoneNumber: "+919876543108",
+        website: "https://phy.iitk.ac.in/users/adutta",
+        employeeId: "HOD008",
+        deptCode: "PHY",
     },
 ];
 
+// ============================================================================
+// ACADEMIC PROGRAMS
+// ============================================================================
 export const programs = [
+    // CSE Programs
     {
-        name: "Bachelor of Technology in Computer Science",
+        name: "Bachelor of Technology in Computer Science & Engineering",
         code: "BTCS",
         degreeType: "BACHELOR" as const,
         deptCode: "CSE",
     },
     {
-        name: "Master of Technology in Computer Science",
+        name: "Master of Technology in Computer Science & Engineering",
         code: "MTCS",
         degreeType: "MASTER" as const,
         deptCode: "CSE",
     },
+    {
+        name: "Doctor of Philosophy in Computer Science",
+        code: "PHCS",
+        degreeType: "PHD" as const,
+        deptCode: "CSE",
+    },
+    // EE Programs
     {
         name: "Bachelor of Technology in Electrical Engineering",
         code: "BTEE",
@@ -103,6 +159,7 @@ export const programs = [
         degreeType: "MASTER" as const,
         deptCode: "EE",
     },
+    // ME Programs
     {
         name: "Bachelor of Technology in Mechanical Engineering",
         code: "BTME",
@@ -110,977 +167,1440 @@ export const programs = [
         deptCode: "ME",
     },
     {
-        name: "Doctor of Philosophy in Computer Science",
-        code: "PHCS",
-        degreeType: "PHD" as const,
-        deptCode: "CSE",
+        name: "Master of Technology in Mechanical Engineering",
+        code: "MTME",
+        degreeType: "MASTER" as const,
+        deptCode: "ME",
+    },
+    // CE Programs
+    {
+        name: "Bachelor of Technology in Civil Engineering",
+        code: "BTCE",
+        degreeType: "BACHELOR" as const,
+        deptCode: "CE",
+    },
+    // ECE Programs
+    {
+        name: "Bachelor of Technology in Electronics & Communication",
+        code: "BTEC",
+        degreeType: "BACHELOR" as const,
+        deptCode: "ECE",
+    },
+    // CHE Programs
+    {
+        name: "Bachelor of Technology in Chemical Engineering",
+        code: "BTCH",
+        degreeType: "BACHELOR" as const,
+        deptCode: "CHE",
     },
 ];
 
+// ============================================================================
+// ACADEMIC ADVISORS
+// ============================================================================
 export const advisors = [
+    // CSE Advisors
     {
-        name: "Dr. Anita Desai",
-        email: withAlias(email, "a1"),
-        phoneNumber: "+919876543220",
-        website: "https://anita-desai.edu",
-        employeeId: "+a1",
+        name: "Dr. Arnab Bhattacharya",
+        email: withAlias(email, "adv-cse1"),
+        phoneNumber: "+919876543201",
+        website: "https://cse.iitk.ac.in/users/arnabb",
+        employeeId: "ADV001",
         deptCode: "CSE",
     },
     {
-        name: "Dr. Rahul Mehta",
-        email: withAlias(email, "a2"),
-        phoneNumber: "+919876543221",
-        website: "https://rahul-mehta.edu",
-        employeeId: "+a2",
+        name: "Dr. Purushottam Kar",
+        email: withAlias(email, "adv-cse2"),
+        phoneNumber: "+919876543202",
+        website: "https://cse.iitk.ac.in/users/purushot",
+        employeeId: "ADV002",
         deptCode: "CSE",
     },
     {
-        name: "Dr. Kavita Reddy",
-        email: withAlias(email, "a3"),
-        phoneNumber: "+919876543222",
-        website: "https://kavita-reddy.edu",
-        employeeId: "+a3",
+        name: "Dr. Nitin Saxena",
+        email: withAlias(email, "adv-cse3"),
+        phoneNumber: "+919876543203",
+        website: "https://cse.iitk.ac.in/users/nitin",
+        employeeId: "ADV003",
+        deptCode: "CSE",
+    },
+    // EE Advisors
+    {
+        name: "Dr. Ketan Rajawat",
+        email: withAlias(email, "adv-ee1"),
+        phoneNumber: "+919876543204",
+        website: "https://ee.iitk.ac.in/users/ketan",
+        employeeId: "ADV004",
         deptCode: "EE",
     },
     {
-        name: "Dr. Sanjay Gupta",
-        email: withAlias(email, "a4"),
-        phoneNumber: "+919876543223",
-        website: "https://sanjay-gupta.edu",
-        employeeId: "+a4",
+        name: "Dr. Aditya Jagannatham",
+        email: withAlias(email, "adv-ee2"),
+        phoneNumber: "+919876543205",
+        website: "https://ee.iitk.ac.in/users/adityaj",
+        employeeId: "ADV005",
         deptCode: "EE",
     },
+    // ME Advisors
     {
-        name: "Dr. Neha Joshi",
-        email: withAlias(email, "a5"),
-        phoneNumber: "+919876543224",
-        website: "https://neha-joshi.edu",
-        employeeId: "+a5",
+        name: "Dr. Bishakh Bhattacharya",
+        email: withAlias(email, "adv-me1"),
+        phoneNumber: "+919876543206",
+        website: "https://me.iitk.ac.in/users/bishakh",
+        employeeId: "ADV006",
         deptCode: "ME",
     },
     {
-        name: "Dr. Arun Kumar",
-        email: withAlias(email, "a6"),
-        phoneNumber: "+919876543225",
-        website: "https://arun-kumar.edu",
-        employeeId: "+a6",
+        name: "Dr. Sameer Khandekar",
+        email: withAlias(email, "adv-me2"),
+        phoneNumber: "+919876543207",
+        website: "https://me.iitk.ac.in/users/samkhan",
+        employeeId: "ADV007",
+        deptCode: "ME",
+    },
+    // CE Advisors
+    {
+        name: "Dr. Vinod Tare",
+        email: withAlias(email, "adv-ce1"),
+        phoneNumber: "+919876543208",
+        website: "https://ce.iitk.ac.in/users/vinod",
+        employeeId: "ADV008",
         deptCode: "CE",
     },
+    // ECE Advisors
     {
-        name: "Dr. Pooja Iyer",
-        email: withAlias(email, "a7"),
-        phoneNumber: "+919876543226",
-        website: "https://pooja-iyer.edu",
-        employeeId: "+a7",
+        name: "Dr. Utpal Das",
+        email: withAlias(email, "adv-ece1"),
+        phoneNumber: "+919876543209",
+        website: "https://ece.iitk.ac.in/users/utpald",
+        employeeId: "ADV009",
         deptCode: "ECE",
+    },
+    // CHE Advisors
+    {
+        name: "Dr. Naveen Tiwari",
+        email: withAlias(email, "adv-che1"),
+        phoneNumber: "+919876543210",
+        website: "https://che.iitk.ac.in/users/naveen",
+        employeeId: "ADV010",
+        deptCode: "CHE",
     },
 ];
 
+// ============================================================================
+// INSTRUCTORS
+// ============================================================================
 export const instructors = [
+    // CSE Instructors
     {
-        name: "Prof. Deepak Chopra",
-        email: withAlias(email, "i1"),
-        phoneNumber: "+919876543230",
-        website: "https://deepak-chopra.edu",
-        employeeId: "+i1",
-        deptCode: "CSE",
-        designation: "Associate Professor",
-    },
-    {
-        name: "Prof. Meera Nair",
-        email: withAlias(email, "i2"),
-        phoneNumber: "+919876543231",
-        website: "https://meera-nair.edu",
-        employeeId: "+i2",
-        deptCode: "CSE",
-        designation: "Assistant Professor",
-    },
-    {
-        name: "Prof. Kiran Rao",
-        email: withAlias(email, "i3"),
-        phoneNumber: "+919876543232",
-        website: "https://kiran-rao.edu",
-        employeeId: "+i3",
+        name: "Prof. Manindra Agrawal",
+        email: withAlias(email, "inst-cse1"),
+        phoneNumber: "+919876543301",
+        website: "https://cse.iitk.ac.in/users/manindra",
+        employeeId: "INS001",
         deptCode: "CSE",
         designation: "Professor",
     },
     {
-        name: "Prof. Suresh Pillai",
-        email: withAlias(email, "i4"),
-        phoneNumber: "+919876543233",
-        website: "https://suresh-pillai.edu",
-        employeeId: "+i4",
+        name: "Prof. Sanjeev Saxena",
+        email: withAlias(email, "inst-cse2"),
+        phoneNumber: "+919876543302",
+        website: "https://cse.iitk.ac.in/users/ssax",
+        employeeId: "INS002",
+        deptCode: "CSE",
+        designation: "Professor",
+    },
+    {
+        name: "Dr. Sumit Ganguly",
+        email: withAlias(email, "inst-cse3"),
+        phoneNumber: "+919876543303",
+        website: "https://cse.iitk.ac.in/users/sganguly",
+        employeeId: "INS003",
+        deptCode: "CSE",
+        designation: "Associate Professor",
+    },
+    {
+        name: "Dr. Ashish Choudhury",
+        email: withAlias(email, "inst-cse4"),
+        phoneNumber: "+919876543304",
+        website: "https://cse.iitk.ac.in/users/ashishc",
+        employeeId: "INS004",
+        deptCode: "CSE",
+        designation: "Assistant Professor",
+    },
+    {
+        name: "Dr. Satyadev Nandakumar",
+        email: withAlias(email, "inst-cse5"),
+        phoneNumber: "+919876543305",
+        website: "https://cse.iitk.ac.in/users/satyadev",
+        employeeId: "INS005",
+        deptCode: "CSE",
+        designation: "Assistant Professor",
+    },
+    // EE Instructors
+    {
+        name: "Prof. K. S. Venkatesh",
+        email: withAlias(email, "inst-ee1"),
+        phoneNumber: "+919876543306",
+        website: "https://ee.iitk.ac.in/users/venkats",
+        employeeId: "INS006",
+        deptCode: "EE",
+        designation: "Professor",
+    },
+    {
+        name: "Dr. Vipul Singh",
+        email: withAlias(email, "inst-ee2"),
+        phoneNumber: "+919876543307",
+        website: "https://ee.iitk.ac.in/users/vipul",
+        employeeId: "INS007",
         deptCode: "EE",
         designation: "Associate Professor",
     },
     {
-        name: "Prof. Lakshmi Menon",
-        email: withAlias(email, "i5"),
-        phoneNumber: "+919876543234",
-        website: "https://lakshmi-menon.edu",
-        employeeId: "+i5",
+        name: "Dr. Adrish Banerjee",
+        email: withAlias(email, "inst-ee3"),
+        phoneNumber: "+919876543308",
+        website: "https://ee.iitk.ac.in/users/adrish",
+        employeeId: "INS008",
         deptCode: "EE",
         designation: "Assistant Professor",
     },
+    // ME Instructors
     {
-        name: "Prof. Ravi Shankar",
-        email: withAlias(email, "i6"),
-        phoneNumber: "+919876543235",
-        website: "https://ravi-shankar.edu",
-        employeeId: "+i6",
+        name: "Prof. Nachiketa Tiwari",
+        email: withAlias(email, "inst-me1"),
+        phoneNumber: "+919876543309",
+        website: "https://me.iitk.ac.in/users/ntiwari",
+        employeeId: "INS009",
         deptCode: "ME",
         designation: "Professor",
     },
     {
-        name: "Prof. Gita Krishnan",
-        email: withAlias(email, "i7"),
-        phoneNumber: "+919876543236",
-        website: "https://gita-krishnan.edu",
-        employeeId: "+i7",
+        name: "Dr. Sawan Suman Sinha",
+        email: withAlias(email, "inst-me2"),
+        phoneNumber: "+919876543310",
+        website: "https://me.iitk.ac.in/users/sawans",
+        employeeId: "INS010",
         deptCode: "ME",
-        designation: "Assistant Professor",
+        designation: "Associate Professor",
     },
+    // CE Instructors
     {
-        name: "Prof. Manoj Tiwari",
-        email: withAlias(email, "i8"),
-        phoneNumber: "+919876543237",
-        website: "https://manoj-tiwari.edu",
-        employeeId: "+i8",
+        name: "Prof. Sudhir Misra",
+        email: withAlias(email, "inst-ce1"),
+        phoneNumber: "+919876543311",
+        website: "https://ce.iitk.ac.in/users/sudhir",
+        employeeId: "INS011",
         deptCode: "CE",
+        designation: "Professor",
+    },
+    // ECE Instructors
+    {
+        name: "Dr. Abhishek Srivastava",
+        email: withAlias(email, "inst-ece1"),
+        phoneNumber: "+919876543312",
+        website: "https://ece.iitk.ac.in/users/abhis",
+        employeeId: "INS012",
+        deptCode: "ECE",
         designation: "Associate Professor",
     },
+    // MTH Instructors (teach service courses to all departments)
     {
-        name: "Prof. Shweta Agarwal",
-        email: withAlias(email, "i9"),
-        phoneNumber: "+919876543238",
-        website: "https://shweta-agarwal.edu",
-        employeeId: "+i9",
-        deptCode: "ECE",
+        name: "Prof. Debasis Kundu",
+        email: withAlias(email, "inst-mth1"),
+        phoneNumber: "+919876543313",
+        website: "https://mth.iitk.ac.in/users/kundu",
+        employeeId: "INS013",
+        deptCode: "MTH",
         designation: "Professor",
     },
     {
-        name: "Prof. Vijay Malhotra",
-        email: withAlias(email, "i10"),
-        phoneNumber: "+919876543239",
-        website: "https://vijay-malhotra.edu",
-        employeeId: "+i10",
-        deptCode: "ECE",
-        designation: "Assistant Professor",
+        name: "Dr. Amit Mitra",
+        email: withAlias(email, "inst-mth2"),
+        phoneNumber: "+919876543314",
+        website: "https://mth.iitk.ac.in/users/amitra",
+        employeeId: "INS014",
+        deptCode: "MTH",
+        designation: "Associate Professor",
+    },
+    // PHY Instructors (teach service courses)
+    {
+        name: "Prof. Tapan Mishra",
+        email: withAlias(email, "inst-phy1"),
+        phoneNumber: "+919876543315",
+        website: "https://phy.iitk.ac.in/users/tapan",
+        employeeId: "INS015",
+        deptCode: "PHY",
+        designation: "Professor",
     },
 ];
 
+// ============================================================================
+// STUDENTS - Realistic Indian names with proper roll number format
+// ============================================================================
 export const students = [
+    // 2021 Batch - CSE (4th year)
     {
-        name: "Arjun Patel",
-        email: withAlias(email, "s1"),
-        rollNo: "2021CSE001",
+        name: "Aarav Sharma",
+        email: withAlias(email, "s21cs01"),
+        rollNo: "210101",
         programCode: "BTCS",
         batchYear: 2021,
-        advisorEmployeeId: "+a1",
+        advisorEmployeeId: "ADV001",
     },
     {
-        name: "Priya Singh",
-        email: withAlias(email, "s2"),
-        rollNo: "2021CSE002",
+        name: "Diya Patel",
+        email: withAlias(email, "s21cs02"),
+        rollNo: "210102",
         programCode: "BTCS",
         batchYear: 2021,
-        advisorEmployeeId: "+a1",
+        advisorEmployeeId: "ADV001",
     },
     {
-        name: "Rohan Kumar",
-        email: withAlias(email, "s3"),
-        rollNo: "2021CSE003",
+        name: "Vivaan Gupta",
+        email: withAlias(email, "s21cs03"),
+        rollNo: "210103",
         programCode: "BTCS",
         batchYear: 2021,
-        advisorEmployeeId: "+a2",
+        advisorEmployeeId: "ADV002",
     },
     {
-        name: "Sneha Sharma",
-        email: withAlias(email, "s4"),
-        rollNo: "2021CSE004",
+        name: "Ananya Singh",
+        email: withAlias(email, "s21cs04"),
+        rollNo: "210104",
         programCode: "BTCS",
         batchYear: 2021,
-        advisorEmployeeId: "+a2",
+        advisorEmployeeId: "ADV002",
     },
     {
-        name: "Amit Verma",
-        email: withAlias(email, "s5"),
-        rollNo: "2022CSE001",
+        name: "Aditya Reddy",
+        email: withAlias(email, "s21cs05"),
+        rollNo: "210105",
+        programCode: "BTCS",
+        batchYear: 2021,
+        advisorEmployeeId: "ADV003",
+    },
+    {
+        name: "Ishita Joshi",
+        email: withAlias(email, "s21cs06"),
+        rollNo: "210106",
+        programCode: "BTCS",
+        batchYear: 2021,
+        advisorEmployeeId: "ADV003",
+    },
+    // 2022 Batch - CSE (3rd year)
+    {
+        name: "Arjun Verma",
+        email: withAlias(email, "s22cs01"),
+        rollNo: "220101",
         programCode: "BTCS",
         batchYear: 2022,
-        advisorEmployeeId: "+a1",
+        advisorEmployeeId: "ADV001",
     },
     {
-        name: "Neha Reddy",
-        email: withAlias(email, "s6"),
-        rollNo: "2022CSE002",
+        name: "Kavya Nair",
+        email: withAlias(email, "s22cs02"),
+        rollNo: "220102",
         programCode: "BTCS",
         batchYear: 2022,
-        advisorEmployeeId: "+a2",
+        advisorEmployeeId: "ADV001",
     },
     {
-        name: "Karan Mehta",
-        email: withAlias(email, "s7"),
-        rollNo: "2023CSE001",
+        name: "Rohan Iyer",
+        email: withAlias(email, "s22cs03"),
+        rollNo: "220103",
+        programCode: "BTCS",
+        batchYear: 2022,
+        advisorEmployeeId: "ADV002",
+    },
+    {
+        name: "Meera Krishnan",
+        email: withAlias(email, "s22cs04"),
+        rollNo: "220104",
+        programCode: "BTCS",
+        batchYear: 2022,
+        advisorEmployeeId: "ADV002",
+    },
+    {
+        name: "Siddharth Menon",
+        email: withAlias(email, "s22cs05"),
+        rollNo: "220105",
+        programCode: "BTCS",
+        batchYear: 2022,
+        advisorEmployeeId: "ADV003",
+    },
+    {
+        name: "Priya Agarwal",
+        email: withAlias(email, "s22cs06"),
+        rollNo: "220106",
+        programCode: "BTCS",
+        batchYear: 2022,
+        advisorEmployeeId: "ADV003",
+    },
+    // 2023 Batch - CSE (2nd year)
+    {
+        name: "Kabir Malhotra",
+        email: withAlias(email, "s23cs01"),
+        rollNo: "230101",
         programCode: "BTCS",
         batchYear: 2023,
-        advisorEmployeeId: "+a1",
+        advisorEmployeeId: "ADV001",
     },
     {
-        name: "Divya Gupta",
-        email: withAlias(email, "s8"),
-        rollNo: "2023CSE002",
+        name: "Aisha Khan",
+        email: withAlias(email, "s23cs02"),
+        rollNo: "230102",
         programCode: "BTCS",
         batchYear: 2023,
-        advisorEmployeeId: "+a2",
+        advisorEmployeeId: "ADV001",
     },
     {
-        name: "Rahul Joshi",
-        email: withAlias(email, "s9"),
-        rollNo: "2021EE001",
+        name: "Vihaan Chopra",
+        email: withAlias(email, "s23cs03"),
+        rollNo: "230103",
+        programCode: "BTCS",
+        batchYear: 2023,
+        advisorEmployeeId: "ADV002",
+    },
+    {
+        name: "Riya Banerjee",
+        email: withAlias(email, "s23cs04"),
+        rollNo: "230104",
+        programCode: "BTCS",
+        batchYear: 2023,
+        advisorEmployeeId: "ADV002",
+    },
+    // 2024 Batch - CSE (1st year)
+    {
+        name: "Ayaan Chauhan",
+        email: withAlias(email, "s24cs01"),
+        rollNo: "240101",
+        programCode: "BTCS",
+        batchYear: 2024,
+        advisorEmployeeId: "ADV001",
+    },
+    {
+        name: "Saanvi Kapoor",
+        email: withAlias(email, "s24cs02"),
+        rollNo: "240102",
+        programCode: "BTCS",
+        batchYear: 2024,
+        advisorEmployeeId: "ADV002",
+    },
+    {
+        name: "Reyansh Deshmukh",
+        email: withAlias(email, "s24cs03"),
+        rollNo: "240103",
+        programCode: "BTCS",
+        batchYear: 2024,
+        advisorEmployeeId: "ADV003",
+    },
+    {
+        name: "Kiara Rao",
+        email: withAlias(email, "s24cs04"),
+        rollNo: "240104",
+        programCode: "BTCS",
+        batchYear: 2024,
+        advisorEmployeeId: "ADV003",
+    },
+    // 2021 Batch - EE (4th year)
+    {
+        name: "Arnav Saxena",
+        email: withAlias(email, "s21ee01"),
+        rollNo: "210201",
         programCode: "BTEE",
         batchYear: 2021,
-        advisorEmployeeId: "+a3",
+        advisorEmployeeId: "ADV004",
     },
     {
-        name: "Kavya Iyer",
-        email: withAlias(email, "s10"),
-        rollNo: "2021EE002",
+        name: "Tanvi Mishra",
+        email: withAlias(email, "s21ee02"),
+        rollNo: "210202",
         programCode: "BTEE",
         batchYear: 2021,
-        advisorEmployeeId: "+a4",
+        advisorEmployeeId: "ADV004",
     },
     {
-        name: "Siddharth Nair",
-        email: withAlias(email, "s11"),
-        rollNo: "2022EE001",
+        name: "Dhruv Sinha",
+        email: withAlias(email, "s21ee03"),
+        rollNo: "210203",
+        programCode: "BTEE",
+        batchYear: 2021,
+        advisorEmployeeId: "ADV005",
+    },
+    {
+        name: "Nisha Pandey",
+        email: withAlias(email, "s21ee04"),
+        rollNo: "210204",
+        programCode: "BTEE",
+        batchYear: 2021,
+        advisorEmployeeId: "ADV005",
+    },
+    // 2022 Batch - EE (3rd year)
+    {
+        name: "Parth Srivastava",
+        email: withAlias(email, "s22ee01"),
+        rollNo: "220201",
         programCode: "BTEE",
         batchYear: 2022,
-        advisorEmployeeId: "+a3",
+        advisorEmployeeId: "ADV004",
     },
     {
-        name: "Anjali Rao",
-        email: withAlias(email, "s12"),
-        rollNo: "2022EE002",
+        name: "Simran Kaur",
+        email: withAlias(email, "s22ee02"),
+        rollNo: "220202",
         programCode: "BTEE",
         batchYear: 2022,
-        advisorEmployeeId: "+a4",
+        advisorEmployeeId: "ADV005",
     },
+    // 2023 Batch - EE (2nd year)
     {
-        name: "Varun Pillai",
-        email: withAlias(email, "s13"),
-        rollNo: "2023EE001",
+        name: "Yash Tiwari",
+        email: withAlias(email, "s23ee01"),
+        rollNo: "230201",
         programCode: "BTEE",
         batchYear: 2023,
-        advisorEmployeeId: "+a3",
+        advisorEmployeeId: "ADV004",
     },
     {
-        name: "Riya Menon",
-        email: withAlias(email, "s14"),
-        rollNo: "2023EE002",
+        name: "Shreya Dubey",
+        email: withAlias(email, "s23ee02"),
+        rollNo: "230202",
         programCode: "BTEE",
         batchYear: 2023,
-        advisorEmployeeId: "+a4",
+        advisorEmployeeId: "ADV005",
+    },
+    // 2024 Batch - EE (1st year)
+    {
+        name: "Lakshay Kumar",
+        email: withAlias(email, "s24ee01"),
+        rollNo: "240201",
+        programCode: "BTEE",
+        batchYear: 2024,
+        advisorEmployeeId: "ADV004",
     },
     {
-        name: "Aditya Kumar",
-        email: withAlias(email, "s15"),
-        rollNo: "2021ME001",
+        name: "Aditi Sharma",
+        email: withAlias(email, "s24ee02"),
+        rollNo: "240202",
+        programCode: "BTEE",
+        batchYear: 2024,
+        advisorEmployeeId: "ADV005",
+    },
+    // 2021 Batch - ME (4th year)
+    {
+        name: "Kartik Bhatt",
+        email: withAlias(email, "s21me01"),
+        rollNo: "210301",
         programCode: "BTME",
         batchYear: 2021,
-        advisorEmployeeId: "+a5",
+        advisorEmployeeId: "ADV006",
     },
     {
-        name: "Simran Singh",
-        email: withAlias(email, "s16"),
-        rollNo: "2021ME002",
+        name: "Nandini Yadav",
+        email: withAlias(email, "s21me02"),
+        rollNo: "210302",
         programCode: "BTME",
         batchYear: 2021,
-        advisorEmployeeId: "+a5",
+        advisorEmployeeId: "ADV007",
     },
+    // 2022 Batch - ME (3rd year)
     {
-        name: "Akash Sharma",
-        email: withAlias(email, "s17"),
-        rollNo: "2022ME001",
+        name: "Shaurya Mehta",
+        email: withAlias(email, "s22me01"),
+        rollNo: "220301",
         programCode: "BTME",
         batchYear: 2022,
-        advisorEmployeeId: "+a5",
+        advisorEmployeeId: "ADV006",
     },
     {
-        name: "Pooja Patel",
-        email: withAlias(email, "s18"),
-        rollNo: "2022ME002",
+        name: "Aarna Goyal",
+        email: withAlias(email, "s22me02"),
+        rollNo: "220302",
         programCode: "BTME",
         batchYear: 2022,
-        advisorEmployeeId: "+a5",
+        advisorEmployeeId: "ADV007",
     },
+    // 2023 Batch - ME (2nd year)
     {
-        name: "Nikhil Verma",
-        email: withAlias(email, "s19"),
-        rollNo: "2023ME001",
+        name: "Om Prakash Singh",
+        email: withAlias(email, "s23me01"),
+        rollNo: "230301",
         programCode: "BTME",
         batchYear: 2023,
-        advisorEmployeeId: "+a5",
+        advisorEmployeeId: "ADV006",
     },
     {
-        name: "Ishita Reddy",
-        email: withAlias(email, "s20"),
-        rollNo: "2023ME002",
+        name: "Navya Rastogi",
+        email: withAlias(email, "s23me02"),
+        rollNo: "230302",
         programCode: "BTME",
         batchYear: 2023,
-        advisorEmployeeId: "+a5",
+        advisorEmployeeId: "ADV007",
     },
+    // 2024 Batch - ME (1st year)
     {
-        name: "Manish Gupta",
-        email: withAlias(email, "s21"),
-        rollNo: "2022CSE003",
-        programCode: "BTCS",
-        batchYear: 2022,
-        advisorEmployeeId: "+a1",
-    },
-    {
-        name: "Shruti Joshi",
-        email: withAlias(email, "s22"),
-        rollNo: "2022CSE004",
-        programCode: "BTCS",
-        batchYear: 2022,
-        advisorEmployeeId: "+a2",
-    },
-    {
-        name: "Harsh Iyer",
-        email: withAlias(email, "s23"),
-        rollNo: "2023CSE003",
-        programCode: "BTCS",
-        batchYear: 2023,
-        advisorEmployeeId: "+a1",
-    },
-    {
-        name: "Tanvi Nair",
-        email: withAlias(email, "s24"),
-        rollNo: "2023CSE004",
-        programCode: "BTCS",
-        batchYear: 2023,
-        advisorEmployeeId: "+a2",
-    },
-    {
-        name: "Vishal Rao",
-        email: withAlias(email, "s25"),
-        rollNo: "2021CSE005",
-        programCode: "BTCS",
-        batchYear: 2021,
-        advisorEmployeeId: "+a1",
-    },
-    {
-        name: "Megha Pillai",
-        email: withAlias(email, "s26"),
-        rollNo: "2021CSE006",
-        programCode: "BTCS",
-        batchYear: 2021,
-        advisorEmployeeId: "+a2",
-    },
-    {
-        name: "Shubham Menon",
-        email: withAlias(email, "s27"),
-        rollNo: "2022EE003",
-        programCode: "BTEE",
-        batchYear: 2022,
-        advisorEmployeeId: "+a3",
-    },
-    {
-        name: "Ananya Kumar",
-        email: withAlias(email, "s28"),
-        rollNo: "2022EE004",
-        programCode: "BTEE",
-        batchYear: 2022,
-        advisorEmployeeId: "+a4",
-    },
-    {
-        name: "Yash Singh",
-        email: withAlias(email, "s29"),
-        rollNo: "2023ME003",
+        name: "Rudra Jain",
+        email: withAlias(email, "s24me01"),
+        rollNo: "240301",
         programCode: "BTME",
-        batchYear: 2023,
-        advisorEmployeeId: "+a5",
+        batchYear: 2024,
+        advisorEmployeeId: "ADV006",
     },
     {
-        name: "Kriti Sharma",
-        email: withAlias(email, "s30"),
-        rollNo: "2023ME004",
+        name: "Myra Agnihotri",
+        email: withAlias(email, "s24me02"),
+        rollNo: "240302",
         programCode: "BTME",
+        batchYear: 2024,
+        advisorEmployeeId: "ADV007",
+    },
+    // 2022 Batch - CE
+    {
+        name: "Harsh Vardhan",
+        email: withAlias(email, "s22ce01"),
+        rollNo: "220401",
+        programCode: "BTCE",
+        batchYear: 2022,
+        advisorEmployeeId: "ADV008",
+    },
+    {
+        name: "Tanya Kulkarni",
+        email: withAlias(email, "s22ce02"),
+        rollNo: "220402",
+        programCode: "BTCE",
+        batchYear: 2022,
+        advisorEmployeeId: "ADV008",
+    },
+    // 2023 Batch - ECE
+    {
+        name: "Atharv Khatri",
+        email: withAlias(email, "s23ec01"),
+        rollNo: "230501",
+        programCode: "BTEC",
         batchYear: 2023,
-        advisorEmployeeId: "+a5",
+        advisorEmployeeId: "ADV009",
+    },
+    {
+        name: "Zara Hussain",
+        email: withAlias(email, "s23ec02"),
+        rollNo: "230502",
+        programCode: "BTEC",
+        batchYear: 2023,
+        advisorEmployeeId: "ADV009",
+    },
+    // 2023 Batch - CHE
+    {
+        name: "Advait Venkatesh",
+        email: withAlias(email, "s23ch01"),
+        rollNo: "230601",
+        programCode: "BTCH",
+        batchYear: 2023,
+        advisorEmployeeId: "ADV010",
+    },
+    {
+        name: "Ira Mahajan",
+        email: withAlias(email, "s23ch02"),
+        rollNo: "230602",
+        programCode: "BTCH",
+        batchYear: 2023,
+        advisorEmployeeId: "ADV010",
     },
 ];
 
+// ============================================================================
+// COURSES - Realistic engineering curriculum
+// ============================================================================
 export const courses = [
+    // First Year Common Courses
     {
-        code: "CS101",
-        title: "Introduction to Programming",
+        code: "ESC101",
+        title: "Fundamentals of Computing",
         lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 2,
-        selfStudyHours: 4,
+        tutorialHours: 0,
+        practicalHours: 3,
+        selfStudyHours: 3,
         credits: 4,
         deptCode: "CSE",
         description: createCourseDescription(
-            "This course provides a comprehensive introduction to the fundamental concepts of computer programming. Students will learn to design, implement, and test simple programs using a high-level language, focusing on logic building and syntax mastery.",
+            "Introduction to computing concepts and programming fundamentals. Students learn problem-solving using Python/C, covering variables, control flow, functions, arrays, and basic file handling.",
             [
-                "Understand the basics of algorithmic thinking and problem-solving.",
-                "Learn the syntax and semantics of a standard programming language.",
-                "Master control structures, loops, and functional programming concepts.",
+                "Understand computational thinking and algorithmic problem solving",
+                "Learn Python/C syntax and programming constructs",
+                "Develop skills in debugging and testing programs",
             ],
             [
-                "Write, compile, and debug efficient code for basic computational problems.",
-                "Demonstrate an understanding of structured programming principles.",
-                "Develop simple applications involving file I/O and data manipulation.",
+                "Write programs to solve mathematical and engineering problems",
+                "Implement algorithms using appropriate data structures",
+                "Design modular programs with proper documentation",
             ]
         ),
     },
+    {
+        code: "MTH101",
+        title: "Mathematics I",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 0,
+        selfStudyHours: 5,
+        credits: 4,
+        deptCode: "MTH",
+        description: createCourseDescription(
+            "Single and multivariable calculus covering limits, continuity, differentiation, integration, sequences, series, and their applications to engineering problems.",
+            [
+                "Master techniques of differentiation and integration",
+                "Understand convergence of sequences and series",
+                "Apply calculus to optimization and rate problems",
+            ],
+            [
+                "Solve complex integration problems using various techniques",
+                "Analyze functions using Taylor and Maclaurin series",
+                "Apply calculus concepts to engineering applications",
+            ]
+        ),
+    },
+    {
+        code: "MTH102",
+        title: "Mathematics II",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 0,
+        selfStudyHours: 5,
+        credits: 4,
+        deptCode: "MTH",
+        description: createCourseDescription(
+            "Linear algebra and ordinary differential equations. Topics include vector spaces, matrices, eigenvalues, first and second order ODEs, Laplace transforms, and applications.",
+            [
+                "Understand vector spaces and linear transformations",
+                "Solve systems of linear equations using matrix methods",
+                "Apply ODE techniques to model physical systems",
+            ],
+            [
+                "Compute eigenvalues and eigenvectors for system analysis",
+                "Solve initial value problems using analytical methods",
+                "Model engineering systems using differential equations",
+            ]
+        ),
+    },
+    {
+        code: "PHY101",
+        title: "Physics I",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 2,
+        selfStudyHours: 3,
+        credits: 4,
+        deptCode: "PHY",
+        description: createCourseDescription(
+            "Classical mechanics, oscillations, waves, and thermodynamics. Emphasis on problem-solving and physical intuition development.",
+            [
+                "Understand Newton's laws and their applications",
+                "Analyze oscillatory and wave phenomena",
+                "Apply thermodynamic principles to physical systems",
+            ],
+            [
+                "Solve mechanics problems using energy and momentum methods",
+                "Analyze wave propagation and interference patterns",
+                "Calculate thermodynamic quantities for ideal systems",
+            ]
+        ),
+    },
+    {
+        code: "PHY102",
+        title: "Physics II",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 2,
+        selfStudyHours: 3,
+        credits: 4,
+        deptCode: "PHY",
+        description: createCourseDescription(
+            "Electromagnetism, optics, and introduction to modern physics. Covers Maxwell's equations, electromagnetic waves, interference, diffraction, and quantum concepts.",
+            [
+                "Understand electromagnetic theory and Maxwell's equations",
+                "Analyze optical phenomena using wave theory",
+                "Introduction to quantum mechanics and atomic physics",
+            ],
+            [
+                "Solve boundary value problems in electrostatics",
+                "Design and analyze optical systems",
+                "Apply quantum concepts to atomic and molecular systems",
+            ]
+        ),
+    },
+
+    // CSE Core Courses
     {
         code: "CS201",
         title: "Data Structures",
         lectureHours: 3,
         tutorialHours: 1,
         practicalHours: 2,
-        selfStudyHours: 4,
+        selfStudyHours: 3,
         credits: 4,
         deptCode: "CSE",
         description: createCourseDescription(
-            "This course explores the organization and management of data to increase the efficiency of algorithms. It covers linear and non-linear data structures, memory management, and complexity analysis.",
+            "Fundamental data structures and their implementations. Covers arrays, linked lists, stacks, queues, trees, heaps, graphs, and hash tables with complexity analysis.",
             [
-                "Understand the abstract data types (ADTs) such as stacks, queues, and lists.",
-                "Analyze the time and space complexity of different data structures.",
-                "Learn the implementation of trees, graphs, and hash tables.",
+                "Understand abstract data types and their implementations",
+                "Analyze time and space complexity of algorithms",
+                "Choose appropriate data structures for given problems",
             ],
             [
-                "Select the appropriate data structure for a given problem scenario.",
-                "Implement complex data structures from scratch.",
-                "Optimize software performance by managing memory and processing time effectively.",
+                "Implement and manipulate complex data structures",
+                "Design efficient algorithms using proper data organization",
+                "Apply data structures to solve real-world problems",
             ]
         ),
     },
     {
-        code: "CS301",
-        title: "Algorithms",
+        code: "CS220",
+        title: "Introduction to Algorithms",
         lectureHours: 3,
         tutorialHours: 1,
         practicalHours: 0,
-        selfStudyHours: 6,
+        selfStudyHours: 5,
         credits: 3,
         deptCode: "CSE",
         description: createCourseDescription(
-            "A deep dive into the design and analysis of algorithms. This course covers divide-and-conquer, dynamic programming, greedy algorithms, and graph algorithms, preparing students for complex computational problem solving.",
+            "Design and analysis of algorithms. Covers sorting, searching, divide-and-conquer, dynamic programming, greedy algorithms, graph algorithms, and NP-completeness.",
             [
-                "Master asymptotic notation and algorithm efficiency analysis.",
-                "Understand major algorithmic paradigms like Greedy and Dynamic Programming.",
-                "Explore advanced graph traversals and shortest-path algorithms.",
+                "Master algorithm design paradigms",
+                "Prove correctness and analyze complexity of algorithms",
+                "Understand computational complexity theory",
             ],
             [
-                "Analyze the correctness and performance of algorithms.",
-                "Design efficient solutions for NP-hard problems using approximation techniques.",
-                "Apply algorithmic strategies to real-world software engineering challenges.",
+                "Design efficient algorithms for optimization problems",
+                "Analyze algorithms using amortized and probabilistic methods",
+                "Recognize and handle NP-hard problems",
             ]
         ),
     },
     {
-        code: "CS401",
-        title: "Database Systems",
+        code: "CS330",
+        title: "Operating Systems",
         lectureHours: 3,
         tutorialHours: 0,
         practicalHours: 2,
-        selfStudyHours: 5,
-        credits: 3.5,
-        deptCode: "CSE",
-        description: createCourseDescription(
-            "This course introduces the concepts of database design and management. It covers the relational model, SQL, normalization, transaction management, and concurrency control in modern DBMS.",
-            [
-                "Understand the architecture of Database Management Systems (DBMS).",
-                "Master SQL for data definition and manipulation.",
-                "Learn the principles of database normalization and schema design.",
-            ],
-            [
-                "Design robust and scalable relational databases.",
-                "Execute complex queries to retrieve and analyze data efficiently.",
-                "Ensure data integrity and handle concurrent transactions effectively.",
-            ]
-        ),
-    },
-    {
-        code: "CS501",
-        title: "Machine Learning",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 2,
         selfStudyHours: 4,
         credits: 4,
         deptCode: "CSE",
         description: createCourseDescription(
-            "An introduction to the field of Machine Learning, covering supervised and unsupervised learning techniques. Students will explore regression, classification, clustering, and neural networks.",
+            "Principles of operating system design and implementation. Covers processes, threads, scheduling, synchronization, memory management, file systems, and virtualization.",
             [
-                "Understand the mathematical foundations of machine learning algorithms.",
-                "Differentiate between supervised, unsupervised, and reinforcement learning.",
-                "Learn to evaluate model performance using metrics like accuracy and precision.",
+                "Understand OS abstractions for hardware resources",
+                "Analyze concurrency and synchronization mechanisms",
+                "Implement system-level programs using OS interfaces",
             ],
             [
-                "Build and train machine learning models using modern libraries.",
-                "Apply ML techniques to solve problems in vision, text, and prediction.",
-                "Critically analyze the ethical implications of AI and automated decision making.",
+                "Design and implement process schedulers",
+                "Develop concurrent programs avoiding race conditions",
+                "Understand virtual memory and file system internals",
             ]
         ),
     },
     {
-        code: "EE101",
-        title: "Basic Electrical Engineering",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 2,
-        selfStudyHours: 4,
-        credits: 4,
-        deptCode: "EE",
-        description: createCourseDescription(
-            "Foundational course covering the principles of electrical circuits, electromagnetic fields, and electrical machines. It serves as a prerequisite for advanced studies in electrical and electronics engineering.",
-            [
-                "Understand Kirchhoff's laws and circuit analysis theorems.",
-                "Learn the behavior of R, L, and C components in AC/DC circuits.",
-                "Explore the working principles of transformers and motors.",
-            ],
-            [
-                "Analyze simple DC and AC electrical circuits.",
-                "Measure electrical quantities using standard laboratory equipment.",
-                "Demonstrate knowledge of electrical safety and power generation basics.",
-            ]
-        ),
-    },
-    {
-        code: "EE201",
-        title: "Circuit Analysis",
+        code: "CS340",
+        title: "Theory of Computation",
         lectureHours: 3,
         tutorialHours: 1,
         practicalHours: 0,
-        selfStudyHours: 6,
+        selfStudyHours: 5,
         credits: 3,
-        deptCode: "EE",
+        deptCode: "CSE",
         description: createCourseDescription(
-            "This course deals with advanced techniques for analyzing complex electrical networks. Topics include transient analysis, two-port networks, and Laplace transform applications in circuit theory.",
+            "Formal languages, automata theory, and computability. Covers finite automata, regular expressions, context-free grammars, pushdown automata, Turing machines, and undecidability.",
             [
-                "Master network theorems for solving complex circuit problems.",
-                "Understand time-domain and frequency-domain analysis.",
-                "Learn to model electrical networks using mathematical tools.",
+                "Understand computational models and their capabilities",
+                "Prove properties of languages using mathematical techniques",
+                "Recognize decidable and undecidable problems",
             ],
             [
-                "Solve complex circuit problems involving transient responses.",
-                "Apply Laplace transforms to analyze network stability.",
-                "Design filters and signal conditioning circuits.",
+                "Design automata and grammars for language recognition",
+                "Apply pumping lemmas to prove non-regularity",
+                "Reduce problems to prove undecidability",
             ]
         ),
     },
     {
-        code: "EE301",
+        code: "CS345",
+        title: "Database Management Systems",
+        lectureHours: 3,
+        tutorialHours: 0,
+        practicalHours: 2,
+        selfStudyHours: 4,
+        credits: 4,
+        deptCode: "CSE",
+        description: createCourseDescription(
+            "Database design, implementation, and querying. Covers relational model, SQL, normalization, query processing, transaction management, and modern database systems.",
+            [
+                "Design normalized relational database schemas",
+                "Write complex SQL queries for data manipulation",
+                "Understand transaction processing and recovery",
+            ],
+            [
+                "Model real-world data using ER diagrams and relations",
+                "Optimize database queries for performance",
+                "Implement database applications with proper ACID properties",
+            ]
+        ),
+    },
+    {
+        code: "CS355",
+        title: "Computer Networks",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 2,
+        selfStudyHours: 3,
+        credits: 4,
+        deptCode: "CSE",
+        description: createCourseDescription(
+            "Computer networking principles and protocols. Covers layered architectures, TCP/IP stack, routing, transport protocols, application layer protocols, and network security.",
+            [
+                "Understand network layering and protocol design",
+                "Analyze routing algorithms and congestion control",
+                "Implement network applications using socket programming",
+            ],
+            [
+                "Configure and troubleshoot network infrastructure",
+                "Design protocols for reliable data transfer",
+                "Analyze network performance and security threats",
+            ]
+        ),
+    },
+    {
+        code: "CS425",
+        title: "Computer Architecture",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 0,
+        selfStudyHours: 5,
+        credits: 3,
+        deptCode: "CSE",
+        description: createCourseDescription(
+            "Computer organization and architecture. Covers instruction set design, pipelining, memory hierarchy, I/O systems, and parallel architectures.",
+            [
+                "Understand CPU design and instruction execution",
+                "Analyze performance of pipelined processors",
+                "Design cache and memory hierarchy systems",
+            ],
+            [
+                "Evaluate architectural tradeoffs in processor design",
+                "Optimize programs for modern architectures",
+                "Understand parallel and multicore systems",
+            ]
+        ),
+    },
+    {
+        code: "CS771",
+        title: "Machine Learning",
+        lectureHours: 3,
+        tutorialHours: 0,
+        practicalHours: 2,
+        selfStudyHours: 4,
+        credits: 4,
+        deptCode: "CSE",
+        description: createCourseDescription(
+            "Introduction to machine learning algorithms and applications. Covers supervised learning, unsupervised learning, neural networks, and practical ML system design.",
+            [
+                "Understand mathematical foundations of ML algorithms",
+                "Implement and evaluate ML models on real datasets",
+                "Apply appropriate techniques for different problem types",
+            ],
+            [
+                "Build end-to-end ML pipelines for classification and regression",
+                "Design and train neural networks using modern frameworks",
+                "Evaluate model performance and handle overfitting",
+            ]
+        ),
+    },
+
+    // EE Core Courses
+    {
+        code: "EE210",
+        title: "Introduction to Electrical Engineering",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 2,
+        selfStudyHours: 3,
+        credits: 4,
+        deptCode: "EE",
+        description: createCourseDescription(
+            "Fundamentals of electrical circuits and systems. Covers circuit analysis, DC and AC circuits, operational amplifiers, and introduction to semiconductor devices.",
+            [
+                "Apply circuit analysis techniques using KVL and KCL",
+                "Analyze AC circuits using phasor methods",
+                "Understand basic semiconductor device operation",
+            ],
+            [
+                "Design and analyze resistive and reactive circuits",
+                "Use operational amplifiers in signal conditioning",
+                "Build and test basic electronic circuits",
+            ]
+        ),
+    },
+    {
+        code: "EE250",
+        title: "Signals and Systems",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 0,
+        selfStudyHours: 5,
+        credits: 3,
+        deptCode: "EE",
+        description: createCourseDescription(
+            "Mathematical representation of signals and systems. Covers convolution, Fourier analysis, Laplace transforms, Z-transforms, and sampling theory.",
+            [
+                "Represent and analyze continuous and discrete signals",
+                "Apply transform techniques to system analysis",
+                "Understand sampling and reconstruction of signals",
+            ],
+            [
+                "Analyze LTI systems using convolution and transforms",
+                "Design filters for signal processing applications",
+                "Implement signal processing algorithms in software",
+            ]
+        ),
+    },
+    {
+        code: "EE320",
         title: "Digital Electronics",
         lectureHours: 3,
         tutorialHours: 0,
         practicalHours: 2,
-        selfStudyHours: 5,
-        credits: 3.5,
+        selfStudyHours: 4,
+        credits: 4,
         deptCode: "EE",
         description: createCourseDescription(
-            "A comprehensive study of digital logic design. The course covers boolean algebra, combinational and sequential circuits, and an introduction to VHDL/Verilog for hardware description.",
+            "Digital logic design and implementation. Covers Boolean algebra, combinational circuits, sequential circuits, state machines, and introduction to HDL.",
             [
-                "Understand binary number systems and Boolean algebra.",
-                "Learn to design combinational logic circuits like adders and multiplexers.",
-                "Master sequential logic including flip-flops, counters, and registers.",
+                "Design combinational and sequential logic circuits",
+                "Implement finite state machines",
+                "Use HDL for digital circuit description",
             ],
             [
-                "Design and simulate digital circuits for practical applications.",
-                "Implement state machines for control logic.",
-                "Troubleshoot and optimize digital systems.",
+                "Minimize logic functions and implement using gates",
+                "Design counters, registers, and memory systems",
+                "Simulate and synthesize digital circuits using Verilog",
             ]
         ),
     },
     {
-        code: "EE401",
-        title: "Power Systems",
+        code: "EE370",
+        title: "Control Systems",
         lectureHours: 3,
         tutorialHours: 1,
+        practicalHours: 2,
+        selfStudyHours: 3,
+        credits: 4,
+        deptCode: "EE",
+        description: createCourseDescription(
+            "Analysis and design of feedback control systems. Covers system modeling, stability analysis, root locus, frequency response methods, and PID controller design.",
+            [
+                "Model physical systems using transfer functions",
+                "Analyze system stability using various criteria",
+                "Design controllers to meet performance specifications",
+            ],
+            [
+                "Apply root locus and Bode plot techniques",
+                "Design and tune PID controllers",
+                "Implement control systems in simulation and hardware",
+            ]
+        ),
+    },
+    {
+        code: "EE380",
+        title: "Power Electronics",
+        lectureHours: 3,
+        tutorialHours: 0,
         practicalHours: 2,
         selfStudyHours: 4,
         credits: 4,
         deptCode: "EE",
         description: createCourseDescription(
-            "This course focuses on the generation, transmission, and distribution of electric power. It covers load flow analysis, fault analysis, and the stability of power grids.",
+            "Power semiconductor devices and converter circuits. Covers rectifiers, DC-DC converters, inverters, and applications in motor drives and power systems.",
             [
-                "Understand the structure of modern power systems.",
-                "Analyze transmission line parameters and performance.",
-                "Learn methods for load flow studies and fault detection.",
+                "Understand power semiconductor device characteristics",
+                "Analyze and design AC-DC and DC-DC converters",
+                "Apply power electronics to motor control",
             ],
             [
-                "Model and analyze power system networks.",
-                "Evaluate the stability and reliability of power grids.",
-                "Design protection schemes for power system components.",
+                "Design switching converters for power supplies",
+                "Implement PWM techniques for voltage control",
+                "Select components for power electronic circuits",
             ]
         ),
     },
-    {
-        code: "ME101",
-        title: "Engineering Mechanics",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 2,
-        selfStudyHours: 4,
-        credits: 4,
-        deptCode: "ME",
-        description: createCourseDescription(
-            "A core engineering course dealing with forces, equilibrium, and motion. It covers statics and dynamics of particles and rigid bodies, providing the basis for structural analysis and mechanical design.",
-            [
-                "Understand the concepts of force vectors and equilibrium.",
-                "Analyze the kinematics and kinetics of particles.",
-                "Learn the principles of friction, work, and energy.",
-            ],
-            [
-                "Solve problems related to static equilibrium in structures.",
-                "Analyze the motion of mechanical systems under various forces.",
-                "Apply mechanical principles to real-world engineering problems.",
-            ]
-        ),
-    },
+
+    // ME Core Courses
     {
         code: "ME201",
         title: "Thermodynamics",
         lectureHours: 3,
         tutorialHours: 1,
         practicalHours: 0,
-        selfStudyHours: 6,
+        selfStudyHours: 5,
         credits: 3,
         deptCode: "ME",
         description: createCourseDescription(
-            "This course introduces the fundamental laws of thermodynamics and their application to energy systems. Topics include properties of pure substances, entropy, and thermodynamic cycles.",
+            "Classical thermodynamics and its applications. Covers first and second laws, entropy, thermodynamic cycles, and properties of pure substances.",
             [
-                "Understand the zeroth, first, and second laws of thermodynamics.",
-                "Analyze thermodynamic cycles like Otto, Diesel, and Rankine.",
-                "Learn the properties of ideal gases and real fluids.",
+                "Apply first and second laws to closed and open systems",
+                "Analyze power cycles and refrigeration cycles",
+                "Use property tables and equations of state",
             ],
             [
-                "Calculate energy transfer and efficiency in thermal systems.",
-                "Analyze power and refrigeration cycles.",
-                "Apply thermodynamic principles to design energy-efficient systems.",
+                "Calculate efficiency of thermodynamic devices",
+                "Design thermal systems for engineering applications",
+                "Evaluate exergy and irreversibility in processes",
             ]
         ),
     },
     {
-        code: "ME301",
+        code: "ME231",
         title: "Fluid Mechanics",
         lectureHours: 3,
-        tutorialHours: 0,
+        tutorialHours: 1,
         practicalHours: 2,
-        selfStudyHours: 5,
-        credits: 3.5,
+        selfStudyHours: 3,
+        credits: 4,
         deptCode: "ME",
         description: createCourseDescription(
-            "Study of fluids at rest and in motion. The course covers fluid properties, fluid statics, Bernoulli's equation, and flow through pipes, essential for hydraulic and aerodynamic engineering.",
+            "Fundamentals of fluid statics and dynamics. Covers fluid properties, conservation laws, boundary layers, pipe flow, and introduction to compressible flow.",
             [
-                "Understand fluid properties and the concept of continuum.",
-                "Master the conservation laws of mass, momentum, and energy in fluids.",
-                "Analyze laminar and turbulent flow in pipes.",
+                "Apply conservation principles to fluid flow problems",
+                "Analyze internal and external flow phenomena",
+                "Understand boundary layer theory and drag",
             ],
             [
-                "Calculate fluid forces on submerged bodies.",
-                "Design piping systems and hydraulic machinery.",
-                "Apply fluid mechanics principles to aerodynamic problems.",
+                "Design piping systems and calculate losses",
+                "Measure flow quantities using experimental techniques",
+                "Apply dimensional analysis to fluid problems",
             ]
         ),
     },
     {
-        code: "MATH101",
-        title: "Calculus I",
-        lectureHours: 4,
+        code: "ME251",
+        title: "Solid Mechanics",
+        lectureHours: 3,
         tutorialHours: 1,
         practicalHours: 0,
         selfStudyHours: 5,
-        credits: 4,
-        deptCode: "CSE",
-        description: createCourseDescription(
-            "Fundamental course in single-variable calculus. Topics include limits, continuity, differentiation, and integration, with applications to science and engineering problems.",
-            [
-                "Understand the rigorous definitions of limits and continuity.",
-                "Master the techniques of differentiation and integration.",
-                "Explore applications like optimization and related rates.",
-            ],
-            [
-                "Solve complex mathematical problems using calculus.",
-                "Model physical phenomena using differential equations.",
-                "Apply calculus concepts to engineering analysis.",
-            ]
-        ),
-    },
-    {
-        code: "MATH201",
-        title: "Linear Algebra",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 0,
-        selfStudyHours: 6,
         credits: 3,
-        deptCode: "CSE",
+        deptCode: "ME",
         description: createCourseDescription(
-            "Study of vector spaces, linear transformations, and matrices. This course provides the mathematical foundation for computer graphics, machine learning, and systems engineering.",
+            "Mechanics of deformable bodies. Covers stress, strain, beam bending, torsion, column buckling, and introduction to energy methods.",
             [
-                "Understand vector spaces, subspaces, and basis.",
-                "Master matrix operations, determinants, and inverses.",
-                "Learn about eigenvalues, eigenvectors, and diagonalization.",
+                "Analyze stress and strain in structural elements",
+                "Apply beam theory for bending and deflection",
+                "Evaluate failure criteria for design",
             ],
             [
-                "Solve systems of linear equations efficiently.",
-                "Apply linear algebra concepts to data science and engineering.",
-                "Understand geometric transformations in n-dimensional space.",
+                "Design structural members for given loading conditions",
+                "Calculate deflections using energy methods",
+                "Analyze statically indeterminate structures",
             ]
         ),
     },
     {
-        code: "CS102",
-        title: "Object Oriented Programming",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 2,
-        selfStudyHours: 4,
-        credits: 4,
-        deptCode: "CSE",
-        description: createCourseDescription(
-            "This course introduces the Object-Oriented paradigm. It covers classes, objects, inheritance, polymorphism, and encapsulation, using a modern OOP language like Java or C++.",
-            [
-                "Understand the four pillars of Object-Oriented Programming.",
-                "Learn to design modular and reusable code structures.",
-                "Master exception handling and multithreading concepts.",
-            ],
-            [
-                "Design complex software systems using OOP principles.",
-                "Implement robust and maintainable codebases.",
-                "Refactor procedural code into object-oriented architecture.",
-            ]
-        ),
-    },
-    {
-        code: "CS202",
-        title: "Operating Systems",
+        code: "ME311",
+        title: "Heat Transfer",
         lectureHours: 3,
         tutorialHours: 0,
         practicalHours: 2,
-        selfStudyHours: 5,
-        credits: 3.5,
-        deptCode: "CSE",
-        description: createCourseDescription(
-            "An in-depth study of operating system internals. Topics include process management, memory management, file systems, concurrency, and virtualization.",
-            [
-                "Understand the role of the kernel and system calls.",
-                "Analyze scheduling algorithms and deadlock prevention mechanisms.",
-                "Learn virtual memory concepts including paging and segmentation.",
-            ],
-            [
-                "Write system-level code to interact with the OS kernel.",
-                "Troubleshoot system performance and synchronization issues.",
-                "Understand the architecture of modern operating systems like Linux.",
-            ]
-        ),
-    },
-    {
-        code: "CS302",
-        title: "Computer Networks",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 2,
         selfStudyHours: 4,
         credits: 4,
-        deptCode: "CSE",
+        deptCode: "ME",
         description: createCourseDescription(
-            "This course covers the design and implementation of computer networks. It focuses on the TCP/IP stack, routing protocols, network security, and distributed systems.",
+            "Fundamentals of heat and mass transfer. Covers conduction, convection, radiation, heat exchangers, and introduction to mass transfer.",
             [
-                "Understand the OSI and TCP/IP reference models.",
-                "Master network protocols like IP, TCP, UDP, and HTTP.",
-                "Learn the principles of routing, switching, and congestion control.",
+                "Analyze steady and unsteady conduction problems",
+                "Apply convection correlations to heat transfer",
+                "Design heat exchangers for thermal systems",
             ],
             [
-                "Configure and troubleshoot network infrastructure.",
-                "Analyze network traffic and optimize performance.",
-                "Implement secure communication channels over public networks.",
+                "Solve fin and extended surface problems",
+                "Calculate radiation exchange between surfaces",
+                "Design cooling systems for electronic equipment",
             ]
         ),
     },
     {
-        code: "CS402",
-        title: "Software Engineering",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 0,
-        selfStudyHours: 6,
-        credits: 3,
-        deptCode: "CSE",
-        description: createCourseDescription(
-            "A study of the software development lifecycle (SDLC). The course covers requirements analysis, software architecture, testing methodologies, and project management (Agile/Scrum).",
-            [
-                "Understand various software development models (Waterfall, Agile).",
-                "Learn techniques for requirements gathering and system design.",
-                "Master testing strategies including unit, integration, and system testing.",
-            ],
-            [
-                "Manage software projects using industry-standard tools.",
-                "Produce high-quality software documentation and design specs.",
-                "Collaborate effectively in a software development team.",
-            ]
-        ),
-    },
-    {
-        code: "EE102",
-        title: "Electronics",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 2,
-        selfStudyHours: 4,
-        credits: 4,
-        deptCode: "EE",
-        description: createCourseDescription(
-            "Introduction to electronic components and circuits. The course covers diodes, transistors (BJT, FET), amplifiers, and operational amplifiers.",
-            [
-                "Understand the physics of semiconductors and PN junctions.",
-                "Analyze biasing and amplification in transistor circuits.",
-                "Learn the applications of Operational Amplifiers (Op-Amps).",
-            ],
-            [
-                "Design basic electronic circuits for signal processing.",
-                "Troubleshoot electronic hardware and PCBs.",
-                "Simulate circuit behavior using SPICE tools.",
-            ]
-        ),
-    },
-    {
-        code: "EE202",
-        title: "Signals and Systems",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 0,
-        selfStudyHours: 6,
-        credits: 3,
-        deptCode: "EE",
-        description: createCourseDescription(
-            "This course provides a mathematical framework for analyzing signals and systems. It covers Fourier series, Fourier transforms, and Z-transforms for continuous and discrete-time systems.",
-            [
-                "Understand the classification of signals and systems.",
-                "Master frequency domain analysis using Fourier Transforms.",
-                "Learn sampling theory and signal reconstruction.",
-            ],
-            [
-                "Analyze the response of linear time-invariant (LTI) systems.",
-                "Apply signal processing techniques to audio and image data.",
-                "Design filters to remove noise from signals.",
-            ]
-        ),
-    },
-    {
-        code: "ME102",
+        code: "ME321",
         title: "Manufacturing Processes",
         lectureHours: 3,
         tutorialHours: 0,
-        practicalHours: 2,
-        selfStudyHours: 5,
-        credits: 3.5,
-        deptCode: "ME",
-        description: createCourseDescription(
-            "Overview of modern manufacturing technologies. The course covers casting, forming, machining, welding, and additive manufacturing (3D printing).",
-            [
-                "Understand the principles of material removal and addition.",
-                "Learn about casting and molding techniques for different materials.",
-                "Explore advanced manufacturing techniques like CNC and laser cutting.",
-            ],
-            [
-                "Select the appropriate manufacturing process for a given part design.",
-                "Optimize manufacturing parameters for cost and quality.",
-                "Operate basic machine tools and fabrication equipment.",
-            ]
-        ),
-    },
-    {
-        code: "ME202",
-        title: "Machine Design",
-        lectureHours: 3,
-        tutorialHours: 1,
-        practicalHours: 2,
-        selfStudyHours: 4,
+        practicalHours: 3,
+        selfStudyHours: 3,
         credits: 4,
         deptCode: "ME",
         description: createCourseDescription(
-            "This course focuses on the design of mechanical elements. It covers stress analysis, failure theories, and the design of gears, bearings, shafts, and fasteners.",
+            "Overview of manufacturing methods and processes. Covers casting, forming, machining, joining, and additive manufacturing.",
             [
-                "Understand theories of failure for static and dynamic loading.",
-                "Learn to design mechanical joints and transmission elements.",
-                "Master the selection of materials for machine components.",
+                "Understand fundamentals of material processing",
+                "Select appropriate manufacturing processes",
+                "Analyze process parameters for quality control",
             ],
             [
-                "Design safe and efficient mechanical components.",
-                "Perform fatigue and stress analysis on machine parts.",
-                "Create detailed engineering drawings for manufacturing.",
+                "Design products considering manufacturability",
+                "Operate basic machine tools and fabrication equipment",
+                "Apply quality control methods in manufacturing",
+            ]
+        ),
+    },
+
+    // CE Courses
+    {
+        code: "CE201",
+        title: "Structural Analysis",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 0,
+        selfStudyHours: 5,
+        credits: 3,
+        deptCode: "CE",
+        description: createCourseDescription(
+            "Analysis of determinate and indeterminate structures. Covers influence lines, energy methods, matrix methods, and introduction to structural dynamics.",
+            [
+                "Analyze statically determinate structures",
+                "Apply energy methods to structural analysis",
+                "Use matrix methods for frame analysis",
+            ],
+            [
+                "Calculate member forces in trusses and frames",
+                "Draw influence lines for moving loads",
+                "Analyze structures using computer programs",
+            ]
+        ),
+    },
+    {
+        code: "CE231",
+        title: "Geotechnical Engineering",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 2,
+        selfStudyHours: 3,
+        credits: 4,
+        deptCode: "CE",
+        description: createCourseDescription(
+            "Soil mechanics and foundation engineering. Covers soil properties, stress distribution, consolidation, shear strength, and shallow foundations.",
+            [
+                "Classify soils and determine engineering properties",
+                "Analyze stress distribution in soil masses",
+                "Design shallow foundations for buildings",
+            ],
+            [
+                "Perform laboratory tests on soil samples",
+                "Calculate settlements and bearing capacity",
+                "Evaluate slope stability for earthworks",
+            ]
+        ),
+    },
+
+    // Elective Courses
+    {
+        code: "CS671",
+        title: "Deep Learning",
+        lectureHours: 3,
+        tutorialHours: 0,
+        practicalHours: 2,
+        selfStudyHours: 4,
+        credits: 4,
+        deptCode: "CSE",
+        description: createCourseDescription(
+            "Advanced deep learning techniques and architectures. Covers CNNs, RNNs, transformers, GANs, and applications in vision and NLP.",
+            [
+                "Understand deep neural network architectures",
+                "Implement models using PyTorch/TensorFlow",
+                "Apply transfer learning and fine-tuning techniques",
+            ],
+            [
+                "Design CNN architectures for computer vision",
+                "Build sequence models for NLP applications",
+                "Train and evaluate large-scale deep learning models",
+            ]
+        ),
+    },
+    {
+        code: "CS682",
+        title: "Cryptography",
+        lectureHours: 3,
+        tutorialHours: 1,
+        practicalHours: 0,
+        selfStudyHours: 5,
+        credits: 3,
+        deptCode: "CSE",
+        description: createCourseDescription(
+            "Mathematical foundations of cryptography. Covers symmetric encryption, public-key cryptography, digital signatures, hash functions, and protocols.",
+            [
+                "Understand mathematical foundations of crypto primitives",
+                "Analyze security of cryptographic protocols",
+                "Apply cryptography to secure systems design",
+            ],
+            [
+                "Implement symmetric and asymmetric encryption",
+                "Design secure protocols using standard primitives",
+                "Evaluate security of cryptographic implementations",
             ]
         ),
     },
 ];
 
+// ============================================================================
+// PREREQUISITES - Course dependencies
+// ============================================================================
 export const prerequisites = [
-    { courseCode: "CS201", prerequisiteCode: "CS101" },
-    { courseCode: "CS301", prerequisiteCode: "CS201" },
-    { courseCode: "CS401", prerequisiteCode: "CS201" },
-    { courseCode: "CS501", prerequisiteCode: "CS301" },
-    { courseCode: "CS501", prerequisiteCode: "MATH201" },
-    { courseCode: "CS202", prerequisiteCode: "CS101" },
-    { courseCode: "CS302", prerequisiteCode: "CS201" },
-    { courseCode: "CS402", prerequisiteCode: "CS201" },
-    { courseCode: "EE201", prerequisiteCode: "EE101" },
-    { courseCode: "EE301", prerequisiteCode: "EE201" },
-    { courseCode: "EE401", prerequisiteCode: "EE201" },
-    { courseCode: "ME201", prerequisiteCode: "ME101" },
-    { courseCode: "ME301", prerequisiteCode: "ME101" },
+    // CSE Prerequisites
+    { courseCode: "CS201", prerequisiteCode: "ESC101" },
+    { courseCode: "CS220", prerequisiteCode: "CS201" },
+    { courseCode: "CS330", prerequisiteCode: "CS201" },
+    { courseCode: "CS340", prerequisiteCode: "CS201" },
+    { courseCode: "CS345", prerequisiteCode: "CS201" },
+    { courseCode: "CS355", prerequisiteCode: "CS201" },
+    { courseCode: "CS425", prerequisiteCode: "CS201" },
+    { courseCode: "CS771", prerequisiteCode: "CS220" },
+    { courseCode: "CS771", prerequisiteCode: "MTH102" },
+    { courseCode: "CS671", prerequisiteCode: "CS771" },
+    { courseCode: "CS682", prerequisiteCode: "MTH102" },
+    // EE Prerequisites
+    { courseCode: "EE250", prerequisiteCode: "MTH102" },
+    { courseCode: "EE320", prerequisiteCode: "EE210" },
+    { courseCode: "EE370", prerequisiteCode: "EE250" },
+    { courseCode: "EE380", prerequisiteCode: "EE210" },
+    // ME Prerequisites
+    { courseCode: "ME231", prerequisiteCode: "MTH101" },
+    { courseCode: "ME251", prerequisiteCode: "PHY101" },
+    { courseCode: "ME311", prerequisiteCode: "ME201" },
+    { courseCode: "ME321", prerequisiteCode: "ME251" },
+    // CE Prerequisites
+    { courseCode: "CE201", prerequisiteCode: "ME251" },
+    { courseCode: "CE231", prerequisiteCode: "PHY101" },
 ];
 
+// ============================================================================
+// SEMESTERS - Academic calendar (with historical completed semesters)
+// ============================================================================
 export const semesters = [
+    // Historical semesters for student records (COMPLETED)
+    {
+        year: 2021,
+        semester: "ODD" as const,
+        startDate: new Date("2021-07-26"),
+        enrollmentDeadline: new Date("2021-08-09"),
+        feedbackFormStartDate: new Date("2021-11-01"),
+        endDate: new Date("2021-11-30"),
+        status: "COMPLETED" as const,
+    },
+    {
+        year: 2022,
+        semester: "EVEN" as const,
+        startDate: new Date("2022-01-10"),
+        enrollmentDeadline: new Date("2022-01-24"),
+        feedbackFormStartDate: new Date("2022-04-15"),
+        endDate: new Date("2022-05-15"),
+        status: "COMPLETED" as const,
+    },
+    {
+        year: 2022,
+        semester: "ODD" as const,
+        startDate: new Date("2022-07-25"),
+        enrollmentDeadline: new Date("2022-08-08"),
+        feedbackFormStartDate: new Date("2022-11-01"),
+        endDate: new Date("2022-11-30"),
+        status: "COMPLETED" as const,
+    },
+    {
+        year: 2023,
+        semester: "EVEN" as const,
+        startDate: new Date("2023-01-09"),
+        enrollmentDeadline: new Date("2023-01-23"),
+        feedbackFormStartDate: new Date("2023-04-15"),
+        endDate: new Date("2023-05-14"),
+        status: "COMPLETED" as const,
+    },
+    {
+        year: 2023,
+        semester: "ODD" as const,
+        startDate: new Date("2023-07-24"),
+        enrollmentDeadline: new Date("2023-08-07"),
+        feedbackFormStartDate: new Date("2023-11-01"),
+        endDate: new Date("2023-11-30"),
+        status: "COMPLETED" as const,
+    },
     {
         year: 2024,
         semester: "EVEN" as const,
-        startDate: new Date("2024-08-01"),
-        enrollmentDeadline: new Date("2024-08-15"),
-        feedbackFormStartDate: new Date("2024-11-15"),
-        endDate: new Date("2024-12-15"),
+        startDate: new Date("2024-01-08"),
+        enrollmentDeadline: new Date("2024-01-22"),
+        feedbackFormStartDate: new Date("2024-04-15"),
+        endDate: new Date("2024-05-12"),
+        status: "COMPLETED" as const,
+    },
+    {
+        year: 2024,
+        semester: "ODD" as const,
+        startDate: new Date("2024-07-22"),
+        enrollmentDeadline: new Date("2024-08-05"),
+        feedbackFormStartDate: new Date("2024-11-01"),
+        endDate: new Date("2024-11-30"),
         status: "COMPLETED" as const,
     },
     {
         year: 2025,
-        semester: "SUMMER" as const,
-        startDate: new Date("2025-01-10"),
+        semester: "EVEN" as const,
+        startDate: new Date("2025-01-06"),
         enrollmentDeadline: new Date("2025-01-20"),
-        feedbackFormStartDate: new Date("2025-04-20"),
-        endDate: new Date("2025-05-20"),
+        feedbackFormStartDate: new Date("2025-04-15"),
+        endDate: new Date("2025-05-10"),
         status: "ONGOING" as const,
     },
     {
         year: 2025,
         semester: "ODD" as const,
-        startDate: new Date("2025-08-01"),
-        enrollmentDeadline: new Date("2025-08-15"),
-        feedbackFormStartDate: new Date("2025-11-15"),
-        endDate: new Date("2025-12-15"),
+        startDate: new Date("2025-07-28"),
+        enrollmentDeadline: new Date("2025-08-11"),
+        feedbackFormStartDate: new Date("2025-11-03"),
+        endDate: new Date("2025-11-28"),
         status: "UPCOMING" as const,
     },
 ];
 
+// ============================================================================
+// CLASSROOMS - Lecture halls, labs, tutorial rooms
+// ============================================================================
 export const classrooms = [
-    { room: "A101", capacity: 60, type: "LECTURE" as const },
-    { room: "A102", capacity: 60, type: "LECTURE" as const },
-    { room: "A103", capacity: 40, type: "TUTORIAL" as const },
-    { room: "B201", capacity: 50, type: "LECTURE" as const },
-    { room: "B202", capacity: 30, type: "LAB" as const },
-    { room: "B203", capacity: 30, type: "LAB" as const },
-    { room: "C301", capacity: 80, type: "SEMINAR" as const },
-    { room: "C302", capacity: 40, type: "TUTORIAL" as const },
-    { room: "D101", capacity: 25, type: "LAB" as const },
-    { room: "D102", capacity: 60, type: "LECTURE" as const },
+    // Lecture Halls (L-prefix)
+    { room: "L1", capacity: 250, type: "LECTURE" as const },
+    { room: "L2", capacity: 250, type: "LECTURE" as const },
+    { room: "L3", capacity: 150, type: "LECTURE" as const },
+    { room: "L4", capacity: 150, type: "LECTURE" as const },
+    { room: "L7", capacity: 120, type: "LECTURE" as const },
+    { room: "L8", capacity: 120, type: "LECTURE" as const },
+    // Tutorial Rooms (T-prefix)
+    { room: "T101", capacity: 40, type: "TUTORIAL" as const },
+    { room: "T102", capacity: 40, type: "TUTORIAL" as const },
+    { room: "T103", capacity: 35, type: "TUTORIAL" as const },
+    { room: "T104", capacity: 35, type: "TUTORIAL" as const },
+    // Computer Labs
+    { room: "CC-LAB1", capacity: 60, type: "LAB" as const },
+    { room: "CC-LAB2", capacity: 60, type: "LAB" as const },
+    { room: "CSE-LAB", capacity: 40, type: "LAB" as const },
+    // EE Labs
+    { room: "EE-LAB1", capacity: 30, type: "LAB" as const },
+    { room: "EE-LAB2", capacity: 30, type: "LAB" as const },
+    // ME Labs
+    { room: "ME-WSHOP", capacity: 25, type: "LAB" as const },
+    { room: "ME-THERM", capacity: 25, type: "LAB" as const },
+    // Seminar Halls
+    { room: "SH1", capacity: 100, type: "SEMINAR" as const },
+    { room: "SH2", capacity: 80, type: "SEMINAR" as const },
 ];
 
+// ============================================================================
+// TIME SLOTS - Weekly schedule slots
+// ============================================================================
 export const timeSlots = [
+    // Monday Theory
     {
         dayOfWeek: "MONDAY" as const,
         sessionType: "THEORY" as const,
@@ -1093,13 +1613,24 @@ export const timeSlots = [
     },
     {
         dayOfWeek: "MONDAY" as const,
+        sessionType: "THEORY" as const,
+        theoryPeriod: "PC-3" as const,
+    },
+    {
+        dayOfWeek: "MONDAY" as const,
         sessionType: "LAB" as const,
         labPeriod: "LAB-3H-1" as const,
+    },
+    // Tuesday
+    {
+        dayOfWeek: "TUESDAY" as const,
+        sessionType: "THEORY" as const,
+        theoryPeriod: "PC-1" as const,
     },
     {
         dayOfWeek: "TUESDAY" as const,
         sessionType: "THEORY" as const,
-        theoryPeriod: "PC-3" as const,
+        theoryPeriod: "PC-2" as const,
     },
     {
         dayOfWeek: "TUESDAY" as const,
@@ -1107,29 +1638,67 @@ export const timeSlots = [
         tutorialPeriod: "T-PC-1" as const,
     },
     {
+        dayOfWeek: "TUESDAY" as const,
+        sessionType: "TUTORIAL" as const,
+        tutorialPeriod: "T-PC-2" as const,
+    },
+    // Wednesday
+    {
         dayOfWeek: "WEDNESDAY" as const,
         sessionType: "THEORY" as const,
-        theoryPeriod: "PC-4" as const,
+        theoryPeriod: "PC-1" as const,
     },
     {
         dayOfWeek: "WEDNESDAY" as const,
         sessionType: "THEORY" as const,
-        theoryPeriod: "PCPE" as const,
+        theoryPeriod: "PC-2" as const,
+    },
+    {
+        dayOfWeek: "WEDNESDAY" as const,
+        sessionType: "THEORY" as const,
+        theoryPeriod: "PC-3" as const,
+    },
+    {
+        dayOfWeek: "WEDNESDAY" as const,
+        sessionType: "LAB" as const,
+        labPeriod: "LAB-2H-1" as const,
+    },
+    // Thursday
+    {
+        dayOfWeek: "THURSDAY" as const,
+        sessionType: "THEORY" as const,
+        theoryPeriod: "PC-1" as const,
     },
     {
         dayOfWeek: "THURSDAY" as const,
         sessionType: "THEORY" as const,
-        theoryPeriod: "HSME" as const,
+        theoryPeriod: "PC-2" as const,
+    },
+    {
+        dayOfWeek: "THURSDAY" as const,
+        sessionType: "TUTORIAL" as const,
+        tutorialPeriod: "T-PC-1" as const,
     },
     {
         dayOfWeek: "THURSDAY" as const,
         sessionType: "LAB" as const,
-        labPeriod: "LAB-2H-1" as const,
+        labPeriod: "LAB-3H-2" as const,
+    },
+    // Friday
+    {
+        dayOfWeek: "FRIDAY" as const,
+        sessionType: "THEORY" as const,
+        theoryPeriod: "PC-1" as const,
     },
     {
         dayOfWeek: "FRIDAY" as const,
         sessionType: "THEORY" as const,
-        theoryPeriod: "PCDE" as const,
+        theoryPeriod: "PC-2" as const,
+    },
+    {
+        dayOfWeek: "FRIDAY" as const,
+        sessionType: "THEORY" as const,
+        theoryPeriod: "PC-3" as const,
     },
     {
         dayOfWeek: "FRIDAY" as const,
@@ -1138,155 +1707,650 @@ export const timeSlots = [
     },
 ];
 
+// ============================================================================
+// FEEDBACK QUESTIONS - Course evaluation survey
+// ============================================================================
 export const feedbackQuestions = [
     {
-        questionText: "The course content was well-organized and clear",
+        questionText:
+            "The course content was well-organized and followed a logical sequence",
         questionType: "RATING" as const,
         isRequired: true,
         order: 1,
     },
     {
         questionText:
-            "The instructor was knowledgeable and explained concepts effectively",
+            "The instructor explained concepts clearly and effectively",
         questionType: "RATING" as const,
         isRequired: true,
         order: 2,
     },
     {
-        questionText:
-            "The course materials (slides, notes, references) were helpful",
+        questionText: "The instructor was well-prepared for lectures",
         questionType: "RATING" as const,
         isRequired: true,
         order: 3,
     },
     {
-        questionText: "The assignments and projects enhanced my understanding",
+        questionText:
+            "The course materials (slides, notes, textbook) were helpful for learning",
         questionType: "RATING" as const,
         isRequired: true,
         order: 4,
     },
     {
         questionText:
-            "The instructor was accessible and responsive to questions",
+            "The assignments and projects helped reinforce the course concepts",
         questionType: "RATING" as const,
         isRequired: true,
         order: 5,
     },
     {
-        questionText: "Would you recommend this course to other students?",
-        questionType: "YES_NO" as const,
+        questionText: "The pace of the course was appropriate",
+        questionType: "RATING" as const,
         isRequired: true,
         order: 6,
     },
     {
-        questionText: "What did you like most about this course?",
-        questionType: "DESCRIPTIVE" as const,
-        isRequired: false,
+        questionText:
+            "The instructor was approachable and responsive to questions",
+        questionType: "RATING" as const,
+        isRequired: true,
         order: 7,
     },
     {
-        questionText: "What improvements would you suggest for this course?",
-        questionType: "DESCRIPTIVE" as const,
-        isRequired: false,
+        questionText:
+            "The examinations were fair and reflected the course content",
+        questionType: "RATING" as const,
+        isRequired: true,
         order: 8,
     },
     {
-        questionText: "The pace of the course was appropriate",
-        questionType: "RATING" as const,
+        questionText: "Would you recommend this course to other students?",
+        questionType: "YES_NO" as const,
         isRequired: true,
         order: 9,
     },
     {
-        questionText: "The grading system was fair and transparent",
-        questionType: "RATING" as const,
-        isRequired: true,
+        questionText: "What aspects of the course did you find most valuable?",
+        questionType: "DESCRIPTIVE" as const,
+        isRequired: false,
         order: 10,
+    },
+    {
+        questionText: "What suggestions do you have for improving this course?",
+        questionType: "DESCRIPTIVE" as const,
+        isRequired: false,
+        order: 11,
+    },
+    {
+        questionText: "Any additional comments about the course or instructor?",
+        questionType: "DESCRIPTIVE" as const,
+        isRequired: false,
+        order: 12,
     },
 ];
 
-export const courseOfferings2025Spring = [
+// ============================================================================
+// HISTORICAL COURSE OFFERINGS - For student records (COMPLETED semesters)
+// Maps: semesterKey -> array of offerings
+// ============================================================================
+export const historicalCourseOfferings: Record<
+    string,
+    Array<{
+        courseCode: string;
+        instructorEmployeeIds: string[];
+        headEmployeeId: string;
+        batchYears: number[];
+        programCodes: string[];
+    }>
+> = {
+    // 2021 ODD - First semester for 2021 batch
+    "2021-ODD": [
+        {
+            courseCode: "ESC101",
+            instructorEmployeeIds: ["INS001", "INS004"],
+            headEmployeeId: "INS001",
+            batchYears: [2021],
+            programCodes: ["BTCS", "BTEE", "BTME"],
+        },
+        {
+            courseCode: "MTH101",
+            instructorEmployeeIds: ["INS013"],
+            headEmployeeId: "INS013",
+            batchYears: [2021],
+            programCodes: ["BTCS", "BTEE", "BTME"],
+        },
+        {
+            courseCode: "PHY101",
+            instructorEmployeeIds: ["INS015"],
+            headEmployeeId: "INS015",
+            batchYears: [2021],
+            programCodes: ["BTCS", "BTEE", "BTME"],
+        },
+    ],
+    // 2022 EVEN - Second semester for 2021 batch
+    "2022-EVEN": [
+        {
+            courseCode: "MTH102",
+            instructorEmployeeIds: ["INS013", "INS014"],
+            headEmployeeId: "INS013",
+            batchYears: [2021],
+            programCodes: ["BTCS", "BTEE", "BTME"],
+        },
+        {
+            courseCode: "PHY102",
+            instructorEmployeeIds: ["INS015"],
+            headEmployeeId: "INS015",
+            batchYears: [2021],
+            programCodes: ["BTCS", "BTEE", "BTME"],
+        },
+    ],
+    // 2022 ODD - Third semester for 2021 batch, First for 2022 batch
+    "2022-ODD": [
+        // 2021 batch courses
+        {
+            courseCode: "CS201",
+            instructorEmployeeIds: ["INS002"],
+            headEmployeeId: "INS002",
+            batchYears: [2021],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "EE210",
+            instructorEmployeeIds: ["INS006"],
+            headEmployeeId: "INS006",
+            batchYears: [2021],
+            programCodes: ["BTEE"],
+        },
+        {
+            courseCode: "ME201",
+            instructorEmployeeIds: ["INS009"],
+            headEmployeeId: "INS009",
+            batchYears: [2021],
+            programCodes: ["BTME"],
+        },
+        // 2022 batch first year courses
+        {
+            courseCode: "ESC101",
+            instructorEmployeeIds: ["INS001", "INS005"],
+            headEmployeeId: "INS001",
+            batchYears: [2022],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTCE"],
+        },
+        {
+            courseCode: "MTH101",
+            instructorEmployeeIds: ["INS013"],
+            headEmployeeId: "INS013",
+            batchYears: [2022],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTCE"],
+        },
+        {
+            courseCode: "PHY101",
+            instructorEmployeeIds: ["INS015"],
+            headEmployeeId: "INS015",
+            batchYears: [2022],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTCE"],
+        },
+    ],
+    // 2023 EVEN
+    "2023-EVEN": [
+        // 2021 batch 4th semester
+        {
+            courseCode: "CS220",
+            instructorEmployeeIds: ["INS001"],
+            headEmployeeId: "INS001",
+            batchYears: [2021],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "EE250",
+            instructorEmployeeIds: ["INS007"],
+            headEmployeeId: "INS007",
+            batchYears: [2021],
+            programCodes: ["BTEE"],
+        },
+        {
+            courseCode: "ME231",
+            instructorEmployeeIds: ["INS010"],
+            headEmployeeId: "INS010",
+            batchYears: [2021],
+            programCodes: ["BTME"],
+        },
+        // 2022 batch 2nd semester
+        {
+            courseCode: "MTH102",
+            instructorEmployeeIds: ["INS013"],
+            headEmployeeId: "INS013",
+            batchYears: [2022],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTCE"],
+        },
+        {
+            courseCode: "PHY102",
+            instructorEmployeeIds: ["INS015"],
+            headEmployeeId: "INS015",
+            batchYears: [2022],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTCE"],
+        },
+    ],
+    // 2023 ODD
+    "2023-ODD": [
+        // 2021 batch 5th semester
+        {
+            courseCode: "CS330",
+            instructorEmployeeIds: ["INS003"],
+            headEmployeeId: "INS003",
+            batchYears: [2021],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "CS345",
+            instructorEmployeeIds: ["INS004"],
+            headEmployeeId: "INS004",
+            batchYears: [2021],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "EE320",
+            instructorEmployeeIds: ["INS008"],
+            headEmployeeId: "INS008",
+            batchYears: [2021],
+            programCodes: ["BTEE"],
+        },
+        {
+            courseCode: "ME311",
+            instructorEmployeeIds: ["INS009"],
+            headEmployeeId: "INS009",
+            batchYears: [2021],
+            programCodes: ["BTME"],
+        },
+        // 2022 batch 3rd semester
+        {
+            courseCode: "CS201",
+            instructorEmployeeIds: ["INS002", "INS005"],
+            headEmployeeId: "INS002",
+            batchYears: [2022],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "EE210",
+            instructorEmployeeIds: ["INS006"],
+            headEmployeeId: "INS006",
+            batchYears: [2022],
+            programCodes: ["BTEE", "BTEC"],
+        },
+        {
+            courseCode: "ME201",
+            instructorEmployeeIds: ["INS009"],
+            headEmployeeId: "INS009",
+            batchYears: [2022],
+            programCodes: ["BTME", "BTCH"],
+        },
+        {
+            courseCode: "ME251",
+            instructorEmployeeIds: ["INS010"],
+            headEmployeeId: "INS010",
+            batchYears: [2022],
+            programCodes: ["BTCE"],
+        },
+        // 2023 batch first year courses
+        {
+            courseCode: "ESC101",
+            instructorEmployeeIds: ["INS001", "INS004"],
+            headEmployeeId: "INS001",
+            batchYears: [2023],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTEC", "BTCH"],
+        },
+        {
+            courseCode: "MTH101",
+            instructorEmployeeIds: ["INS013", "INS014"],
+            headEmployeeId: "INS013",
+            batchYears: [2023],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTEC", "BTCH"],
+        },
+        {
+            courseCode: "PHY101",
+            instructorEmployeeIds: ["INS015"],
+            headEmployeeId: "INS015",
+            batchYears: [2023],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTEC", "BTCH"],
+        },
+    ],
+    // 2024 EVEN
+    "2024-EVEN": [
+        // 2021 batch 6th semester
+        {
+            courseCode: "CS355",
+            instructorEmployeeIds: ["INS005"],
+            headEmployeeId: "INS005",
+            batchYears: [2021],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "CS340",
+            instructorEmployeeIds: ["INS002"],
+            headEmployeeId: "INS002",
+            batchYears: [2021],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "EE370",
+            instructorEmployeeIds: ["INS006", "INS007"],
+            headEmployeeId: "INS006",
+            batchYears: [2021],
+            programCodes: ["BTEE"],
+        },
+        {
+            courseCode: "ME321",
+            instructorEmployeeIds: ["INS010"],
+            headEmployeeId: "INS010",
+            batchYears: [2021],
+            programCodes: ["BTME"],
+        },
+        // 2022 batch 4th semester
+        {
+            courseCode: "CS220",
+            instructorEmployeeIds: ["INS001"],
+            headEmployeeId: "INS001",
+            batchYears: [2022],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "EE250",
+            instructorEmployeeIds: ["INS007"],
+            headEmployeeId: "INS007",
+            batchYears: [2022],
+            programCodes: ["BTEE"],
+        },
+        {
+            courseCode: "ME231",
+            instructorEmployeeIds: ["INS010"],
+            headEmployeeId: "INS010",
+            batchYears: [2022],
+            programCodes: ["BTME"],
+        },
+        {
+            courseCode: "CE201",
+            instructorEmployeeIds: ["INS011"],
+            headEmployeeId: "INS011",
+            batchYears: [2022],
+            programCodes: ["BTCE"],
+        },
+        // 2023 batch 2nd semester
+        {
+            courseCode: "MTH102",
+            instructorEmployeeIds: ["INS013"],
+            headEmployeeId: "INS013",
+            batchYears: [2023],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTEC", "BTCH"],
+        },
+        {
+            courseCode: "PHY102",
+            instructorEmployeeIds: ["INS015"],
+            headEmployeeId: "INS015",
+            batchYears: [2023],
+            programCodes: ["BTCS", "BTEE", "BTME", "BTEC", "BTCH"],
+        },
+    ],
+    // 2024 ODD
+    "2024-ODD": [
+        // 2021 batch 7th semester (electives)
+        {
+            courseCode: "CS771",
+            instructorEmployeeIds: ["INS003", "INS004"],
+            headEmployeeId: "INS003",
+            batchYears: [2021],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "CS425",
+            instructorEmployeeIds: ["INS001"],
+            headEmployeeId: "INS001",
+            batchYears: [2021],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "EE380",
+            instructorEmployeeIds: ["INS008"],
+            headEmployeeId: "INS008",
+            batchYears: [2021],
+            programCodes: ["BTEE"],
+        },
+        // 2022 batch 5th semester
+        {
+            courseCode: "CS330",
+            instructorEmployeeIds: ["INS003"],
+            headEmployeeId: "INS003",
+            batchYears: [2022],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "CS345",
+            instructorEmployeeIds: ["INS004"],
+            headEmployeeId: "INS004",
+            batchYears: [2022],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "EE320",
+            instructorEmployeeIds: ["INS008"],
+            headEmployeeId: "INS008",
+            batchYears: [2022],
+            programCodes: ["BTEE"],
+        },
+        {
+            courseCode: "ME311",
+            instructorEmployeeIds: ["INS009"],
+            headEmployeeId: "INS009",
+            batchYears: [2022],
+            programCodes: ["BTME"],
+        },
+        {
+            courseCode: "CE231",
+            instructorEmployeeIds: ["INS011"],
+            headEmployeeId: "INS011",
+            batchYears: [2022],
+            programCodes: ["BTCE"],
+        },
+        // 2023 batch 3rd semester
+        {
+            courseCode: "CS201",
+            instructorEmployeeIds: ["INS002", "INS005"],
+            headEmployeeId: "INS002",
+            batchYears: [2023],
+            programCodes: ["BTCS"],
+        },
+        {
+            courseCode: "EE210",
+            instructorEmployeeIds: ["INS006"],
+            headEmployeeId: "INS006",
+            batchYears: [2023],
+            programCodes: ["BTEE", "BTEC"],
+        },
+        {
+            courseCode: "ME201",
+            instructorEmployeeIds: ["INS009"],
+            headEmployeeId: "INS009",
+            batchYears: [2023],
+            programCodes: ["BTME", "BTCH"],
+        },
+        // 2024 batch first year courses
+        {
+            courseCode: "ESC101",
+            instructorEmployeeIds: ["INS001", "INS004"],
+            headEmployeeId: "INS001",
+            batchYears: [2024],
+            programCodes: ["BTCS", "BTEE", "BTME"],
+        },
+        {
+            courseCode: "MTH101",
+            instructorEmployeeIds: ["INS013", "INS014"],
+            headEmployeeId: "INS013",
+            batchYears: [2024],
+            programCodes: ["BTCS", "BTEE", "BTME"],
+        },
+        {
+            courseCode: "PHY101",
+            instructorEmployeeIds: ["INS015"],
+            headEmployeeId: "INS015",
+            batchYears: [2024],
+            programCodes: ["BTCS", "BTEE", "BTME"],
+        },
+    ],
+};
+
+// ============================================================================
+// CURRENT SEMESTER COURSE OFFERINGS - 2025 EVEN (ONGOING)
+// ============================================================================
+export const courseOfferings2025Even = [
+    // 2021 batch 8th semester (final year electives/projects)
     {
-        courseCode: "CS101",
-        instructorEmployeeIds: ["+i1", "+i2"],
-        headEmployeeId: "+i1",
-        batchYears: [2023],
-        programCode: "BTCS",
+        courseCode: "CS671",
+        instructorEmployeeIds: ["INS003", "INS004"],
+        headEmployeeId: "INS003",
+        batchYears: [2021, 2022],
+        programCodes: ["BTCS"],
     },
     {
-        courseCode: "CS201",
-        instructorEmployeeIds: ["+i2"],
-        headEmployeeId: "+i2",
-        batchYears: [2022],
-        programCode: "BTCS",
-    },
-    {
-        courseCode: "CS301",
-        instructorEmployeeIds: ["+i3"],
-        headEmployeeId: "+i3",
+        courseCode: "CS682",
+        instructorEmployeeIds: ["INS002"],
+        headEmployeeId: "INS002",
         batchYears: [2021],
-        programCode: "BTCS",
+        programCodes: ["BTCS"],
     },
+    // 2022 batch 6th semester
     {
-        courseCode: "CS102",
-        instructorEmployeeIds: ["+i1"],
-        headEmployeeId: "+i1",
-        batchYears: [2023],
-        programCode: "BTCS",
-    },
-    {
-        courseCode: "CS202",
-        instructorEmployeeIds: ["+i2", "+i3"],
-        headEmployeeId: "+i2",
+        courseCode: "CS355",
+        instructorEmployeeIds: ["INS005"],
+        headEmployeeId: "INS005",
         batchYears: [2022],
-        programCode: "BTCS",
+        programCodes: ["BTCS"],
     },
     {
-        courseCode: "EE101",
-        instructorEmployeeIds: ["+i4"],
-        headEmployeeId: "+i4",
-        batchYears: [2023],
-        programCode: "BTEE",
-    },
-    {
-        courseCode: "EE201",
-        instructorEmployeeIds: ["+i5"],
-        headEmployeeId: "+i5",
+        courseCode: "CS340",
+        instructorEmployeeIds: ["INS002"],
+        headEmployeeId: "INS002",
         batchYears: [2022],
-        programCode: "BTEE",
+        programCodes: ["BTCS"],
     },
     {
-        courseCode: "EE301",
-        instructorEmployeeIds: ["+i4"],
-        headEmployeeId: "+i4",
-        batchYears: [2021],
-        programCode: "BTEE",
-    },
-    {
-        courseCode: "ME101",
-        instructorEmployeeIds: ["+i6"],
-        headEmployeeId: "+i6",
-        batchYears: [2023],
-        programCode: "BTME",
-    },
-    {
-        courseCode: "ME201",
-        instructorEmployeeIds: ["+i7"],
-        headEmployeeId: "+i7",
+        courseCode: "EE370",
+        instructorEmployeeIds: ["INS006", "INS007"],
+        headEmployeeId: "INS006",
         batchYears: [2022],
-        programCode: "BTME",
+        programCodes: ["BTEE"],
     },
     {
-        courseCode: "MATH101",
-        instructorEmployeeIds: ["+i3"],
-        headEmployeeId: "+i3",
-        batchYears: [2023],
-        programCode: "BTCS",
-    },
-    {
-        courseCode: "MATH201",
-        instructorEmployeeIds: ["+i2"],
-        headEmployeeId: "+i2",
+        courseCode: "ME321",
+        instructorEmployeeIds: ["INS010"],
+        headEmployeeId: "INS010",
         batchYears: [2022],
-        programCode: "BTCS",
+        programCodes: ["BTME"],
+    },
+    // 2023 batch 4th semester
+    {
+        courseCode: "CS220",
+        instructorEmployeeIds: ["INS001"],
+        headEmployeeId: "INS001",
+        batchYears: [2023],
+        programCodes: ["BTCS"],
+    },
+    {
+        courseCode: "EE250",
+        instructorEmployeeIds: ["INS007"],
+        headEmployeeId: "INS007",
+        batchYears: [2023],
+        programCodes: ["BTEE", "BTEC"],
+    },
+    {
+        courseCode: "ME231",
+        instructorEmployeeIds: ["INS010"],
+        headEmployeeId: "INS010",
+        batchYears: [2023],
+        programCodes: ["BTME", "BTCH"],
+    },
+    // 2024 batch 2nd semester
+    {
+        courseCode: "MTH102",
+        instructorEmployeeIds: ["INS013"],
+        headEmployeeId: "INS013",
+        batchYears: [2024],
+        programCodes: ["BTCS", "BTEE", "BTME"],
+    },
+    {
+        courseCode: "PHY102",
+        instructorEmployeeIds: ["INS015"],
+        headEmployeeId: "INS015",
+        batchYears: [2024],
+        programCodes: ["BTCS", "BTEE", "BTME"],
     },
 ];
+
+// Keep old export for backward compatibility
+export const courseOfferings2025Spring = courseOfferings2025Even;
+
+// ============================================================================
+// GRADE DISTRIBUTION HELPER - For realistic grade generation
+// ============================================================================
+export const gradeDistribution = {
+    excellent: ["A", "A", "A", "A-"] as const,
+    good: ["A-", "B", "B", "B-"] as const,
+    average: ["B", "B-", "C", "C-"] as const,
+    poor: ["C-", "D", "D", "F"] as const,
+};
+
+// Student performance profiles (affects grade generation in seed script)
+export const studentPerformanceProfiles: Record<
+    string,
+    "excellent" | "good" | "average" | "poor"
+> = {
+    "210101": "excellent", // Aarav Sharma - top performer
+    "210102": "good", // Diya Patel
+    "210103": "excellent", // Vivaan Gupta
+    "210104": "good", // Ananya Singh
+    "210105": "average", // Aditya Reddy
+    "210106": "good", // Ishita Joshi
+    "220101": "excellent", // Arjun Verma
+    "220102": "good", // Kavya Nair
+    "220103": "average", // Rohan Iyer
+    "220104": "good", // Meera Krishnan
+    "220105": "good", // Siddharth Menon
+    "220106": "excellent", // Priya Agarwal
+    "230101": "good", // Kabir Malhotra
+    "230102": "excellent", // Aisha Khan
+    "230103": "average", // Vihaan Chopra
+    "230104": "good", // Riya Banerjee
+    "240101": "good", // Ayaan Chauhan
+    "240102": "excellent", // Saanvi Kapoor
+    "240103": "average", // Reyansh Deshmukh
+    "240104": "good", // Kiara Rao
+    // EE students
+    "210201": "good",
+    "210202": "excellent",
+    "210203": "average",
+    "210204": "good",
+    "220201": "good",
+    "220202": "excellent",
+    "230201": "good",
+    "230202": "average",
+    "240201": "good",
+    "240202": "excellent",
+    // ME students
+    "210301": "excellent",
+    "210302": "good",
+    "220301": "good",
+    "220302": "average",
+    "230301": "good",
+    "230302": "excellent",
+    "240301": "average",
+    "240302": "good",
+    // CE students
+    "220401": "good",
+    "220402": "excellent",
+    // ECE students
+    "230501": "good",
+    "230502": "excellent",
+    // CHE students
+    "230601": "average",
+    "230602": "good",
+};

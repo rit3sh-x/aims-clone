@@ -159,7 +159,7 @@ async function seedBatches(programs: (typeof program.$inferSelect)[]) {
     const batchData = [];
 
     for (const prog of data.programs) {
-        for (const year of [2021, 2022, 2023]) {
+        for (const year of [2021, 2022, 2023, 2024]) {
             batchData.push({
                 year,
                 programId: programMap.get(prog.code)!,
@@ -309,9 +309,17 @@ async function seedCourseOfferings(
     const courseMap = new Map(courses.map((c) => [c.code, c.id]));
     const instructorMap = new Map(instructors.map((i) => [i.employeeId, i.id]));
     const programMap = new Map(programs.map((p) => [p.code, p.id]));
+
     const spring2025 = semesters.find(
-        (s) => s.year === 2025 && s.semester === "SUMMER"
-    )!;
+        (s) => s.year === 2025 && s.semester === "EVEN"
+    );
+
+    if (!spring2025) {
+        console.log(
+            "⚠ No 2025 EVEN semester found, skipping current offerings"
+        );
+        return [];
+    }
 
     const offerings = await db
         .insert(courseOffering)
@@ -339,21 +347,27 @@ async function seedCourseOfferings(
 
     const batchAssignments = [];
     for (let i = 0; i < data.courseOfferings2025Spring.length; i++) {
-        const co = data.courseOfferings2025Spring[i];
-        const programId = programMap.get(co!.programCode)!;
-        for (const year of co!.batchYears) {
-            const batchId = batches.find(
-                (b) => b.year === year && b.programId === programId
-            )?.id;
-            if (batchId) {
-                batchAssignments.push({
-                    offeringId: offerings[i]!.id,
-                    batchId,
-                });
+        const co = data.courseOfferings2025Spring[i]!;
+        for (const progCode of co.programCodes) {
+            const programId = programMap.get(progCode);
+            if (!programId) continue;
+            for (const year of co.batchYears) {
+                const batchId = batches.find(
+                    (b) => b.year === year && b.programId === programId
+                )?.id;
+                if (batchId) {
+                    batchAssignments.push({
+                        offeringId: offerings[i]!.id,
+                        batchId,
+                    });
+                }
             }
         }
     }
-    await db.insert(offeringBatch).values(batchAssignments);
+
+    if (batchAssignments.length > 0) {
+        await db.insert(offeringBatch).values(batchAssignments);
+    }
 
     console.log(`✓ Created ${offerings.length} course offerings`);
     return offerings;
@@ -643,6 +657,167 @@ async function seedCourseFeedback(
     );
 }
 
+async function seedHistoricalOfferings(
+    courses: (typeof course.$inferSelect)[],
+    semesters: (typeof semester.$inferSelect)[],
+    instructors: (typeof instructor.$inferSelect)[],
+    batches: (typeof batch.$inferSelect)[],
+    programs: (typeof program.$inferSelect)[],
+    students: (typeof student.$inferSelect)[]
+) {
+    console.log("Seeding historical course offerings and grades...");
+
+    const courseMap = new Map(courses.map((c) => [c.code, c.id]));
+    const instructorMap = new Map(instructors.map((i) => [i.employeeId, i.id]));
+    const programMap = new Map(programs.map((p) => [p.code, p.id]));
+    const semesterMap = new Map(
+        semesters.map((s) => [`${s.year}-${s.semester}`, s])
+    );
+
+    const completedSemesters = semesters.filter(
+        (s) => s.status === "COMPLETED"
+    );
+    let totalEnrollments = 0;
+    let totalGrades = 0;
+
+    for (const sem of completedSemesters) {
+        const semKey = `${sem.year}-${sem.semester}`;
+        const offeringData = data.historicalCourseOfferings[semKey];
+
+        if (!offeringData) continue;
+
+        const offerings = await db
+            .insert(courseOffering)
+            .values(
+                offeringData.map((co) => ({
+                    courseId: courseMap.get(co.courseCode)!,
+                    semesterId: sem.id,
+                    status: "COMPLETED" as const,
+                }))
+            )
+            .returning();
+
+        const instructorAssignments = [];
+        for (let i = 0; i < offeringData.length; i++) {
+            const co = offeringData[i]!;
+            for (const empId of co.instructorEmployeeIds) {
+                instructorAssignments.push({
+                    offeringId: offerings[i]!.id,
+                    instructorId: instructorMap.get(empId)!,
+                    isHead: empId === co.headEmployeeId,
+                });
+            }
+        }
+        if (instructorAssignments.length > 0) {
+            await db
+                .insert(courseOfferingInstructor)
+                .values(instructorAssignments);
+        }
+
+        const batchAssignments = [];
+        for (let i = 0; i < offeringData.length; i++) {
+            const co = offeringData[i]!;
+            for (const progCode of co.programCodes) {
+                const programId = programMap.get(progCode);
+                if (!programId) continue;
+                for (const year of co.batchYears) {
+                    const batchId = batches.find(
+                        (b) => b.year === year && b.programId === programId
+                    )?.id;
+                    if (batchId) {
+                        batchAssignments.push({
+                            offeringId: offerings[i]!.id,
+                            batchId,
+                        });
+                    }
+                }
+            }
+        }
+        if (batchAssignments.length > 0) {
+            await db.insert(offeringBatch).values(batchAssignments);
+        }
+
+        for (let i = 0; i < offerings.length; i++) {
+            const offer = offerings[i]!;
+            const co = offeringData[i]!;
+
+            const eligibleStudents = students.filter((s) => {
+                const studentBatch = batches.find((b) => b.id === s.batchId);
+                if (!studentBatch) return false;
+
+                const studentProgram = programs.find(
+                    (p) => p.id === studentBatch.programId
+                );
+                if (!studentProgram) return false;
+
+                return (
+                    co.batchYears.includes(studentBatch.year) &&
+                    co.programCodes.includes(studentProgram.code)
+                );
+            });
+
+            if (eligibleStudents.length === 0) continue;
+
+            const enrollmentValues = eligibleStudents.map((s) => ({
+                studentId: s.id,
+                offeringId: offer.id,
+                status: "COMPLETED" as const,
+                instructorApprovedAt: sem.startDate,
+                advisorApprovedAt: sem.startDate,
+            }));
+
+            const enrollmentRecords = await db
+                .insert(enrollment)
+                .values(enrollmentValues)
+                .returning();
+
+            totalEnrollments += enrollmentRecords.length;
+
+            const gradeValues = enrollmentRecords.map((enr) => {
+                const stud = eligibleStudents.find(
+                    (s) => s.id === enr.studentId
+                );
+                const profile =
+                    data.studentPerformanceProfiles[stud?.rollNo || ""] ||
+                    "average";
+                const gradeOptions = data.gradeDistribution[profile];
+                const selectedGrade =
+                    gradeOptions[
+                        Math.floor(Math.random() * gradeOptions.length)
+                    ] || "C";
+
+                const gradeToMarks: Record<string, number> = {
+                    A: 92 + Math.random() * 8,
+                    "A-": 85 + Math.random() * 7,
+                    B: 75 + Math.random() * 10,
+                    "B-": 68 + Math.random() * 7,
+                    C: 58 + Math.random() * 10,
+                    "C-": 50 + Math.random() * 8,
+                    D: 40 + Math.random() * 10,
+                    F: 20 + Math.random() * 20,
+                };
+
+                return {
+                    enrollmentId: enr.id,
+                    totalMarks: Number(gradeToMarks[selectedGrade]!.toFixed(2)),
+                    grade: selectedGrade,
+                };
+            });
+
+            await db.insert(grade).values(gradeValues);
+            totalGrades += gradeValues.length;
+        }
+
+        console.log(
+            `  ✓ ${semKey}: Created offerings with enrollments and grades`
+        );
+    }
+
+    console.log(
+        `✓ Created ${totalEnrollments} historical enrollments with ${totalGrades} grades`
+    );
+}
+
 async function main() {
     console.log("🌱 Starting database seed...\n");
 
@@ -660,6 +835,16 @@ async function main() {
         const classrooms = await seedClassrooms();
         const timeSlots = await seedTimeSlots();
         const questions = await seedFeedbackQuestions();
+
+        await seedHistoricalOfferings(
+            courses,
+            semesters,
+            instructors,
+            batches,
+            programs,
+            students
+        );
+
         const offerings = await seedCourseOfferings(
             courses,
             semesters,
@@ -670,7 +855,6 @@ async function main() {
         const enrollments = await seedEnrollments(students, offerings, batches);
         const templates = await seedAssessmentTemplates(offerings);
         const assessments = await seedAssessments(enrollments, templates);
-        await seedGrades(enrollments, assessments);
         await seedAttendance(enrollments);
         await seedSchedules(offerings, timeSlots, classrooms);
         await seedCourseFeedback(enrollments, questions);

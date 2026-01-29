@@ -6,8 +6,10 @@ import {
 
 export const AdminFeedbackView = () => {
     return (
-        <Suspense fallback={<QuestionsListSkeleton />}>
-            <QuestionsList />
-        </Suspense>
+        <div className="h-full">
+            <Suspense fallback={<QuestionsListSkeleton />}>
+                <QuestionsList />
+            </Suspense>
+        </div>
     );
 };

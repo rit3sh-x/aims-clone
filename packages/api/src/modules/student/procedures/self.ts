@@ -7,6 +7,7 @@ import {
     enrollment,
     grade,
     semester,
+    student,
 } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
 import { GradeType } from "@workspace/db";
@@ -25,7 +26,15 @@ const GRADE_POINTS: Record<GradeType, number | null> = {
 
 export const selfManagement = createTRPCRouter({
     performance: studentProcedure.query(async ({ ctx }) => {
-        const studentId = ctx.session.user.id;
+        const userId = ctx.session.user.id;
+
+        const studentRecord = await db.query.student.findFirst({
+            where: eq(student.userId, userId),
+        });
+
+        if (!studentRecord) {
+            return [];
+        }
 
         const rows = await db
             .select({
@@ -43,7 +52,7 @@ export const selfManagement = createTRPCRouter({
             .innerJoin(semester, eq(courseOffering.semesterId, semester.id))
             .where(
                 and(
-                    eq(enrollment.studentId, studentId),
+                    eq(enrollment.studentId, studentRecord.id),
                     eq(enrollment.status, "COMPLETED")
                 )
             )

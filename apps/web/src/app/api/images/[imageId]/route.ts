@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, document } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import {auth} from "@workspace/auth";
 import { s3Service } from "@workspace/infra";
 
 interface Props {
@@ -10,6 +11,17 @@ interface Props {
 }
 
 export async function GET(req: NextRequest, { params }: Props) {
+    const session = await auth.api.getSession({
+        headers: req.headers,
+    });
+
+    if (!session) {
+        return NextResponse.json(
+            { error: "Unauthorized" },
+            { status: 401 }
+        );
+    }
+
     const { imageId } = await params;
 
     try {

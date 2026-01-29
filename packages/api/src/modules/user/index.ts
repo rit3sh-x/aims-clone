@@ -52,7 +52,7 @@ export const userRouter = createTRPCRouter({
 
                     await tx
                         .update(user)
-                        .set({ image: `/api/image/${documentId}` })
+                        .set({ image: `/api/images/${documentId}` })
                         .where(eq(user.id, currentUser.id));
                 });
 
@@ -64,7 +64,7 @@ export const userRouter = createTRPCRouter({
                 }
 
                 return {
-                    imageUrl: `/api/image/${documentId}`,
+                    imageUrl: `/api/images/${documentId}`,
                 };
             } catch (error) {
                 await removeUserProfileImage({

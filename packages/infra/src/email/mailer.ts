@@ -26,13 +26,11 @@ export async function sendMail({ to, subject, html }: SendMailParams) {
         const recipients = Array.isArray(to) ? to.join(",") : to;
 
         const info = await transporter.sendMail({
-            from: SMTP_FROM || `"My App" <${SMTP_USER}>`,
+            from: SMTP_FROM || `<${SMTP_USER}>`,
             to: recipients,
             subject,
             html,
         });
-
-        console.log("Message sent: %s", info.messageId);
         return { success: true, messageId: info.messageId };
     } catch (error) {
         console.error("Error sending email:", error);

@@ -55,7 +55,7 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
             <Button
                 type="button"
                 variant="outline"
-                className="w-full flex items-center justify-center my-10 gap-3 text-black bg-white"
+                className="w-full flex items-center justify-center my-10 gap-3 text-black! bg-white!"
                 onClick={async () => {
                     try {
                         await loginwithGoogle();
